@@ -33,13 +33,13 @@
 <bool-comparisison> ::= '==' | '!=' | '<' | '<=' | '>' | '>=' | '&&' | '||'
 
 <task> ::= 'Task {'
-            'title:' <string-identifier-with-space> ','
-            'description:' <string-paragraph> ','
-            'state:' <state> ','
-            'member:' <member> ','
-            'tag:' <tag> ','
-            'subTasks ': <list>
-        '}'
+                'title:' <string-identifier-with-space> ','
+                'description:' <string-paragraph> ','
+                'state:' <state> ','
+                'member:' <member> ','
+                'tag:' <tag> ','
+                'subTasks ': <list>
+            '}'
 
 <tag> ::= <string-identifier> | 'NoTag'
 
@@ -78,7 +78,11 @@
 
 <param> ::= <identifier> ':' <type>
 
-<statement> ::= <function-call> | value
+<statement> 
+    ::= <function-call> 
+    | <value> 
+    | <condition-statement> 
+    | <cycle-statement>
 
 <function-call> ::= <identifier> '(' <function-call-params> ')'
 
@@ -88,7 +92,12 @@
 
 <identifier> ::= <string-identifier>
 
-<condition-statement> ::= 'if' '(' <boolean-expression> ')' 'then' <statement> 'else' <statement>
+<condition-statement> 
+    ::= 'if' '(' <boolean-expression> ')' 'then' <statement> 'else' <statement>
+
+<cycle-statement> ::= 'map' '(' <function-ref> ',' <list> ')' 
+
+<function-ref> ::= <identifier>
 
 <code> ::= {<function>} <do-statement>
 

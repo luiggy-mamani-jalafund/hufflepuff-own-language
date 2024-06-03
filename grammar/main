@@ -36,7 +36,7 @@ func setDoneTasks -> List {
         list: ListTask
     }
     return {
-        map (setDone, list, Task)
+        map (setDone, list)
     }
 }
 
