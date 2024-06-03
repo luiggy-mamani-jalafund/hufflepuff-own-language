@@ -1,0 +1,92 @@
+func makeTask -> Task {
+    params {
+        ...taksParams
+    }
+    return {
+        Task {
+            ...return task created using params
+        }
+    }
+}
+
+func isFinished -> Bool {
+	params {
+		myTask : Task
+    }
+    return {
+        if (myTask.status == "DONE") then True
+        else False
+    }
+}
+
+func setDone -> Task {
+    params {
+        task: Task
+    }
+    return {
+        Task {
+            ... task atributtes from task param,
+            state: "DONE"
+        }
+    }
+}
+
+func setDoneTasks -> List {
+    params {
+        list: ListTask
+    }
+    return {
+        map (setDone, list, Task)
+    }
+}
+
+func createTaskWithDecription -> Task {
+    params {
+        title: String,
+        state: State,
+        member: Member
+    }
+    pattern {
+        case (_, DONE, NoAssigned) {
+            Task {
+                ... task atributtes,
+                description: "This task was already finished with NoAssigned member",
+            }
+        }
+        case (_, IN_PROGRESS, _) {
+            Task {
+                ... task atributtes,
+                description: "This task is being developed"
+            }
+        }
+        default {
+            Task {
+                ...default task atributtes
+            }
+        }
+    }
+}
+
+func createProject -> Task {
+    params {}
+    return {
+        Task {
+            ...atributtes of the taks,
+            SubTasks: List [
+                List [
+                    ListTask []
+                ],
+                List [
+                    ListTask []
+                ]
+            ]
+        }
+    }
+}
+
+// main function
+do {
+    isFinished (
+        makeTask(...task atributtes)
+    )
+}
