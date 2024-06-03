@@ -1,0 +1,95 @@
+<string-identifier> ::= '"' {<alphanumeric> | <digit>} '"'
+<string-identifier-with-space> ::= '"' {<alphanumeric> | <digit> | <space>} '"'
+<string-paragraph> ::= '"' {<alphanumeric> | <digit> | <space> | <paragraph-symbol>} '"'
+<paragraph-symbol> ::= '.' | ',' | ';'
+
+<value>
+    ::= <string-identifier> 
+    | <string-identifier-with-space> 
+    | <string-paragraph> 
+    | <bool> 
+    | <task> 
+    | <tag>
+    | <member>
+    | <list>
+    | <list-task>
+
+<type>
+    ::= 'StringId' 
+    | 'StringIdSpace' 
+    | 'StringParagraph' 
+    | 'State' 
+    | 'Bool' 
+    | 'Member' 
+    | 'Tag' 
+    | 'List' 
+    | 'ListTask'
+
+<state> ::= <string-identifier>
+<bool> ::= 'True' | 'False'
+<boolean-expression> ::= <boolean-term> | <boolean-comparisison>
+<boolean-comparisison> ::= <boolean-term> <bool-comparisison> <boolean-term>
+<boolean-term> ::= <bool> | <function-call> | <value>
+<bool-comparisison> ::= '==' | '!=' | '<' | '<=' | '>' | '>=' | '&&' | '||'
+
+<task> ::= 'Task {'
+            'title:' <string-identifier-with-space> ','
+            'description:' <string-paragraph> ','
+            'state:' <state> ','
+            'member:' <member> ','
+            'tag:' <tag> ','
+            'subTasks ': <list>
+        '}'
+
+<tag> ::= <string-identifier> | 'NoTag'
+
+<member> ::= 'Member [{' 
+                'name:' <string-identifier-with-space> ','
+                'role:' <string-identifier>
+            '}]' 
+            | 'NoAssigned'
+
+<list-task> ::= ['ListTask [' <task> {',' <task>} ']']
+<list> ::= ['List [' <list> {',' <list>} ']'] | <list-task>
+
+<function> ::= 'func' <identifier> '->' <type> 
+        '{' 
+            'params {' [<params>] '}' 
+            <function-body>
+        '}'
+
+<function-body> ::= <return-function> | <pattern-function>
+
+<return-function> ::= 'return' '{' <statement> '}'
+
+<patten-function> ::= 'pattern {' <pattern-body> '}'
+
+<pattern-body> ::= [<pattern-case>] <pattern-default>
+
+<pattern-case> ::= 'case' '(' <pattern-case-values> ')' '{' <statement> '}'
+
+<pattern-default> ::= 'default' '{' <statement> '}'
+
+<pattern-case-values> ::= <pattern-case-value> {',' <pattern-case-value>}
+
+<pattern-case-value> ::= '_' | <value>
+
+<params> ::= <param> {',' <param>}
+
+<param> ::= <identifier> ':' <type>
+
+<statement> ::= <function-call> | value
+
+<function-call> ::= <identifier> '(' <function-call-params> ')'
+
+<function-call-params> ::= <function-call-value> {',' <function-call-value>}
+
+<function-call-value> ::= <value> | <function-call>
+
+<identifier> ::= <string-identifier>
+
+<condition-statement> ::= 'if' '(' <boolean-expression> ')' 'then' <statement> 'else' <statement>
+
+<code> ::= {<function>} <do-statement>
+
+<do-statement> ::= 'do' '{' <function-call> '}'
