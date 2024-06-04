@@ -1,18 +1,19 @@
-<string-identifier> ::= '"' {<alphanumeric> | <digit>} '"'
+<identifier> ::= {<alphanumeric> | <digit>}
+<string> ::= <string-identifier> 
+    | <string-identifier-with-space> 
+    | <string-paragraph> 
+<string-identifier> ::= '"' <identifier> '"'
 <string-identifier-with-space> ::= '"' {<alphanumeric> | <digit> | <space>} '"'
 <string-paragraph> ::= '"' {<alphanumeric> | <digit> | <space> | <paragraph-symbol>} '"'
 <paragraph-symbol> ::= '.' | ',' | ';'
 
 <value>
-    ::= <string-identifier> 
-    | <string-identifier-with-space> 
-    | <string-paragraph> 
+    ::= <string>
     | <bool> 
     | <task> 
     | <tag>
     | <member>
     | <list>
-    | <list-task>
 
 <type>
     ::= 'StringId' 
@@ -22,14 +23,13 @@
     | 'Bool' 
     | 'Member' 
     | 'Tag' 
-    | 'List' 
-    | 'ListTask'
+    | 'List'
 
 <state> ::= <string-identifier>
 <bool> ::= 'True' | 'False'
 <boolean-expression> ::= <boolean-term> | <boolean-comparisison>
 <boolean-comparisison> ::= <boolean-term> <bool-comparisison> <boolean-term>
-<boolean-term> ::= <bool> | <function-call> | <value>
+<boolean-term> ::= <bool> | <function-call> | <value> | <take-take-attribute>
 <bool-comparisison> ::= '==' | '!=' | '<' | '<=' | '>' | '>=' | '&&' | '||'
 
 <task> ::= 'Task {'
@@ -41,6 +41,16 @@
                 'subTasks ': <list>
             '}'
 
+<task-attributes> 
+    ::= 'title'
+    | 'description'
+    | 'state'
+    | 'member'
+    | 'tag'
+    | 'subTasks'
+    
+<take-task-attribute> ::= <identifier> "." <task-attributes>
+
 <tag> ::= <string-identifier> | 'NoTag'
 
 <member> ::= 'Member [{' 
@@ -49,8 +59,20 @@
             '}]' 
             | 'NoAssigned'
 
-<list-task> ::= ['ListTask [' <task> {',' <task>} ']']
-<list> ::= ['List [' <list> {',' <list>} ']'] | <list-task>
+<list> ::= <list-string>
+         | <list-bool>
+         | <list-task>
+         | <list-tag>
+         | <list-member>
+
+<list-type> ::= 'List' ':' <type>
+
+<list-string> ::= <list-type> '[' <string> {',' <string>} ']'
+<list-bool> ::= <list-type> '[' <bool> {',' <bool>} ']'
+<list-task> ::= <list-type> '[' <task> {',' <task>} ']'
+<list-tag> ::= <list-type> '[' <tag> {',' <tag>} ']'
+<list-member> ::= <list-type> '[' <member> {',' <member>} ']'
+<list-list> ::= <list-type> '[' <list> {',' <list>} ']'
 
 <function> ::= 'func' <identifier> '->' <type> 
         '{' 
@@ -80,7 +102,8 @@
 
 <statement> 
     ::= <function-call> 
-    | <value> 
+    | <value>
+    | <take-task-attribute>
     | <condition-statement> 
     | <cycle-statement>
 
@@ -89,8 +112,6 @@
 <function-call-params> ::= <function-call-value> {',' <function-call-value>}
 
 <function-call-value> ::= <value> | <function-call>
-
-<identifier> ::= <string-identifier>
 
 <condition-statement> 
     ::= 'if' '(' <boolean-expression> ')' 'then' <statement> 'else' <statement>

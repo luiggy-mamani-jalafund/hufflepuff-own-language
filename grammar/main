@@ -31,9 +31,9 @@ func setDone -> Task {
     }
 }
 
-func setDoneTasks -> List {
+func setDoneTasks -> List:Task {
     params {
-        list: ListTask
+        list: List:Task
     }
     return {
         map (setDone, list)
@@ -72,12 +72,12 @@ func createProject -> Task {
     return {
         Task {
             ...atributtes of the taks,
-            SubTasks: List [
-                List [
-                    ListTask []
+            SubTasks: List:List [
+                List:List [
+                    List:Task []
                 ],
-                List [
-                    ListTask []
+                List:List [
+                    List:Task []
                 ]
             ]
         }
