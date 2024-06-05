@@ -1,11 +1,25 @@
-<identifier> ::= {<alphanumeric> | <digit>}
+<letter> ::= 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G'
+       | 'H' | 'I' | 'J' | 'K' | 'L' | 'M' | 'N'
+       | 'O' | 'P' | 'Q' | 'R' | 'S' | 'T' | 'U'
+       | 'V' | 'W' | 'X' | 'Y' | 'Z' 
+       | 'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g'
+       | 'h' | 'i' | 'j' | 'k' | 'l' | 'm' | 'n'
+       | 'o' | 'p' | 'q' | 'r' | 's' | 't' | 'u'
+       | 'v' | 'w' | 'x' | 'y' | 'z'
+
+<digit> ::= '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'
+<space> ::= '\0';
+<symbol> ::= '.' | ',' | ';' | '?' | '¿' | '!' | '¡'
+
+<alphanumeric> ::= <letter> | <digit>
+<identifier> ::= {<alphanumeric>}
+<identifier-ref> ::= <identifier>
 <string> ::= <string-identifier> 
     | <string-identifier-with-space> 
     | <string-paragraph> 
 <string-identifier> ::= '"' <identifier> '"'
-<string-identifier-with-space> ::= '"' {<alphanumeric> | <digit> | <space>} '"'
-<string-paragraph> ::= '"' {<alphanumeric> | <digit> | <space> | <paragraph-symbol>} '"'
-<paragraph-symbol> ::= '.' | ',' | ';'
+<string-identifier-with-space> ::= '"' {<alphanumeric> | <space>} '"'
+<string-paragraph> ::= '"' {<alphanumeric> | <space> | <symbol>} '"'
 
 <value>
     ::= <string>
@@ -33,19 +47,28 @@
 <bool-comparisison> ::= '==' | '!=' | '<' | '<=' | '>' | '>=' | '&&' | '||'
 
 <task> ::= 'Task {'
-                'title:' <string-identifier-with-space> ','
-                'description:' <string-paragraph> ','
-                'state:' <state> ','
-                'member:' <member> ','
-                'tag:' <tag> ','
-                'subTasks ': <list>
+                'title:' <task-title> ','
+                'description:' <task-description> ','
+                'state:' <task-state> ','
+                'members:' <task-members> ','
+                'tag:' <task-tag> ','
+                'subTasks ': 
             '}'
+
+<task-ref-attribute> ::= <identifier-ref> | <take-task-attribute>
+
+<task-title> ::= <string-identifier-with-space> | <task-ref-attribute>
+<task-description> ::= <string-paragraph> | <task-ref-attribute>
+<task-state> ::= <state> | <task-ref-attribute>
+<task-members> ::= <list-member> | <task-ref-attribute>
+<task-tag> ::= <tag> | <task-ref-attribute>
+<task-subTasks> ::= <list> | <task-ref-attribute>
 
 <task-attributes> 
     ::= 'title'
     | 'description'
     | 'state'
-    | 'member'
+    | 'members'
     | 'tag'
     | 'subTasks'
     
@@ -53,11 +76,14 @@
 
 <tag> ::= <string-identifier> | 'NoTag'
 
-<member> ::= 'Member [{' 
+<member> ::= 'Member {' 
                 'name:' <string-identifier-with-space> ','
                 'role:' <string-identifier>
-            '}]' 
+            '}' 
             | 'NoAssigned'
+
+<member-name> ::= <string-identifier-with-space> | <identifier-ref>
+<member-role> ::= <string-identifier> | <identifier-ref>
 
 <list> ::= <list-string>
          | <list-bool>
@@ -116,9 +142,7 @@
 <condition-statement> 
     ::= 'if' '(' <boolean-expression> ')' 'then' <statement> 'else' <statement>
 
-<cycle-statement> ::= 'map' '(' <function-ref> ',' <list> ')' 
-
-<function-ref> ::= <identifier>
+<cycle-statement> ::= 'map' '(' <identifier-ref> ',' <list> ')' 
 
 <code> ::= {<function>} <do-statement>
 

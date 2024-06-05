@@ -1,20 +1,57 @@
+// code ->
+// |
+// |
+// <function> ->
+// 'func' <identifier> '->' <type>
+//         |                 |
+//         |__makeTask       |__Task
+// '{' 
+//     'params {' [<params>] '}' 
+//                 |
+//                 |__<param> ','
+//                 |     |                    |
+//                 |     |__<identifier> ':'  |__<type>
+//                 |         |                   |
+//                 |         |__ title           |__ StringIdSpace
+//                 |__<param> ','
+//                    
+//     <function-body>
+//      |
+//      |__<return-function>
+//          |
+//          |__'return' '{' <statement> '}'
+//                           |
+//                           |__<value>
+//                               |
+//                               |__<task>
+//                                   |
+//                                   |__Task
+// '}'
 func makeTask -> Task {
     params {
-        ...taksParams
+        title: StringIdSpace,
+        description: StringParagraph,
+        state: State,
+        tag: Tag
     }
     return {
         Task {
-            ...return task created using params
+            title: title,
+            description: description,
+            state: state,
+            members: List:Member [],
+            tag: tag,
+            subTasks: List:Task []
         }
     }
 }
 
 func isFinished -> Bool {
-	params {
-		myTask : Task
+    params {
+        myTask: Task
     }
     return {
-        if (myTask.status == "DONE") then True
+        if (myTask.state == "DONE") then True
         else False
     }
 }
@@ -25,8 +62,12 @@ func setDone -> Task {
     }
     return {
         Task {
-            ... task atributtes from task param,
-            state: "DONE"
+            title: task.title,
+            description: task.description,
+            state: "DONE",
+            members: task.members,
+            tag: task.tag,
+            subTasks: task.subTasks
         }
     }
 }
@@ -36,57 +77,154 @@ func setDoneTasks -> List:Task {
         list: List:Task
     }
     return {
-        map (setDone, list)
+        map(setDone, list)
     }
 }
 
-func createTaskWithDecription -> Task {
+func taskFromName -> Task {
     params {
-        title: String,
+        title: StringIdSpace,
+    }
+    return {
+        Task {
+            title: title,
+            description: "",
+            state: "BACKLOG",
+            members: List:Member [],
+            tag: "TASK",
+            subTasks: List:Task []
+        }
+    }
+}
+
+func createTasks -> List:Task {
+    params {
+        titles: List:StringIdSpace,
+    }
+    return {
+        map (taskFromName, titles)
+    }
+}
+
+func createTaskWithDescription -> Task {
+    params {
+        title: StringIdSpace,
         state: State,
         member: Member
     }
     pattern {
-        case (_, DONE, NoAssigned) {
+        case (_, "DONE", "NoAssigned") {
             Task {
-                ... task atributtes,
+                title: title,
                 description: "This task was already finished with NoAssigned member",
+                state: "DONE",
+                members: List:Member [member],
+                tag: "DefaultTag",
+                subTasks: List:Task []
             }
         }
-        case (_, IN_PROGRESS, _) {
+        case (_, "IN_PROGRESS", _) {
             Task {
-                ... task atributtes,
-                description: "This task is being developed"
+                title: title,
+                description: "This task is being developed",
+                state: "IN_PROGRESS",
+                members: List:Member [member],
+                tag: "DefaultTag",
+                subTasks: List:Task []
             }
         }
         default {
             Task {
-                ...default task atributtes
+                title: title,
+                description: "Default description",
+                state: state,
+                members: List:Member [member],
+                tag: "DefaultTag",
+                subTasks: List:Task []
             }
         }
     }
 }
 
-func createProject -> Task {
-    params {}
+func createScrumProject -> Task {
+    params {
+        projectTitle: StringIdSpace,
+        projectDescription: StringParagraph
+    }
     return {
         Task {
-            ...atributtes of the taks,
-            SubTasks: List:List [
-                List:List [
-                    List:Task []
-                ],
-                List:List [
-                    List:Task []
-                ]
+            title: projectTitle,
+            description: projectDescription,
+            state: "NoAssigned",
+            members: List:Member [],
+            tag: "ProjectScrum",
+            subTasks: List:Task [
+                Task {
+                    title: "Subtask 1",
+                    description: "Description for subtask 1",
+                    state: "NoAssigned",
+                    members: List:Member [],
+                    tag: "SubtaskTag",
+                    subTasks: List:Task []
+                },
+                Task {
+                    title: "Subtask 2",
+                    description: "Description for subtask 2",
+                    state: "NoAssigned",
+                    members: List:Member [],
+                    tag: "SubtaskTag",
+                    subTasks: List:Task []
+                }
             ]
         }
     }
 }
 
-// main function
+func createScrumProject -> Task {
+    params {
+        projectTitle: StringIdSpace,
+        projectDescription: StringParagraph
+    }
+    return {
+        Task {
+            title: projectTitle,
+            description: projectDescription,
+            state: "NoAssigned",
+            members: List:Member [],
+            tag: "ProjectScrum",
+            subTasks: List:Task [
+                Task {
+                    title: "Sprint 1",
+                    description: "First sprint of the project",
+                    state: "NoAssigned",
+                    members: List:Member [],
+                    tag: "Sprint",
+                    subTasks: List:Task []
+                },
+                Task {
+                    title: "Sprint 2",
+                    description: "Second sprint of the project",
+                    state: "NoAssigned",
+                    members: List:Member [],
+                    tag: "Sprint",
+                    subTasks: List:Task []
+                },
+                Task {
+                    title: "Sprint 3",
+                    description: "Third sprint of the project",
+                    state: "NoAssigned",
+                    members: List:Member [],
+                    tag: "Sprint",
+                    subTasks: List:Task []
+                }
+            ]
+        }
+    }
+}
+
 do {
-    isFinished (
-        makeTask(...task atributtes)
+    createScrumProject(
+        "My scrum project",
+        "Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime mollitia, molestiae quas"
     )
 }
