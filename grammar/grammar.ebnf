@@ -1,0 +1,83 @@
+letter ::= 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'I' | 'J' | 'K' | 'L' | 'M' | 'N' | 'O' | 'P' | 'Q' | 'R' | 'S' | 'T' | 'U' | 'V' | 'W' | 'X' | 'Y' | 'Z' | 'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'h' | 'i' | 'j' | 'k' | 'l' | 'm' | 'n' | 'o' | 'p' | 'q' | 'r' | 's' | 't' | 'u' | 'v' | 'w' | 'x' | 'y' | 'z'
+digit ::= '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'
+space ::= '\0'
+symbol ::= '.' | ',' | ';' | '?' | '¿' | '!' | '¡'
+
+alphanumeric ::= letter | digit
+identifier ::= alphanumeric*
+identifier-ref ::= identifier
+string ::= string-identifier | string-identifier-with-space | string-paragraph
+string-identifier ::= '"' identifier '"'
+string-identifier-with-space ::= '"' (alphanumeric | space)* '"'
+string-paragraph ::= '"' (alphanumeric | space | symbol)* '"'
+
+value ::= string | bool | task | tag | member | list
+
+type ::= 'StringId' | 'StringIdSpace' | 'StringParagraph' | 'State' | 'Bool' | 'Member' | 'Tag' | 'List'
+
+state ::= string-identifier
+bool ::= 'True' | 'False'
+boolean-expression ::= boolean-term | boolean-comparisison
+boolean-comparisison ::= boolean-term bool-comparisison boolean-term
+boolean-term ::= bool | function-call | value | take-task-attribute
+bool-comparisison ::= '==' | '!=' | '<' | '<=' | '>' | '>=' | '&&' | '||'
+
+task ::= 'Task {' 'title:' task-title ',' 'description:' task-description ',' 'state:' task-state ',' 'members:' task-members ',' 'tag:' task-tag ',' 'subTasks' '}'
+task-ref-attribute ::= identifier-ref | take-task-attribute
+task-title ::= string-identifier-with-space | task-ref-attribute
+task-description ::= string-paragraph | task-ref-attribute
+task-state ::= state | task-ref-attribute
+task-members ::= list-member | task-ref-attribute
+task-tag ::= tag | task-ref-attribute
+task-subTasks ::= list | task-ref-attribute
+
+task-attributes ::= 'title' | 'description' | 'state' | 'members' | 'tag' | 'subTasks'
+take-task-attribute ::= identifier "." task-attributes
+
+tag ::= string-identifier | 'NoTag'
+
+member ::= 'Member {' 'name:' string-identifier-with-space ',' 'role:' string-identifier '}' | 'NoAssigned'
+member-name ::= string-identifier-with-space | identifier-ref
+member-role ::= string-identifier | identifier-ref
+
+list ::= list-string | list-bool | list-task | list-tag | list-member
+
+list-type ::= 'List' ':' type
+list-string ::= list-type '[' string (',' string)* ']'
+list-bool ::= list-type '[' bool (',' bool)* ']'
+list-task ::= list-type '[' task (',' task)* ']'
+list-tag ::= list-type '[' tag (',' tag)* ']'
+list-member ::= list-type '[' member (',' member)* ']'
+list-list ::= list-type '[' list (',' list)* ']'
+
+function ::= 'func' identifier '->' type '{' 'params {' params? '}' function-body '}'
+
+function-body ::= return-function | pattern-function
+
+return-function ::= 'return' '{' statement '}'
+
+pattern-function ::= 'pattern {' pattern-body '}'
+
+pattern-body ::= (pattern-case)* pattern-default
+
+pattern-case ::= 'case' '(' pattern-case-values ')' '{' statement '}'
+
+pattern-default ::= 'default' '{' statement '}'
+
+pattern-case-values ::= pattern-case-value (',' pattern-case-value)*
+pattern-case-value ::= '_' | value
+
+params ::= param (',' param)*
+param ::= identifier ':' type
+
+statement ::= function-call | value | take-task-attribute | condition-statement | cycle-statement
+
+function-call ::= identifier '(' function-call-params ')'
+function-call-params ::= function-call-value (',' function-call-value)*
+function-call-value ::= value | function-call
+
+condition-statement ::= 'if' '(' boolean-expression ')' 'then' statement 'else' statement
+cycle-statement ::= 'map' '(' identifier-ref ',' list ')'
+
+code ::= function* do-statement
+do-statement ::= 'do' '{' function-call '}'
