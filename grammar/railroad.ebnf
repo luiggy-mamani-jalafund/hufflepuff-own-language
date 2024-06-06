@@ -28,11 +28,11 @@ bool ::= 'True' | 'False'
 
 boolean-expression ::= bool | boolean-comparison
 
-boolean-comparison ::= string-comparison | boolean-comparison | task-comparison | member-comparison
+boolean-comparison ::= string-comparison | bool-comparison | task-comparison | member-comparison
 
 string-comparison ::= string bool-comparator string
 
-boolean-comparison ::= bool bool-comparator bool
+bool-comparison ::= bool bool-comparator bool
 
 task-comparison ::= task bool-comparator task
 
