@@ -1,0 +1,236 @@
+<letter> 
+    ::= 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G'
+    | 'H' | 'I' | 'J' | 'K' | 'L' | 'M' | 'N'
+    | 'O' | 'P' | 'Q' | 'R' | 'S' | 'T' | 'U'
+    | 'V' | 'W' | 'X' | 'Y' | 'Z' 
+    | 'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g'
+    | 'h' | 'i' | 'j' | 'k' | 'l' | 'm' | 'n'
+    | 'o' | 'p' | 'q' | 'r' | 's' | 't' | 'u'
+    | 'v' | 'w' | 'x' | 'y' | 'z'
+
+<digit> ::= '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'
+
+<space> ::= ' '
+
+<symbol> ::= '.' | ',' | ';' | '?' | '¿' | '!' | '¡'
+
+<alphanumeric> ::= <letter> | <digit>
+
+<identifier> ::= <letter> {<alphanumeric>}
+
+<string> 
+    ::= <string-identifier> 
+    | <string-identifier-with-space> 
+    | <string-paragraph> 
+    | <take-string-task-attribute>
+    | <take-member-attribute>
+
+<string-identifier> ::= '"' <identifier> '"'
+
+<string-identifier-with-space> ::= '"' <alphanumeric> | <space> 
+    {<alphanumeric> | <space>} '"'
+
+<string-paragraph> ::= '"' <alphanumeric> | <space> | <symbol> 
+        {<alphanumeric> | <space> | <symbol>} '"'
+
+<value>
+    ::= <string>
+    | <bool> 
+    | <task> 
+    | <tag>
+    | <member>
+    | <list>
+
+<type>
+    ::= 'StringId' 
+    | 'StringIdSpace' 
+    | 'StringParagraph' 
+    | 'State' 
+    | 'Bool' 
+    | 'Member' 
+    | 'Tag' 
+    | 'Task' 
+    | 'List:Task'
+    | 'List:List'
+    | 'List:StringId'
+    | 'List:StringIdSpace'
+    | 'List:StringParagraph'
+    | 'List:State'
+    | 'List:Bool'
+    | 'List:Member'
+    | 'List:Tag'
+
+<state> ::= <string-identifier>
+
+<bool> ::= 'True' | 'False'
+
+<boolean-expression> ::= <bool> | <boolean-comparison>
+
+<boolean-comparison> 
+    ::= <string-comparison>
+    | <boolean-comparison>
+    | <task-comparison>
+    | <member-comparison>
+
+<string-comparison> ::= <string> <bool-comparator> <string>
+
+<boolean-comparison> ::= <bool> <bool-comparator> <bool>
+
+<task-comparison> ::= <task> <bool-comparator> <task>
+
+<member-comparison> ::= <member> <bool-comparator> <member>
+
+<bool-comparator> ::= '==' | '!=' | '<' | '<=' | '>' | '>=' | '&&' | '||'
+
+<task> 
+    ::= 'Task {'
+            'title:' <task-title> ','
+            'description:' <task-description> ','
+            'state:' <task-state> ','
+            'members:' <task-members> ','
+            'tag:' <task-tag> ','
+            'subTasks ': <task-subTasks>
+        '}'
+
+<task-title> ::= <string-identifier-with-space> | <identifier> | <take-title-task>
+
+<task-description> ::= <string-paragraph> | <identifier> | <take-description-task>
+
+<task-state> ::= <state> | <identifier> | <take-state-task>
+
+<task-members> ::= <list-member> | <identifier> | <take-members-task>
+
+<task-tag> ::= <tag> | <identifier> | <take-tag-task>
+
+<task-subTasks> ::= <list> | <identifier> | <take-subTasks-task>
+
+<take-task-attribute> 
+    ::= <take-string-task-attribute>
+    | <take-members-task>
+    | <take-subTasks-task>
+
+<take-string-task-attribute>
+    ::= <take-title-task>
+    | <take-description-task>
+    | <take-state-task>
+    | <take-tag-task>
+
+<take-title-task> ::= <identifier> '.' 'title'
+
+<take-description-task> ::= <identifier> '.' 'description'
+
+<take-state-task> ::= <identifier> '.' 'state'
+
+<take-tag-task> ::= <identifier> '.' 'tag'
+
+<take-members-task> ::= <identifier> '.' 'members'
+
+<take-subTasks-task> ::= <identifier> '.' 'subTasks'
+
+<tag> ::= <string-identifier> | 'NoTag'
+
+<member> 
+    ::= 'Member {' 
+            'name:' <string-identifier-with-space> ','
+            'role:' <string-identifier>
+        '}' 
+        | 'NoAssigned'
+
+<member-name> ::= <string-identifier-with-space> | <identifier>
+
+<member-role> ::= <string-identifier> | <identifier>
+
+<take-member-attribute>
+    ::= <take-name-member>
+    | <take-role-member>
+
+<take-name-member> ::= <identifier> '.' 'name'
+
+<take-role-member> ::= <identifier> '.' 'role'
+
+<list> ::= <list-string>
+         | <list-bool>
+         | <list-task>
+         | <list-tag>
+         | <list-member>
+         | <list-state>
+         | <list-list>
+
+<list-string> 
+    ::= <list-string-id>
+    | <list-string-id-space>
+    | <list-string-paragraph>
+
+<list-string-id> 
+    ::= 'List:StringId' '[' <string-identifier> 
+            {',' <string-identifier>} ']'
+
+<list-string-id-space> 
+    ::= 'List:StringIdSpace' '[' <string-identifier-with-space> 
+            {',' <string-identifier-with-space>} ']'
+
+<list-string-paragraph> 
+    ::= 'List:StringParagraph' '[' <string-paragraph> {',' <string-paragraph>} ']'
+
+<list-bool> ::= 'List:Bool' '[' <bool> {',' <bool>} ']'
+
+<list-task> ::= 'List:Task' '[' <task> {',' <task>} ']'
+
+<list-tag> ::= 'List:Tag' '[' <tag> {',' <tag>} ']'
+
+<list-state> ::= 'List:State' '[' <state> {',' <state>} ']'
+
+<list-member> ::= 'List:Member' '[' <member> {',' <member>} ']'
+
+<list-list> ::= 'List:List' '[' <list> {',' <list>} ']'
+
+<function> 
+    ::= 'func' <identifier> '->' <type> '{' 
+            'params {' {<params>} '}' 
+            <function-body>
+        '}'
+
+<function-body> ::= <return-function> | <pattern-function>
+
+<return-function> ::= 'return' '{' <statement> '}'
+
+<patten-function> ::= 'pattern {' <pattern-body> '}'
+
+<pattern-body> ::= {<pattern-case>} <pattern-default>
+
+<pattern-case> ::= 'case' '(' <pattern-case-values> ')' '{' <statement> '}'
+
+<pattern-default> ::= 'default' '{' <statement> '}'
+
+<pattern-case-values> ::= <pattern-case-value> {',' <pattern-case-value>}
+
+<pattern-case-value> ::= '_' | <value>
+
+<params> ::= <param> {',' <param>}
+
+<param> ::= <identifier> ':' <type>
+
+<statement> 
+    ::= <function-call> 
+    | <value>
+    | <take-task-attribute>
+    | <condition-statement> 
+    | <cycle-statement>
+
+<function-call> ::= <identifier> '(' {<function-call-params>} ')'
+
+<function-call-params> ::= <function-call-value> {',' <function-call-value>}
+
+<function-call-value> ::= <value> | <function-call>
+
+<condition-statement> 
+    ::= 'if' '(' <boolean-expression> ')' 'then' <statement> 
+        'else' <statement>
+
+<cycle-statement> ::= 'map' '(' <identifier> ',' <cycle-list> ')' 
+
+<cycle-list> ::= <list> | <identifier> 
+
+<code> ::= {<function>} <do-statement>
+
+<do-statement> ::= 'do' '{' <function-call> '}'
