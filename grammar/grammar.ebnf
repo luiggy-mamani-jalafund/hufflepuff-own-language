@@ -114,7 +114,7 @@ return-function ::= "return" "{" statement "}"
 
 pattern-function ::= "pattern {" pattern-body "}"
 
-pattern-body ::= [pattern-case] pattern-default
+pattern-body ::= (pattern-case)* pattern-default
 
 pattern-case ::= "case" "(" pattern-case-values ")" "{" statement "}"
 
