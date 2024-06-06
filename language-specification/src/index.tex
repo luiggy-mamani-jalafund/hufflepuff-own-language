@@ -34,11 +34,74 @@ So, this DSL aims to be a robust and adaptable tool for project management, impr
 
 \section{Key Features}
 \label{sec:key-features}
-% content here
+
+\subsection{Task}
+\label{sec:task}
+Tasks provide flexibility to represent various elements in a project, such as user stories or epics. Users can create tasks and structure them based on their needs and methodologies. This simplicity reduces the learning curve by minimizing the number of elements to master.
+
+\subsection{List}
+\label{sec:list}
+Lists help structure and organize a project by dividing it into manageable parts. For example, in Scrum, a project can be separated into sprints, each represented as a list containing tasks. This flexibility allows adaptation to various project management methodologies.
+
+\subsection{Body}
+\label{sec:body}
+The body of a task provides a comprehensive description and includes subtasks, breaking down complex tasks into smaller ones. This ensures all relevant information is documented.
+
+\subsection{Status}
+\label{sec:status}
+Statuses indicate the progress of tasks within the workflow, such as ToDo, In Progress, and Done. They add visibility and facilitate the management of the task lifecycle, ensuring systematic progress through different stages.
+
+\subsection{Function}
+\label{sec:function}
+Functions allow operations on tasks or lists, such as creation, editing, or verification. Creating or editing tasks involves specifying necessary parameters, preserving the characteristics of a functional language.
+
+\subsection{Cycle}
+\label{sec:cycle}
+A loop performs operations on tasks or lists while a condition is met. In our functional language, a while loop can automate repetitive tasks, such as adding sprints in a Scrum project.
+
+\subsection{Conditionals}
+\label{sec:conditionals}
+Conditionals add clarity and expressivity to the DSL, enabling decision-making based on specific criteria. They help manage the flow of execution and define automated rules responding to project state changes.
+
+\subsection{Pattern Matching}
+\label{sec:pattern-matching}
+Pattern matching, especially in Haskell, allows concise and readable evaluation of conditions. It handles different cases by destructuring and inspecting data, ensuring all scenarios are considered.
 
 \section{Compiled or Interpreter}
 \label{sec:compiled-or-interpreter}
-% content here
+Our EBNF could be said to be based on or have influences from JavaScript/TypeScript or Python, given the use of common structures such as conditionals and loops, as well as the way functions and templates are defined. \\
+
+Due to the similarity it has with those languages, the team considered it viable to create an interpreter.
+
+\section{Interpreter}
+\label{sec:interpreter}
+
+\subsection{Frontend and Backend}
+\label{sec:frontend_backend}
+
+\subsubsection{Frontend}
+\begin{itemize}
+    \item Step Lexer
+    \item Step Parser
+    \item Step Syntax analyser
+\end{itemize}
+
+\subsubsection{Backend}
+\begin{itemize}
+    \item Tree Walk Interpreter
+\end{itemize}
+
+Some programming languages execute code right after parsing it to an AST, with some static analysis. The interpreter traverses the syntax tree, evaluating each node, a method often called a tree-walk interpreter.
+
+\subsection{Transpilers}
+\label{sec:transpilers}
+
+A transpiler front end produces source code for another high-level language in the back end. Instead of lowering semantics to a primitive target language, it outputs valid source code for a language with existing compilation tools.
+
+Modern transpilers often target JavaScript due to its ubiquity in web browsers. The transpiler's scanner and parser resemble those of other compilers. If the source language closely matches the target language, it may skip analysis and directly output analogous syntax. For more semantic differences, it includes typical compiler phases like analysis and optimization before generating the target language's source code.
+
+Transpiling is a form of compiling that translates to another high-level language, using existing compilation pipelines. Compilers translate source code to a lower-level form without execution, while interpreters execute source code directly.
+
 
 \section{EBNF}
 \label{sec:bnf}
