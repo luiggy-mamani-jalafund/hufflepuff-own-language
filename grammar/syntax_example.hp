@@ -1,0 +1,244 @@
+func isTaskOpen -> Bool {
+    params {
+        task: Task
+    }
+    return {
+        task.state == "Open"
+    }
+}
+
+func getAllOpenTasks -> List:Task {
+    params {
+        tasks: List:Task
+    }
+    return {
+        List:Task [
+            map(task, tasks) {
+                if (isTaskOpen(task)) then
+                    task
+            }
+        ]
+    }
+}
+
+func getTeamNames -> List:StringIdSpace {
+    params {
+        tasks: List:Task
+    }
+    return {
+        List:StringIdSpace [
+            map(task, tasks) {
+                map(member, task.members) {
+                    member.name
+                }
+            }
+        ]
+    }
+}
+
+func createFeatureTask -> Task {
+    params {
+        id: StringId,
+        title: StringIdSpace,
+        description: StringParagraph,
+        state: State,
+        members: List:Member,
+        tag: Tag,
+        subTasks: List:Task
+    }
+    return {
+        Task {
+            title: title,
+            description: description,
+            state: state,
+            members: members,
+            tag: tag,
+            subTasks: subTasks
+        }
+    }
+}
+
+func assignFeatureMember -> Member {
+    params {
+        name: StringIdSpace,
+        role: StringId
+    }
+    return {
+        Member {
+            name: name,
+            role: role
+        }
+    }
+}
+
+
+
+func main -> List:Task {
+    params {}
+    return {
+        List:Task [
+            createTask(
+                "task1",
+                "Design Database Schema",
+                "Design the schema for storing information about the vegetables, soil conditions, and growth stages.",
+                "Open",
+                List:Member [
+                    assignMember("Alice", "Database Architect"),
+                    assignMember("Bob", "Database Developer")
+                ],
+                "Design",
+                List:Task []
+            ),
+            createTask(
+                "task2",
+                "Develop Sensor Interface",
+                "Develop the software interface to communicate with soil and weather sensors.",
+                "Open",
+                List:Member [
+                    assignMember("Charlie", "IoT Specialist"),
+                    assignMember("Dana", "Embedded Systems Developer")
+                ],
+                "Development",
+                List:Task []
+            ),
+            createTask(
+                "task3",
+                "Implement User Interface",
+                "Create the web application for farmers to monitor and control the cultivation process.",
+                "Open",
+                List:Member [
+                    assignMember("Eve", "Frontend Developer"),
+                    assignMember("Frank", "UI/UX Designer")
+                ],
+                "UI",
+                List:Task []
+            ),
+            createTask(
+                "task4",
+                "Setup Deployment Pipeline",
+                "Setup CI/CD pipeline for automatic deployment and testing of the software.",
+                "Open",
+                List:Member [
+                    assignMember("Grace", "DevOps Engineer"),
+                    assignMember("Hank", "Backend Developer")
+                ],
+                "Deployment",
+                List:Task []
+            ),
+            createFeatureTask(
+                "feature1",
+                "Soil Monitoring",
+                "Develop the functionality to measure and report soil moisture, pH, and nutrient levels in real-time.",
+                "Open",
+                List:Member [
+                    assignFeatureMember("Alice", "Soil Scientist"),
+                    assignFeatureMember("Bob", "IoT Specialist")
+                ],
+                "Feature",
+                List:Task []
+            ),
+            createFeatureTask(
+                "feature2",
+                "Weather Monitoring",
+                "Implement weather tracking to monitor local conditions and predict weather patterns.",
+                "Open",
+                List:Member [
+                    assignFeatureMember("Charlie", "Meteorologist"),
+                    assignFeatureMember("Dana", "Backend Developer")
+                ],
+                "Feature",
+                List:Task []
+            ),
+            createFeatureTask(
+                "feature3",
+                "Planting and Harvesting Management",
+                "Develop scheduling tools to optimize planting and harvesting cycles, including crop rotation.",
+                "Open",
+                List:Member [
+                    assignFeatureMember("Eve", "Agronomist"),
+                    assignFeatureMember("Frank", "Frontend Developer")
+                ],
+                "Feature",
+                List:Task []
+            ),
+            createFeatureTask(
+                "feature4",
+                "Irrigation Control",
+                "Automate irrigation based on soil and weather data, with manual control options.",
+                "Open",
+                List:Member [
+                    assignFeatureMember("Grace", "Hydrologist"),
+                    assignFeatureMember("Hank", "Embedded Systems Developer")
+                ],
+                "Feature",
+                List:Task []
+            ),
+            createFeatureTask(
+                "feature5",
+                "Pest and Disease Management",
+                "Identify common pests and diseases, and suggest treatments and preventive measures.",
+                "Open",
+                List:Member [
+                    assignFeatureMember("Ivy", "Plant Pathologist"),
+                    assignFeatureMember("Jack", "AI Specialist")
+                ],
+                "Feature",
+                List:Task []
+            ),
+            createFeatureTask(
+                "feature6",
+                "Inventory Management",
+                "Track inventory of seeds, fertilizers, pesticides, and supplies, and provide low stock alerts.",
+                "Open",
+                List:Member [
+                    assignFeatureMember("Kate", "Inventory Manager"),
+                    assignFeatureMember("Leo", "Database Developer")
+                ],
+                "Feature",
+                List:Task []
+            ),
+            createFeatureTask(
+                "feature7",
+                "Task Scheduling and Management",
+                "Assign and track tasks for farm workers, generating task lists for different timeframes.",
+                "Open",
+                List:Member [
+                    assignFeatureMember("Mia", "Operations Manager"),
+                    assignFeatureMember("Nate", "Backend Developer")
+                ],
+                "Feature",
+                List:Task []
+            ),
+            createFeatureTask(
+                "feature8",
+                "Data Analysis and Reporting",
+                "Analyze farm data to optimize operations and generate various reports.",
+                "Open",
+                List:Member [
+                    assignFeatureMember("Olivia", "Data Scientist"),
+                    assignFeatureMember("Paul", "Full Stack Developer")
+                ],
+                "Feature",
+                List:Task []
+            ),
+            createFeatureTask(
+                "feature9",
+                "User Management",
+                "Manage user roles, permissions, and ensure secure system access.",
+                "Open",
+                List:Member [
+                    assignFeatureMember("Quinn", "Security Specialist"),
+                    assignFeatureMember("Riley", "Backend Developer")
+                ],
+                "Feature",
+                List:Task []
+            )
+        ]
+    }
+}
+
+do {
+    tasks = main()
+    openTasks = getAllOpenTasks(tasks)
+    teamNames = getTeamNames(tasks)
+}
