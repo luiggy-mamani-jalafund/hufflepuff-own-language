@@ -1,0 +1,28 @@
+\section{Interpreter}
+\label{sec:interpreter}
+
+\subsection{Frontend and Backend}
+\label{sec:frontend_backend}
+
+\subsubsection{Frontend}
+\begin{itemize}
+    \item Step Lexer
+    \item Step Parser
+    \item Step Syntax analyser
+\end{itemize}
+
+\subsubsection{Backend}
+\begin{itemize}
+    \item Tree Walk Interpreter
+\end{itemize}
+
+Some programming languages execute code right after parsing it to an AST, with some static analysis. The interpreter traverses the syntax tree, evaluating each node, a method often called a tree-walk interpreter.
+
+\subsection{Transpilers}
+\label{sec:transpilers}
+
+A transpiler front end produces source code for another high-level language in the back end. Instead of lowering semantics to a primitive target language, it outputs valid source code for a language with existing compilation tools.
+
+Modern transpilers often target JavaScript due to its ubiquity in web browsers. The transpiler's scanner and parser resemble those of other compilers. If the source language closely matches the target language, it may skip analysis and directly output analogous syntax. For more semantic differences, it includes typical compiler phases like analysis and optimization before generating the target language's source code.
+
+Transpiling is a form of compiling that translates to another high-level language, using existing compilation pipelines. Compilers translate source code to a lower-level form without execution, while interpreters execute source code directly.
