@@ -3,5 +3,5 @@ name = "language-specification"
 bundle = "https://data1.fullyjustified.net/tlextras-2022.0r0.tar"
 
 [[output]]
-name = "default"
+name = "hp_language-specification.v0.0.0-alpha.v1.0.0"
 type = "pdf"
