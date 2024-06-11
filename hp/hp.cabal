@@ -25,7 +25,8 @@ source-repository head
 
 library
   exposed-modules:
-      Lexemes
+      AbstractSyntaxTree
+      Lexer
       Lib
   other-modules:
       Paths_hp

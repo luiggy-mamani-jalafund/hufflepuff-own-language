@@ -1,0 +1,373 @@
+// code ->
+// |
+// |
+// |
+// |
+// <function> ->
+// 'func' <identifier> '->' <type>
+//         |                 |
+//         |__makeTask       |__Task
+// '{' 
+//     'params {' [<params>] '}' 
+//                 |
+//                 |__<param> ','
+//                 |     |                    |
+//                 |     |__<identifier> ':'  |__<type>
+//                 |         |                   |
+//                 |         |__ title           |__ StringIdSpace
+//                 |__<param> ','
+//                    
+//     <function-body>
+//      |
+//      |__<return-function>
+//          |
+//          |__'return' '{' <statement> '}'
+//                           |
+//                           |__<value>
+//                               |
+//                               |__<task>
+//                                   |
+//                                   |__Task {
+//                                          title: <task-title>
+//                                                  |
+//                                                  |__<identifier> __ title
+//                                          ...
+//                                       }
+// '}'
+func makeTask -> Task {
+    params {
+        title: StringIdSpace,
+        description: StringParagraph,
+        state: State,
+        tag: Tag
+    }
+    return {
+        Task {
+            title: title,
+            description: description,
+            state: state,
+            members: List:Member [],
+            tag: tag,
+            subTasks: List:Task []
+        }
+    }
+}
+// |
+// |
+// |
+// |
+// <function> ->
+// 'func' <identifier> '->' <type>
+//         |                 |
+//         |__isFinished     |__Bool
+// '{' 
+//     'params {' [<params>] '}' 
+//                 |
+//                 |__<param>
+//                      |                    |
+//                      |__<identifier> ':'  |__<type>
+//                          |                   |
+//                          |__ myTask          |__Task
+//                    
+//     <function-body>
+//      |
+//      |__<return-function>
+//          |
+//          |__'return' '{' <statement> '}'
+//                           |
+//                           |__<condition-statement> 
+//                               |
+//                               |__'if' '(' <boolean-expression> ')' 'then'             <statement>         'else'     <statement>
+//                                            |                                          |                               |
+//                                            |__<boolean-comparisison>                  |__<value>                      |__<value>
+//                                                |                                         |                               |
+//                                                |__<string-comparisison>                  |__<bool> __ True               |__<bool> __ False
+//                                                   |
+//                                                   |__<string>                         <bool-comparator>   <string>
+//                                                      |                                 |                   |           
+//                                                      |__<take-string-task-attribute>   |__==               |__<string-identifier>
+//                                                         |                                                      |
+//                                                         |__<take-state-task>                                   |__"DONE"
+//                                                            |
+//                                                            |__myTask.state
+// '}'
+func isFinished -> Bool {
+    params {
+        myTask: Task
+    }
+    return {
+        if (myTask.state == "DONE") then True
+        else False
+    }
+}
+// |
+// |
+// |
+// |
+// <function> ->
+// 'func' <identifier> '->' <type>
+//         |                 |
+//         |__setDone       |__Task
+// '{' 
+//     'params {' [<params>] '}' 
+//                 |
+//                 |__<param> ','
+//                 |     |                    |
+//                 |     |__<identifier> ':'  |__<type>
+//                 |         |                   |
+//                 |         |__ title           |__ StringIdSpace
+//                 |__<param> ','
+//                    
+//     <function-body>
+//      |
+//      |__<return-function>
+//          |
+//          |__'return' '{' <statement> '}'
+//                           |
+//                           |__<value>
+//                               |
+//                               |__<task>
+//                                   |
+//                                   |__Task {
+//                                          title: <task-title>
+//                                                  |
+//                                                  |__<take-title-task> __ task.title
+//                                          ...
+//                                          state: <task-state>
+//                                                  |
+//                                                  |__<state> __ <string-identifier> __ "DONE"
+//                                       }
+// '}'
+func setDone -> Task {
+    params {
+        task: Task
+    }
+    return {
+        Task {
+            title: task.title,
+            description: task.description,
+            state: "DONE",
+            members: task.members,
+            tag: task.tag,
+            subTasks: task.subTasks
+        }
+    }
+}
+// |
+// |
+// |
+// |
+// <function> ->
+// 'func' <identifier> '->' <type>
+//         |                 |
+//         |__setDoneTasks   |__List:Task
+// '{' 
+//     'params {' [<params>] '}' 
+//                 |
+//                 |__<param>
+//                     |                    |
+//                     |__<identifier> ':'  |__<type>
+//                         |                   |
+//                         |__ list            |__ List:Task
+//                    
+//     <function-body>
+//      |
+//      |__<return-function>
+//          |
+//          |__'return' '{' <statement> '}'
+//                           |
+//                           |__<cycle-statement>
+//                              |
+//                              |__'map' '(' <identifier> ',' <cycle-list> ')' 
+//                                            |                |
+//                                            |__setDone       |__<identifier>
+//                                                                |
+//                                                                |__list
+// '}'
+func setDoneTasks -> List:Task {
+    params {
+        list: List:Task
+    }
+    return {
+        map(setDone, list)
+    }
+}
+// |
+// |
+// |
+// |
+// same function as the previous ones
+func taskFromName -> Task {
+    params {
+        title: StringIdSpace,
+    }
+    return {
+        Task {
+            title: title,
+            description: "",
+            state: "BACKLOG",
+            members: List:Member [],
+            tag: "TASK",
+            subTasks: List:Task []
+        }
+    }
+}
+// |
+// |
+// |
+// |
+// same function as the previous one
+func createTasks -> List:Task {
+    params {
+        titles: List:StringIdSpace,
+    }
+    return {
+        map (taskFromName, titles)
+    }
+}
+// |
+// |
+// |
+// |
+// <function> ->
+// 'func' <identifier> '->'              <type>
+//         |                              |
+//         |__createTaskWithDescription   |__Task
+// '{' 
+//     'params {' [<params>] '}' 
+//                 |
+//                 |__<param> ','
+//                 |     |                    |
+//                 |     |__<identifier> ':'  |__<type>
+//                 |         |                   |
+//                 |         |__ title           |__ StringIdSpace
+//                 |__<param> ','
+//                    
+//     <function-body>
+//      |
+//      |__<pattern-function>
+//          |
+//          |__'pattern {' <pattern-body> '}'
+//                          |
+//                          |__<pattern-case>
+//                              |
+//                              |__'case' '(' <pattern-case-values> ')' '{' <statement> '}'
+//                              |              |                             |
+//                              |              |__<pattern-case-value>       |__ <value> __ <task> ...like the previous ones
+//                              |              |   |
+//                              |              |   |__ _
+//                              |              |                             
+//                              |              |__ , <pattern-case-value> 
+//                              |              |      |                             
+//                              |              |      |__ <value> __ "DONE"
+//                              |              |__ ...             
+//                              |          
+//                              |__'default' '{' <statement> '}'
+//                                                |
+//                                                |__<value> __ <task> ...like the previous ones
+// '}'
+func createTaskWithDescription -> Task {
+    params {
+        title: StringIdSpace,
+        state: State,
+        member: Member
+    }
+    pattern {
+        case (_, "DONE", "NoAssigned") {
+            Task {
+                title: title,
+                description: "This task was already finished with NoAssigned member",
+                state: "DONE",
+                members: List:Member [member],
+                tag: "DefaultTag",
+                subTasks: List:Task []
+            }
+        }
+        case (_, "IN_PROGRESS", _) {
+            Task {
+                title: title,
+                description: "This task is being developed",
+                state: "IN_PROGRESS",
+                members: List:Member [member],
+                tag: "DefaultTag",
+                subTasks: List:Task []
+            }
+        }
+        default {
+            Task {
+                title: title,
+                description: "Default description",
+                state: state,
+                members: List:Member [member],
+                tag: "DefaultTag",
+                subTasks: List:Task []
+            }
+        }
+    }
+}
+// |
+// |
+// |
+// |
+// same function as the previous ones
+func createScrumProject -> Task {
+    params {
+        projectTitle: StringIdSpace,
+        projectDescription: StringParagraph
+    }
+    return {
+        Task {
+            title: projectTitle,
+            description: projectDescription,
+            state: "NoAssigned",
+            members: List:Member [],
+            tag: "ProjectScrum",
+            subTasks: List:Task [
+                Task {
+                    title: "Sprint 1",
+                    description: "First sprint of the project",
+                    state: "NoAssigned",
+                    members: List:Member [],
+                    tag: "Sprint",
+                    subTasks: List:Task []
+                },
+                Task {
+                    title: "Sprint 2",
+                    description: "Second sprint of the project",
+                    state: "NoAssigned",
+                    members: List:Member [],
+                    tag: "Sprint",
+                    subTasks: List:Task []
+                },
+                Task {
+                    title: "Sprint 3",
+                    description: "Third sprint of the project",
+                    state: "NoAssigned",
+                    members: List:Member [],
+                    tag: "Sprint",
+                    subTasks: List:Task []
+                }
+            ]
+        }
+    }
+}
+// |
+// |
+// |
+// |
+// <do-statement>
+//  |
+//  |__'do' '{' <function-call> '}'
+//               |
+//               |__<identifier> '('          <function-call-params> ')'
+//                   |                         |
+//                   |__createScrumProject     |__<function-call-value>
+//                                             |   |
+//                                             |   |__<value>__"My scrum project"
+//                                             |___|__, <value>__"Lorem ipsum dolor sit..."
+do {
+    createScrumProject(
+        "My scrum project",
+        "Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime mollitia, molestiae quas"
+    )
+}
