@@ -25,6 +25,7 @@ source-repository head
 
 library
   exposed-modules:
+      Lexemes
       Lib
   other-modules:
       Paths_hp
