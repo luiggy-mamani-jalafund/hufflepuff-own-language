@@ -218,7 +218,11 @@ data Condition = Condition
 -- CYCLE STATEMENT
 type MapFunctionRef = Identifier
 
-data Cycle = Cycle MapFunctionRef CycleList deriving (Show)
+data Cycle = Cycle
+  { mapF :: MapFunctionRef,
+    mapL :: CycleList
+  }
+  deriving (Show)
 
 data CycleList
   = CycleList List

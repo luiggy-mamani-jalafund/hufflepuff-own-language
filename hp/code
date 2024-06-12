@@ -1,2 +1,3 @@
-if (myTask.state == someMember.role) then True
-        else False
+return {
+        map(setDone, list)
+    }

@@ -76,17 +76,18 @@ funcReturn = do
 
 statement :: Parser Statement
 statement =
-  SBoolCondition <$> condition
-    <|> SBoolExp <$> boolExp
-    <|> SValue <$> value'
+  try (SBoolCondition <$> condition)
+    <|> try (SBoolExp <$> boolExp)
+    <|> try (SValue <$> value')
+    <|> try (SCycle <$> cycle')
 
 value' :: Parser Value
 value' =
-  ValLiteral <$> literal
-    <|> ValTask <$> task'
-    <|> ValMember <$> member
-    <|> ValList <$> lists
-    <|> ValTag <$> tag'
+  try (ValLiteral <$> literal)
+    <|> try (ValTask <$> task')
+    <|> try (ValMember <$> member)
+    <|> try (ValList <$> lists)
+    <|> try (ValTag <$> tag')
 
 task' :: Parser Task
 task' = do
@@ -217,7 +218,7 @@ listOfTasks = do
 listOfBool :: Parser List
 listOfBool = do
   whiteSpace
-  _ <- string "List:Task"
+  _ <- string "List:Bool"
   whiteSpace
   _ <- string "["
   whiteSpace
@@ -507,3 +508,30 @@ boolComparison = do
   s2 <- boolVal
   whiteSpace
   return $ CBool s1 cmp s2
+
+cycle' :: Parser Cycle
+cycle' = mapCycle
+
+mapCycle :: Parser Cycle
+mapCycle = do
+  whiteSpace
+  reserved "map"
+  whiteSpace
+  reservedOp "("
+  whiteSpace
+  i <- identifier
+  reservedOp ","
+  l <- mapList
+  whiteSpace
+  reservedOp ")"
+  whiteSpace
+  return $
+    Cycle
+      { mapF = i,
+        mapL = l
+      }
+
+mapList :: Parser CycleList
+mapList =
+  try (CycleList <$> lists)
+    <|> try (CycleId <$> identifier)
