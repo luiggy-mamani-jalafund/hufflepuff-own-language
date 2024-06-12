@@ -146,7 +146,7 @@ func setDone -> Task {
         Task {
             title: task.title,
             description: task.description,
-            state: "DONE",
+            state: "Done",
             members: task.members,
             tag: task.tag,
             subTasks: task.subTasks
@@ -205,9 +205,9 @@ func taskFromName -> Task {
         Task {
             title: title,
             description: "",
-            state: "BACKLOG",
+            state: "Backlog",
             members: List:Member [],
-            tag: "TASK",
+            tag: "Task",
             subTasks: List:Task []
         }
     }
@@ -273,21 +273,21 @@ func createTaskWithDescription -> Task {
         member: Member
     }
     pattern {
-        case (_, "DONE", "NoAssigned") {
+        case (_, "Done", "NoAssigned") {
             Task {
                 title: title,
                 description: "This task was already finished with NoAssigned member",
-                state: "DONE",
+                state: "Done",
                 members: List:Member [member],
                 tag: "DefaultTag",
                 subTasks: List:Task []
             }
         }
-        case (_, "IN_PROGRESS", _) {
+        case (_, "InProgress", _) {
             Task {
                 title: title,
                 description: "This task is being developed",
-                state: "IN_PROGRESS",
+                state: "InProgress",
                 members: List:Member [member],
                 tag: "DefaultTag",
                 subTasks: List:Task []

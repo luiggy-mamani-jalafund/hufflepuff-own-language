@@ -13,7 +13,10 @@ import Lib
     statement,
     boolComparison,
     literal,
-    takeTaskAttribute
+    takeTaskAttribute,
+    casePattern,
+    casePatternVal,
+    casePatternVals
   )
 import Text.Parsec
 

@@ -160,10 +160,8 @@ data FunParam = FunParam Identifier Type deriving (Show, Read)
 
 data FuncBody
   = FuncReturn Statement
-  | FuncPattern Pattern
+  | FuncPattern [PatternCase] PatternDefault
   deriving (Show)
-
-data Pattern = Pattern [PatternCase] PatternDefault deriving (Show)
 
 data PatternCase = Case [PatternCaseValue] Statement deriving (Show)
 

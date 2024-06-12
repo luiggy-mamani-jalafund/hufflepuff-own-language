@@ -10,6 +10,9 @@ module Lib
     boolComparison,
     literal,
     takeTaskAttribute,
+    casePattern,
+    casePatternVal,
+    casePatternVals,
   )
 where
 
@@ -60,7 +63,7 @@ funcParams :: Parser [FunParam]
 funcParams = sepBy funcParam (char ',')
 
 funcBody :: Parser FuncBody
-funcBody = funcReturn
+funcBody = try funcReturn <|> try funcPattern
 
 funcReturn :: Parser FuncBody
 funcReturn = do
@@ -88,6 +91,7 @@ value' =
     <|> try (ValMember <$> member)
     <|> try (ValList <$> lists)
     <|> try (ValTag <$> tag')
+    <|> try (ValBool <$> boolVal)
 
 task' :: Parser Task
 task' = do
@@ -168,20 +172,23 @@ taskMembers :: Parser MembersTask
 taskMembers =
   try $
     TMembersValue <$> listOfMembers
-      <|> TMembersId
-        <$ whiteSpace
-        <*> identifier
-        <* whiteSpace
+      <|> try
+        ( TMembersId
+            <$ whiteSpace
+            <*> identifier
+            <* whiteSpace
+        )
 
 taskSubTasks :: Parser SubTasksTask
 taskSubTasks =
   try $
     TSubTasksValue <$> lists
-      <|> ( TSubTasksId
-              <$ whiteSpace
-              <*> identifier
-              <* whiteSpace
-          )
+      <|> try
+        ( TSubTasksId
+            <$ whiteSpace
+            <*> identifier
+            <* whiteSpace
+        )
 
 lists :: Parser List
 lists =
@@ -535,3 +542,75 @@ mapList :: Parser CycleList
 mapList =
   try (CycleList <$> lists)
     <|> try (CycleId <$> identifier)
+
+funcPattern :: Parser FuncBody
+funcPattern = do
+  whiteSpace
+  reserved "pattern"
+  whiteSpace
+  reservedOp "{"
+  whiteSpace
+  c <- casePatterns
+  whiteSpace
+  d <- defaultPattern
+  whiteSpace
+  reservedOp "}"
+  whiteSpace
+  return $ FuncPattern c d
+
+casePatterns :: Parser [PatternCase]
+casePatterns = many casePattern
+
+casePattern :: Parser PatternCase
+casePattern = do
+  whiteSpace
+  reserved "case"
+  whiteSpace
+  reservedOp "("
+  whiteSpace
+  c <- casePatternVals
+  whiteSpace
+  reservedOp ")"
+  whiteSpace
+  reservedOp "{"
+  whiteSpace
+  s <- statement
+  whiteSpace
+  reservedOp "}"
+  whiteSpace
+  return $ Case c s
+
+defaultPattern :: Parser PatternDefault
+defaultPattern = do
+  whiteSpace
+  reserved "default"
+  whiteSpace
+  reservedOp "{"
+  whiteSpace
+  s <- statement
+  whiteSpace
+  reservedOp "}"
+  whiteSpace
+  return $ PDefault s
+
+casePatternVal :: Parser PatternCaseValue
+casePatternVal =
+  try casePatternEmpty
+    <|> try casePatternValue
+
+casePatternEmpty :: Parser PatternCaseValue
+casePatternEmpty = do
+  whiteSpace
+  _ <-string "_"
+  whiteSpace
+  return PCaseEmpty
+
+casePatternValue :: Parser PatternCaseValue
+casePatternValue = do
+  whiteSpace
+  v <- value'
+  whiteSpace
+  return $ PCaseValue v
+
+casePatternVals :: Parser [PatternCaseValue]
+casePatternVals = sepBy casePatternVal (char ',')
