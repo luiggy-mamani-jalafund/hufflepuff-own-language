@@ -96,7 +96,7 @@ func isFinished -> Bool {
         myTask: Task
     }
     return {
-        if ("myTask state" == "DONE") then True
+        if (myTask.state == "DONE") then True
         else False
     }
 }

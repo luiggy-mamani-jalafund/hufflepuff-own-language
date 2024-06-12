@@ -9,6 +9,7 @@ module Lib
     statement,
     boolComparison,
     literal,
+    takeTaskAttribute
   )
 where
 
@@ -255,6 +256,67 @@ member =
       <* string "NoAssigned"
       <* whiteSpace
 
+takeTaskAttribute :: Parser TakeTaskAttribute
+takeTaskAttribute =
+  try (TTAStrings <$> ttaStrings)
+    <|> try ttaMembers
+    <|> try ttaSubTasks
+
+ttaStrings :: Parser  TTAStrings
+ttaStrings =
+  try ttaTitle
+    <|> try ttaDescription
+    <|> try ttaState
+    <|> try ttaTag
+
+ttaTitle :: Parser TTAStrings
+ttaTitle = do
+  whiteSpace
+  i <- identifier
+  _ <- string ".title"
+  whiteSpace
+  return $ TTATitle i
+
+ttaDescription :: Parser TTAStrings
+ttaDescription = do
+  whiteSpace
+  i <- identifier
+  _ <- string ".description"
+  whiteSpace
+  return $ TTADescription i
+
+ttaState :: Parser TTAStrings
+ttaState = do
+  whiteSpace
+  i <- identifier
+  _ <- string ".state"
+  whiteSpace
+  return $ TTAState i
+
+ttaTag :: Parser TTAStrings
+ttaTag = do
+  whiteSpace
+  i <- identifier
+  _ <- string ".tag"
+  whiteSpace
+  return $ TTATag i
+
+ttaMembers :: Parser TakeTaskAttribute
+ttaMembers = do
+  whiteSpace
+  i <- identifier
+  _ <- string ".members"
+  whiteSpace
+  return $ TTAMembers i
+
+ttaSubTasks :: Parser TakeTaskAttribute
+ttaSubTasks = do
+  whiteSpace
+  i <- identifier
+  _ <- string ".subTasks"
+  whiteSpace
+  return $ TTASubTasks i
+
 boolComparator :: Parser BoolComparator
 boolComparator =
   Eq
@@ -305,6 +367,7 @@ literal =
   try (LStringId . StrId <$> strId)
     <|> try (LStringIdSpaces . StrIdSpaces <$> strIdSpaces)
     <|> try (LStringParagraph . StrParagraph <$> strParagraph)
+    <|> try (LTTAStrings <$> ttaStrings)
 
 strId :: Parser String
 strId = do

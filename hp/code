@@ -1,4 +1,2 @@
-if (True != False) then
-    if (True != False) then "Hola"
-    else "Nose 1 ??"
-else "Nose 2 ??"
+if (myTask.state == "DONE") then True
+        else False

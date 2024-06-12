@@ -5,6 +5,7 @@ data Literal
   = LStringId StrId
   | LStringIdSpaces StrIdSpaces
   | LStringParagraph StrParagraph
+  | LTTAStrings TTAStrings
   deriving (Show)
 
 newtype StrId = StrId String deriving (Show)

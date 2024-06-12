@@ -12,7 +12,8 @@ import Lib
     taskMembers,
     statement,
     boolComparison,
-    literal
+    literal,
+    takeTaskAttribute
   )
 import Text.Parsec
 
