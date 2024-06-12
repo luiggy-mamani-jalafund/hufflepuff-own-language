@@ -1,4 +1,10 @@
-Member {
-    name: "luiggy mamani",
-    role: "SM"
+return {
+    Task {
+            title: title,
+            description: "some desc",
+            state: "BACKLOG",
+            members: List:Member [],
+            tag: "TASK",
+            subTasks: task
+        }
 }

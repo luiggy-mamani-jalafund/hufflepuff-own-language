@@ -1,5 +1,6 @@
 module Lib
-  ( funcParam,
+  ( func,
+    funcParam,
     funcParams,
     funcBody,
     task',
@@ -69,9 +70,11 @@ funcReturn = do
   reservedOp "}"
   return $ FuncReturn s
 
+statement :: Parser Statement
 statement =
   SValue <$> value'
 
+value' :: Parser Value
 value' =
   ValTask <$> task'
     <|> ValMember <$> member
@@ -138,18 +141,22 @@ task' = do
         subTasks = st
       }
 
+taskTitle :: Parser TitleTask
 taskTitle =
   TVTitle <$> identifierWithSpace
     <|> TITitle <$> identifier
 
+taskDescription :: Parser DescriptionTask
 taskDescription =
   TVDescription <$> identifierWithSpace
     <|> TIDescription <$> identifier
 
+taskState :: Parser StateTask
 taskState =
   TVState <$> identifierWithSpace
     <|> TIState <$> identifier
 
+taskMembers :: Parser MembersTask
 taskMembers =
   try $
     TMembersValue <$> listOfMembers
@@ -158,6 +165,7 @@ taskMembers =
         <*> identifier
         <* whiteSpace
 
+taskSubTasks :: Parser SubTasksTask
 taskSubTasks =
   try $
     TSubTasksValue <$> lists
@@ -167,8 +175,10 @@ taskSubTasks =
               <* whiteSpace
           )
 
-lists = listOfMembers <|> listOfTasks
+lists :: Parser List
+lists = try listOfTasks <|> try listOfMembers
 
+listOfMembers :: Parser List
 listOfMembers = do
   whiteSpace
   _ <- string "List:Member"
@@ -236,10 +246,12 @@ member =
       <* string "NoAssigned"
       <* whiteSpace
 
+memberName :: Parser MemberName
 memberName =
   MVName <$> identifierWithSpace
     <|> MIName <$> identifier
 
+memberRole  :: Parser MemberRole
 memberRole =
   MVRole <$> identifierWithSpace
     <|> MIRole <$> identifier
