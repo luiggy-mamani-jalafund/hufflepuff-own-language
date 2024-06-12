@@ -9,7 +9,7 @@ module Lib
     statement,
     boolComparison,
     literal,
-    takeTaskAttribute
+    takeTaskAttribute,
   )
 where
 
@@ -20,6 +20,7 @@ import Text.Parsec.String (Parser)
 
 func :: Parser Func
 func = do
+  whiteSpace
   reserved "func"
   whiteSpace
   funId <- identifier
@@ -182,7 +183,10 @@ taskSubTasks =
           )
 
 lists :: Parser List
-lists = try listOfTasks <|> try listOfMembers
+lists =
+  try listOfTasks
+    <|> try listOfMembers
+    <|> try listOfBool
 
 listOfMembers :: Parser List
 listOfMembers = do
@@ -191,11 +195,11 @@ listOfMembers = do
   whiteSpace
   _ <- string "["
   whiteSpace
-  m <- sepBy member (char ',')
+  i <- sepBy member (char ',')
   whiteSpace
   _ <- string "]"
   whiteSpace
-  return $ ListMember m
+  return $ ListMember i
 
 listOfTasks :: Parser List
 listOfTasks = do
@@ -204,11 +208,24 @@ listOfTasks = do
   whiteSpace
   _ <- string "["
   whiteSpace
-  m <- sepBy task' (char ',')
+  i <- sepBy task' (char ',')
   whiteSpace
   _ <- string "]"
   whiteSpace
-  return $ ListTask m
+  return $ ListTask i
+
+listOfBool :: Parser List
+listOfBool = do
+  whiteSpace
+  _ <- string "List:Task"
+  whiteSpace
+  _ <- string "["
+  whiteSpace
+  i <- sepBy boolVal (char ',')
+  whiteSpace
+  _ <- string "]"
+  whiteSpace
+  return $ ListBool i
 
 tag' :: Parser Tag
 tag' =
@@ -256,13 +273,34 @@ member =
       <* string "NoAssigned"
       <* whiteSpace
 
+takeMemberAttribute :: Parser TakeMemberAttribute
+takeMemberAttribute =
+  try tmaName
+    <|> try tmaRole
+
+tmaName :: Parser TakeMemberAttribute
+tmaName = do
+  whiteSpace
+  i <- identifier
+  _ <- string ".name"
+  whiteSpace
+  return $ TMAName i
+
+tmaRole :: Parser TakeMemberAttribute
+tmaRole = do
+  whiteSpace
+  i <- identifier
+  _ <- string ".role"
+  whiteSpace
+  return $ TMARole i
+
 takeTaskAttribute :: Parser TakeTaskAttribute
 takeTaskAttribute =
   try (TTAStrings <$> ttaStrings)
     <|> try ttaMembers
     <|> try ttaSubTasks
 
-ttaStrings :: Parser  TTAStrings
+ttaStrings :: Parser TTAStrings
 ttaStrings =
   try ttaTitle
     <|> try ttaDescription
@@ -368,6 +406,7 @@ literal =
     <|> try (LStringIdSpaces . StrIdSpaces <$> strIdSpaces)
     <|> try (LStringParagraph . StrParagraph <$> strParagraph)
     <|> try (LTTAStrings <$> ttaStrings)
+    <|> try (LTMAStrings <$> takeMemberAttribute)
 
 strId :: Parser String
 strId = do

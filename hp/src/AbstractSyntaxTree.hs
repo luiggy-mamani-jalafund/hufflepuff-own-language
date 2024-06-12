@@ -6,6 +6,7 @@ data Literal
   | LStringIdSpaces StrIdSpaces
   | LStringParagraph StrParagraph
   | LTTAStrings TTAStrings
+  | LTMAStrings TakeMemberAttribute
   deriving (Show)
 
 newtype StrId = StrId String deriving (Show)

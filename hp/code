@@ -1,2 +1,2 @@
-if (myTask.state == "DONE") then True
+if (myTask.state == someMember.role) then True
         else False
