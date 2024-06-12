@@ -18,4 +18,72 @@ This PRD describes the requirements and objectives of the \textbf{"Pac-Man Game 
 
 \section*{Description}
 \textbf{Pac-Man} is a classic arcade video game where the player controls Pac-Man, a character who moves through a maze eating points and avoiding being caught by 4 ghosts that have different behaviors. This modern version of Pac-Man will include improved graphics, new customizable levels, and additional features to improve gameplay and user experience.
+
+
+\section*{Project Objectives}
+\begin{enumerate}
+    \item \textbf{Game Mechanics Development:} Implement the game logic, including Pac-Man's movement, the ghosts, and the interactions between them.
+    \item \textbf{Level Design:} Create and design the different levels of the game.
+    \item \textbf{User Interface (UI):} Develop an intuitive and attractive user interface.
+    \item \textbf{Sound and Music:} Include sound effects and music to improve the gaming experience.
+    \item \textbf{Testing and Debugging:} Perform extensive testing to ensure the game runs smoothly and fix bugs.
+    \item \textbf{Deployment and Maintenance:} Deploy the game on target platforms and provide post-launch maintenance.
+\end{enumerate}
+
+\section*{Functional Requirements}
+\begin{enumerate}
+    \item \textbf{Pac-Man Move}
+    
+    Pac-Man must move in the four directions (up, down, left, right) within the maze using the keyboard keys \textbf{(A, W, S, D)}. Pac-Man should move without problems, respond to the player's controls and interactions, and not cross the walls of the maze.
+    
+    \item \textbf{Ghost Movement}
+    
+    The ghosts must move autonomously within the maze, following predefined patterns that each ghost has \textbf{(Investigate the pattern of each ghost)}. The ghosts should follow defined movement patterns, interact correctly with the maze, and react to Pac-Man's presence.
+    
+    \item \textbf{Interaction between Pac-Man and Ghosts}
+    
+    If a ghost touches Pac-Man, he loses a life. If Pac-Man eats a power point, he can temporarily eat ghosts for \textbf{7 seconds}. The interaction must be handled correctly, where the game updates the lives and status of the ghosts according to the game rules.
+    
+    \item \textbf{Special Points and Items}
+    
+    The maze must contain normal points and power points. Pac-Man should be able to eat both. Pac-Man should be able to collect points, the score should be updated, and the power points should affect the ghosts (Specific powers and extra abilities will be added).
+    
+    \item \textbf{Level Design}
+    
+    Each level must have a unique design and a progressive increase in difficulty. The levels should be well designed, offer increasing challenges, and not present design problems (Once the main objective is finished, user-customizable levels or maps will be added).
+    
+    \item \textbf{User Interface}
+    
+    The UI should display the player's score, number of lives remaining, and other relevant elements. The interface should be clear, intuitive, and display the correct information at all times.
+    
+    \item \textbf{Sound and Music}
+    
+    Include sound effects for Pac-Man's movement, ghosts, point collection, and special events. Include background music during the game. The sounds and music should play correctly, improving the player's experience and not present technical problems.
+    
+    \item \textbf{Pause and Resume Mechanism}
+    
+    The player must be able to pause and resume the game at any time.
+\end{enumerate}
+
+\section*{Non-Functional Requirements}
+\begin{enumerate}
+    \item \textbf{Usability}
+    
+    The game should be easy to play and understand, with intuitive controls. Players should be able to learn to play quickly and navigate the interface without difficulty.
+    
+    \item \textbf{Performance}
+    
+    The game should run smoothly on the target platforms, without lags or performance issues. The game should run at an appropriate speed, with minimal loading times and no performance drops.
+    
+    \item \textbf{Compatibility}
+    
+    The game must be compatible with multiple platforms, including PC, consoles, and mobile devices. The game should run correctly on all target platforms, with the same functionality and quality.
+\end{enumerate}
+
+\section*{Assumptions and Dependencies}
+\begin{enumerate}
+    \item It is assumed that players will be familiar with the basic mechanics of arcade games and familiar with Pac-Man. It is also assumed that the \textbf{"Hufflepuff"} development team has access to the tools necessary for the development and testing of the game.
+    \item The project depends on the availability of team members for development and testing tasks. The project relies on game development tools and graphics engines to create and test the game.
+\end{enumerate}
+
 \end{document}
