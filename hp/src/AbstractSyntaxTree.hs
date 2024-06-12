@@ -1,7 +1,15 @@
 module AbstractSyntaxTree (module AbstractSyntaxTree) where
 
 -- TERMINALS
-type Literal = String
+data Literal 
+  = LStringId StrId
+  | LStringIdSpaces StrIdSpaces
+  | LStringParagraph StrParagraph
+  deriving (Show)
+
+newtype StrId = StrId String deriving (Show)
+newtype StrIdSpaces = StrIdSpaces String deriving (Show)
+newtype StrParagraph = StrParagraph String deriving (Show)
 
 type Identifier = String
 
@@ -33,17 +41,17 @@ data Strings
 
 data Value
   = ValString Strings
-  | ValBool Bool
   | ValTask Task
   | ValTag Tag
   | ValMember Member
   | ValList List
+  | ValBool Bool
   deriving (Show)
 
 -- TASK DATA
-data Tag = Tag Literal | NoTag deriving (Show)
+data Tag = Tag StrId | NoTag deriving (Show)
 
-type State = Literal
+type State = StrId
 
 data Task = Task
   { title :: TitleTask,
@@ -57,12 +65,12 @@ data Task = Task
 
 -- TASK ATTRIBUTTE
 data TitleTask
-  = TVTitle Literal
+  = TVTitle StrIdSpaces
   | TITitle Identifier
   deriving (Show)
 
 data DescriptionTask
-  = TVDescription Literal
+  = TVDescription StrParagraph
   | TIDescription Identifier
   deriving (Show)
 
@@ -101,22 +109,25 @@ data TTAStrings
   deriving (Show)
 
 -- MEMBER DATA
-type Role = Literal
+type Role = StrIdSpaces
 
-type Name = Literal
+type Name = StrIdSpaces
 
 data Member
-  = Member MemberName MemberRole
+  = Member
+      { name :: MemberName,
+        role :: MemberRole
+      }
   | NoAssigned
   deriving (Show)
 
 data MemberName
-  = MVName Literal
+  = MVName Name
   | MIName Identifier
   deriving (Show)
 
 data MemberRole
-  = MVRole Literal
+  = MVRole Role
   | MIRole Identifier
   deriving (Show)
 
@@ -127,9 +138,9 @@ data TakeMemberAttribute
 
 -- LIST DATA
 data List
-  = ListStringId [Identifier]
-  | ListStringIdSpace [Literal]
-  | ListStringParagraph [Literal]
+  = ListStringId [StrId]
+  | ListStringIdSpace [StrIdSpaces]
+  | ListStringParagraph [StrParagraph]
   | ListBool [Bool]
   | ListTask [Task]
   | ListTag [Tag]
@@ -170,6 +181,7 @@ data FuncCallParam
 -- BOOLEAN EXPRESSION
 data BoolExpression
   = BExp Bool
+  | BCondition Condition
   | BComparison Comparison
   deriving (Show)
 
@@ -213,7 +225,7 @@ data Statement
   = SFuncCall FuncCall
   | SValue Value
   | STTA TakeTaskAttribute
-  | SCondition Condition
+  | SBool BoolExpression
   | SCycle Cycle
   deriving (Show)
 

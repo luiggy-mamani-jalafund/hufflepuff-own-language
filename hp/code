@@ -1,10 +1,9 @@
-return {
-    Task {
-            title: title,
-            description: "some desc",
-            state: "BACKLOG",
-            members: List:Member [],
-            tag: "TASK",
-            subTasks: task
-        }
+func isFinished -> Bool {
+    params {
+        myTask: Task
+    }
+    return {
+        if ("myTask state" == "DONE") then True
+        else False
+    }
 }

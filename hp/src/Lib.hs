@@ -6,6 +6,7 @@ module Lib
     task',
     taskMembers,
     member,
+    statement,
   )
 where
 
@@ -17,18 +18,17 @@ import Text.Parsec.String (Parser)
 func :: Parser Func
 func = do
   reserved "func"
-  spaces
+  whiteSpace
   funId <- identifier
-  spaces
+  whiteSpace
   reservedOp "->"
-  spaces
+  whiteSpace
   funType <- dataType
-  let t = str2type funType
-  spaces
+  whiteSpace
   reservedOp "{"
   whiteSpace
   reserved "params"
-  spaces
+  whiteSpace
   reservedOp "{"
   whiteSpace
   params <- funcParams
@@ -39,7 +39,7 @@ func = do
   whiteSpace
   reservedOp "}"
   whiteSpace
-  return $ Func funId t params body
+  return $ Func funId (str2type funType) params body
 
 funcParam :: Parser FunParam
 funcParam = do
@@ -72,7 +72,8 @@ funcReturn = do
 
 statement :: Parser Statement
 statement =
-  SValue <$> value'
+  SBool <$> boolExp
+    <|> SValue <$> value'
 
 value' :: Parser Value
 value' =
@@ -143,17 +144,17 @@ task' = do
 
 taskTitle :: Parser TitleTask
 taskTitle =
-  TVTitle <$> identifierWithSpace
+  TVTitle . StrIdSpaces <$> strIdSpaces
     <|> TITitle <$> identifier
 
 taskDescription :: Parser DescriptionTask
 taskDescription =
-  TVDescription <$> identifierWithSpace
+  TVDescription . StrParagraph <$> strParagraph
     <|> TIDescription <$> identifier
 
 taskState :: Parser StateTask
 taskState =
-  TVState <$> identifierWithSpace
+  TVState . StrId <$> strId
     <|> TIState <$> identifier
 
 taskMembers :: Parser MembersTask
@@ -207,7 +208,7 @@ listOfTasks = do
 tag' :: Parser Tag
 tag' =
   try $
-    Tag <$> identifierWithSpace
+    Tag . StrId <$> strId
       <|> do
         whiteSpace
         _ <- string "NoTag"
@@ -240,33 +241,156 @@ member =
 
     _ <- string "}"
     whiteSpace
-    return $ Member n r
+    return $
+      Member
+        { name = n,
+          role = r
+        }
     <|> NoAssigned
       <$ whiteSpace
       <* string "NoAssigned"
       <* whiteSpace
 
+boolComparator :: Parser BoolComparator
+boolComparator =
+  Eq
+    <$ whiteSpace
+    <* string "=="
+    <* whiteSpace
+    <|> Neq
+      <$ whiteSpace
+      <* string "!="
+      <* whiteSpace
+    <|> Lt
+      <$ whiteSpace
+      <* string "<"
+      <* whiteSpace
+    <|> Le
+      <$ whiteSpace
+      <* string "<="
+      <* whiteSpace
+    <|> Gt
+      <$ whiteSpace
+      <* string ">"
+      <* whiteSpace
+    <|> Ge
+      <$ whiteSpace
+      <* string ">="
+      <* whiteSpace
+    <|> And
+      <$ whiteSpace
+      <* string "&&"
+      <* whiteSpace
+    <|> Or
+      <$ whiteSpace
+      <* string "||"
+      <* whiteSpace
+
 memberName :: Parser MemberName
 memberName =
-  MVName <$> identifierWithSpace
+  MVName . StrIdSpaces <$> strIdSpaces
     <|> MIName <$> identifier
 
-memberRole  :: Parser MemberRole
+memberRole :: Parser MemberRole
 memberRole =
-  MVRole <$> identifierWithSpace
+  MVRole . StrIdSpaces <$> strIdSpaces
     <|> MIRole <$> identifier
 
-identifierWithSpace :: Parser String
-identifierWithSpace = do
+literal :: Parser String
+literal = try strId <|> try strIdSpaces <|> try strParagraph
+
+strId :: Parser String
+strId = do
+  whiteSpace
+  _ <- char '\"'
+  v <- identifier
+  _ <- char '\"'
+  whiteSpace
+  return v
+
+strIdSpaces :: Parser String
+strIdSpaces = do
   whiteSpace
   _ <- char '\"'
   v <- letter
-  r <- many (letter <|> digit <|> space)
+  r <- many (alphaNum <|> space)
   _ <- char '\"'
   whiteSpace
   return $ v : r
+
+strParagraph :: Parser String
+strParagraph = do
+  whiteSpace
+  _ <- char '\"'
+  v <- many (alphaNum <|> space <|> oneOf ".,;?¿!¡")
+  _ <- char '\"'
+  whiteSpace
+  return v
 
 str2type :: String -> Type
 str2type str = read $ 'T' : strType
   where
     strType = filter (/= ':') str
+
+condition :: Parser Condition
+condition = do
+  reserved "if"
+  whiteSpace
+  reservedOp "("
+  whiteSpace
+  e <- boolExp
+  whiteSpace
+  reservedOp ")"
+  whiteSpace
+
+  reserved "then"
+  whiteSpace
+  s1 <- statement
+  whiteSpace
+  reserved "else"
+  whiteSpace
+  s2 <- statement
+  whiteSpace
+  return $ Condition e s1 s2
+
+boolExp :: Parser BoolExpression
+boolExp =
+  BExp <$ whiteSpace <*> boolVal <* whiteSpace
+    <|> BCondition <$ whiteSpace <*> condition <* whiteSpace
+    <|> BComparison <$ whiteSpace <*> comparison <* whiteSpace
+
+comparison :: Parser Comparison
+comparison = try strComparison <|> try boolComparison
+
+boolVal :: Parser Bool
+boolVal = try boolTrue <|> try boolFalse
+
+boolTrue :: Parser Bool
+boolTrue = do
+  _ <- string "True"
+  return True
+
+boolFalse :: Parser Bool
+boolFalse = do
+  _ <- string "False"
+  return False
+
+strComparison :: Parser Comparison
+strComparison = do
+  s1 <- literal
+  whiteSpace
+  cmp <- boolComparator
+  whiteSpace
+  s2 <- literal
+  whiteSpace
+  return $ CString s1 cmp s2
+
+boolComparison :: Parser Comparison
+boolComparison = do
+  s1 <- boolVal
+  whiteSpace
+  cmp <- boolComparator
+  whiteSpace
+  s2 <- boolVal
+  whiteSpace
+  return $ CBool s1 cmp s2
