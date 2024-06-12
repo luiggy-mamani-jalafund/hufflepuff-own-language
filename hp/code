@@ -1,9 +1,4 @@
-func isFinished -> Bool {
-    params {
-        myTask: Task
-    }
-    return {
-        if ("myTask state" == "DONE") then True
-        else False
-    }
-}
+if (True != False) then
+    if (True != False) then "Hola"
+    else "Nose 1 ??"
+else "Nose 2 ??"

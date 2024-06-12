@@ -1,14 +1,16 @@
 module AbstractSyntaxTree (module AbstractSyntaxTree) where
 
 -- TERMINALS
-data Literal 
+data Literal
   = LStringId StrId
   | LStringIdSpaces StrIdSpaces
   | LStringParagraph StrParagraph
   deriving (Show)
 
 newtype StrId = StrId String deriving (Show)
+
 newtype StrIdSpaces = StrIdSpaces String deriving (Show)
+
 newtype StrParagraph = StrParagraph String deriving (Show)
 
 type Identifier = String
@@ -40,7 +42,7 @@ data Strings
   deriving (Show)
 
 data Value
-  = ValString Strings
+  = ValLiteral Literal
   | ValTask Task
   | ValTag Tag
   | ValMember Member
@@ -181,7 +183,6 @@ data FuncCallParam
 -- BOOLEAN EXPRESSION
 data BoolExpression
   = BExp Bool
-  | BCondition Condition
   | BComparison Comparison
   deriving (Show)
 
@@ -197,18 +198,20 @@ data BoolComparator
   deriving (Show)
 
 data Comparison
-  = CString String BoolComparator String
+  = CString Literal BoolComparator Literal
   | CBool Bool BoolComparator Bool
   | CTask Task BoolComparator Task
   | CMember Member BoolComparator Member
   deriving (Show)
 
 -- CONDITION STATEMENT
-type ConditionElse = Statement
 
-type ConditionIf = Statement
-
-data Condition = Condition BoolExpression ConditionIf ConditionElse deriving (Show)
+data Condition = Condition
+  { ifCondition :: BoolExpression,
+    thenStatement :: Statement,
+    elseStatament :: Statement
+  }
+  deriving (Show)
 
 -- CYCLE STATEMENT
 type MapFunctionRef = Identifier
@@ -225,7 +228,8 @@ data Statement
   = SFuncCall FuncCall
   | SValue Value
   | STTA TakeTaskAttribute
-  | SBool BoolExpression
+  | SBoolExp BoolExpression
+  | SBoolCondition Condition
   | SCycle Cycle
   deriving (Show)
 

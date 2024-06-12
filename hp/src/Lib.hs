@@ -7,6 +7,8 @@ module Lib
     taskMembers,
     member,
     statement,
+    boolComparison,
+    literal,
   )
 where
 
@@ -72,12 +74,14 @@ funcReturn = do
 
 statement :: Parser Statement
 statement =
-  SBool <$> boolExp
+  SBoolCondition <$> condition
+    <|> SBoolExp <$> boolExp
     <|> SValue <$> value'
 
 value' :: Parser Value
 value' =
-  ValTask <$> task'
+  ValLiteral <$> literal
+    <|> ValTask <$> task'
     <|> ValMember <$> member
     <|> ValList <$> lists
     <|> ValTag <$> tag'
@@ -296,8 +300,11 @@ memberRole =
   MVRole . StrIdSpaces <$> strIdSpaces
     <|> MIRole <$> identifier
 
-literal :: Parser String
-literal = try strId <|> try strIdSpaces <|> try strParagraph
+literal :: Parser Literal
+literal =
+  try (LStringId . StrId <$> strId)
+    <|> try (LStringIdSpaces . StrIdSpaces <$> strIdSpaces)
+    <|> try (LStringParagraph . StrParagraph <$> strParagraph)
 
 strId :: Parser String
 strId = do
@@ -351,16 +358,20 @@ condition = do
   whiteSpace
   s2 <- statement
   whiteSpace
-  return $ Condition e s1 s2
+  return $
+    Condition
+      { ifCondition = e,
+        thenStatement = s1,
+        elseStatament = s2
+      }
 
 boolExp :: Parser BoolExpression
 boolExp =
-  BExp <$ whiteSpace <*> boolVal <* whiteSpace
-    <|> BCondition <$ whiteSpace <*> condition <* whiteSpace
-    <|> BComparison <$ whiteSpace <*> comparison <* whiteSpace
+  BComparison <$ whiteSpace <*> comparison <* whiteSpace
+    <|> BExp <$ whiteSpace <*> boolVal <* whiteSpace
 
 comparison :: Parser Comparison
-comparison = try strComparison <|> try boolComparison
+comparison = try boolComparison <|> try strComparison
 
 boolVal :: Parser Bool
 boolVal = try boolTrue <|> try boolFalse
