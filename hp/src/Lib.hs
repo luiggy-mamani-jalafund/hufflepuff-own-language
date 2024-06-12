@@ -13,6 +13,7 @@ module Lib
     casePattern,
     casePatternVal,
     casePatternVals,
+    code,
   )
 where
 
@@ -20,6 +21,30 @@ import AbstractSyntaxTree
 import Lexer
 import Text.Parsec
 import Text.Parsec.String (Parser)
+
+code :: Parser Code
+code = do
+  whiteSpace
+  f <- funcs
+  whiteSpace
+  d <- doStatement
+  whiteSpace
+  return $ Code f d
+
+doStatement :: Parser DoStatement
+doStatement = do
+  reserved "do"
+  whiteSpace
+  reservedOp "{"
+  whiteSpace
+  c <- funcCall
+  whiteSpace
+  reservedOp "}"
+  whiteSpace
+  return $ DoStatement c
+
+funcs :: Parser [Func]
+funcs = many func
 
 func :: Parser Func
 func = do
@@ -156,40 +181,49 @@ task' = do
 
 taskTitle :: Parser TitleTask
 taskTitle =
-  TVTitle . StrIdSpaces <$> strIdSpaces
-    <|> TITitle <$> identifier
+  try (TTTitle <$> ttaTitle)
+    <|> try (TVTitle . StrIdSpaces <$> strIdSpaces)
+    <|> try (TITitle <$> identifier)
 
 taskDescription :: Parser DescriptionTask
 taskDescription =
-  TVDescription . StrParagraph <$> strParagraph
-    <|> TIDescription <$> identifier
+  try (TTDescription <$> ttaDescription)
+    <|> try (TVDescription . StrParagraph <$> strParagraph)
+    <|> try (TIDescription <$> identifier)
 
 taskState :: Parser StateTask
 taskState =
-  TVState . StrId <$> strId
-    <|> TIState <$> identifier
+  try (TTState <$> ttaState)
+    <|> try (TVState . StrId <$> strId)
+    <|> try (TIState <$> identifier)
 
 taskMembers :: Parser MembersTask
 taskMembers =
-  try $
-    TMembersValue <$> listOfMembers
-      <|> try
-        ( TMembersId
-            <$ whiteSpace
-            <*> identifier
-            <* whiteSpace
-        )
+  try (TTMembers <$> ttaMembers)
+    <|> try (TVMembers <$> listOfMembers)
+    <|> try
+      ( TIMembers
+          <$ whiteSpace
+          <*> identifier
+          <* whiteSpace
+      )
+
+taskTag :: Parser TagTask
+taskTag =
+  try (TTTag <$> ttaTag)
+    <|> try (TVTag <$> tag')
+    <|> try (TITag <$> identifier)
 
 taskSubTasks :: Parser SubTasksTask
 taskSubTasks =
-  try $
-    TSubTasksValue <$> lists
-      <|> try
-        ( TSubTasksId
-            <$ whiteSpace
-            <*> identifier
-            <* whiteSpace
-        )
+  try (TTSubTasks <$> ttaSubTasks)
+    <|> try (TVSubTasks <$> lists)
+    <|> try
+      ( TISubTasks
+          <$ whiteSpace
+          <*> identifier
+          <* whiteSpace
+      )
 
 lists :: Parser List
 lists =
@@ -245,9 +279,6 @@ tag' =
         _ <- string "NoTag"
         whiteSpace
         return NoTag
-
-taskTag :: Parser TagTask
-taskTag = TVTag <$> tag' <|> TITag <$> identifier
 
 member :: Parser Member
 member =
@@ -306,63 +337,63 @@ tmaRole = do
 takeTaskAttribute :: Parser TakeTaskAttribute
 takeTaskAttribute =
   try (TTAStrings <$> ttaStrings)
-    <|> try ttaMembers
-    <|> try ttaSubTasks
+    <|> try (TTAMembers <$> ttaMembers)
+    <|> try (TTASubTasks <$> ttaSubTasks)
 
 ttaStrings :: Parser TTAStrings
 ttaStrings =
-  try ttaTitle
-    <|> try ttaDescription
-    <|> try ttaState
-    <|> try ttaTag
+  try (TTAState <$> ttaState)
+    <|> try (TTATitle <$> ttaTitle)
+    <|> try (TTADescription <$> ttaDescription)
+    <|> try (TTATag <$> ttaTag)
 
-ttaTitle :: Parser TTAStrings
+ttaTitle :: Parser String
 ttaTitle = do
   whiteSpace
   i <- identifier
   _ <- string ".title"
   whiteSpace
-  return $ TTATitle i
+  return i
 
-ttaDescription :: Parser TTAStrings
+ttaDescription :: Parser String
 ttaDescription = do
   whiteSpace
   i <- identifier
   _ <- string ".description"
   whiteSpace
-  return $ TTADescription i
+  return i
 
-ttaState :: Parser TTAStrings
+ttaState :: Parser String
 ttaState = do
   whiteSpace
   i <- identifier
   _ <- string ".state"
   whiteSpace
-  return $ TTAState i
+  return i
 
-ttaTag :: Parser TTAStrings
+ttaTag :: Parser String
 ttaTag = do
   whiteSpace
   i <- identifier
   _ <- string ".tag"
   whiteSpace
-  return $ TTATag i
+  return i
 
-ttaMembers :: Parser TakeTaskAttribute
+ttaMembers :: Parser String
 ttaMembers = do
   whiteSpace
   i <- identifier
   _ <- string ".members"
   whiteSpace
-  return $ TTAMembers i
+  return i
 
-ttaSubTasks :: Parser TakeTaskAttribute
+ttaSubTasks :: Parser String
 ttaSubTasks = do
   whiteSpace
   i <- identifier
   _ <- string ".subTasks"
   whiteSpace
-  return $ TTASubTasks i
+  return i
 
 boolComparator :: Parser BoolComparator
 boolComparator =

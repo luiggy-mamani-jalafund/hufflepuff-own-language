@@ -71,31 +71,37 @@ data Task = Task
 data TitleTask
   = TVTitle StrIdSpaces
   | TITitle Identifier
+  | TTTitle Identifier
   deriving (Show)
 
 data DescriptionTask
   = TVDescription StrParagraph
   | TIDescription Identifier
+  | TTDescription Identifier
   deriving (Show)
 
 data StateTask
   = TVState State
   | TIState Identifier
+  | TTState Identifier
   deriving (Show)
 
 data TagTask
   = TVTag Tag
   | TITag Identifier
+  | TTTag Identifier
   deriving (Show)
 
 data MembersTask
-  = TMembersValue List
-  | TMembersId Identifier
+  = TVMembers List
+  | TIMembers Identifier
+  | TTMembers Identifier
   deriving (Show)
 
 data SubTasksTask
-  = TSubTasksValue List
-  | TSubTasksId Identifier
+  = TVSubTasks List
+  | TISubTasks Identifier
+  | TTSubTasks Identifier
   deriving (Show)
 
 -- TAKE TASK ATTRIBUTE
