@@ -176,8 +176,8 @@ newtype PatternDefault = PDefault Statement deriving (Show)
 data FuncCall = FuncCall Identifier [FuncCallParam] deriving (Show)
 
 data FuncCallParam
-  = FuncCallParamValue Value
-  | FunCall FuncCall
+  = FCParamValue Value
+  | FCParam FuncCall
   deriving (Show)
 
 -- BOOLEAN EXPRESSION

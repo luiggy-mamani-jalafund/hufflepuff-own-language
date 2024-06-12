@@ -83,6 +83,7 @@ statement =
     <|> try (SBoolExp <$> boolExp)
     <|> try (SValue <$> value')
     <|> try (SCycle <$> cycle')
+    <|> try (SFuncCall <$> funcCall)
 
 value' :: Parser Value
 value' =
@@ -601,7 +602,7 @@ casePatternVal =
 casePatternEmpty :: Parser PatternCaseValue
 casePatternEmpty = do
   whiteSpace
-  _ <-string "_"
+  _ <- string "_"
   whiteSpace
   return PCaseEmpty
 
@@ -614,3 +615,37 @@ casePatternValue = do
 
 casePatternVals :: Parser [PatternCaseValue]
 casePatternVals = sepBy casePatternVal (char ',')
+
+funcCall :: Parser FuncCall
+funcCall = do
+  whiteSpace
+  i <- identifier
+  whiteSpace
+  reservedOp "("
+  whiteSpace
+  p <- funcCallParams
+  whiteSpace
+  reservedOp ")"
+  return $ FuncCall i p
+
+funcCallParams :: Parser [FuncCallParam]
+funcCallParams = sepBy funcCallParam (char ',')
+
+funcCallParam :: Parser FuncCallParam
+funcCallParam =
+  try funcCallParamVal
+    <|> try funcCallParamFC
+
+funcCallParamVal :: Parser FuncCallParam
+funcCallParamVal = do
+  whiteSpace
+  v <- value'
+  whiteSpace
+  return $ FCParamValue v
+
+funcCallParamFC :: Parser FuncCallParam
+funcCallParamFC = do
+  whiteSpace
+  v <- funcCall
+  whiteSpace
+  return $ FCParam v

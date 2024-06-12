@@ -1,32 +1,4 @@
-pattern {
-        case (_, "DONE", "NoAssigned") {
-            Task {
-                title: title,
-                description: "This task was already finished with NoAssigned member",
-                state: "DONE",
-                members: List:Member [],
-                tag: "DefaultTag",
-                subTasks: List:Task []
-            }
-        }
-        case (_, "INPROGRESS", _) {
-            Task {
-                title: title,
-                description: "This task is being developed",
-                state: "INPROGRESS",
-                members: List:Member [],
-                tag: "DefaultTag",
-                subTasks: List:Task []
-            }
-        }
-        default {
-            Task {
-                title: title,
-                description: "Default description",
-                state: state,
-                members: List:Member [],
-                tag: "DefaultTag",
-                subTasks: List:Task []
-            }
-        }
-    }
+createScrumProject(
+        "My scrum project",
+        "Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime mollitia, molestiae quas"
+    )
