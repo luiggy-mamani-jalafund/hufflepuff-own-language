@@ -1,10 +1,19 @@
-module Lib (funcParam, funcParams) where
+module Lib
+  ( funcParam,
+    funcParams,
+    funcBody,
+    task',
+    taskMembers,
+    member,
+  )
+where
 
 import AbstractSyntaxTree
 import Lexer
 import Text.Parsec
 import Text.Parsec.String (Parser)
 
+func :: Parser Func
 func = do
   reserved "func"
   spaces
@@ -16,19 +25,19 @@ func = do
   let t = str2type funType
   spaces
   reservedOp "{"
-  _ <- many $ char '\n' <|> char '\0'
+  whiteSpace
   reserved "params"
   spaces
   reservedOp "{"
-  _ <- many $ char '\n' <|> char '\0'
+  whiteSpace
   params <- funcParams
-  _ <- many $ char '\n' <|> char '\0'
+  whiteSpace
   reservedOp "}"
-  _ <- many $ char '\n' <|> char '\0'
+  whiteSpace
   body <- funcBody
-  _ <- many $ char '\n' <|> char '\0'
+  whiteSpace
   reservedOp "}"
-  _ <- many $ char '\n' <|> char '\0'
+  whiteSpace
   return $ Func funId t params body
 
 funcParam :: Parser FunParam
@@ -45,16 +54,18 @@ funcParam = do
 funcParams :: Parser [FunParam]
 funcParams = sepBy funcParam (char ',')
 
+funcBody :: Parser FuncBody
 funcBody = funcReturn
 
+funcReturn :: Parser FuncBody
 funcReturn = do
-  _ <- many $ char '\n' <|> char '\0'
+  whiteSpace
   reserved "return"
-  _ <- many $ char '\n' <|> char '\0'
+  whiteSpace
   reservedOp "{"
-  _ <- many $ char '\n' <|> char '\0'
+  whiteSpace
   s <- statement
-  _ <- many $ char '\n' <|> char '\0'
+  whiteSpace
   reservedOp "}"
   return $ FuncReturn s
 
@@ -65,57 +76,58 @@ value' =
   ValTask <$> task'
     <|> ValMember <$> member
     <|> ValList <$> lists
-    <|> ValTag <$> tags
+    <|> ValTag <$> tag'
 
+task' :: Parser Task
 task' = do
-  _ <- many $ char '\n' <|> char '\0'
-  _ <- string "Task {"
-  _ <- many $ char '\n' <|> char '\0'
-  _ <- string "Task {"
+  whiteSpace
+  _ <- string "Task"
+  whiteSpace
+  _ <- string "{"
 
-  _ <- many $ char '\n' <|> char '\0'
-  _ <- string "title: "
-  _ <- many $ char '\n' <|> char '\0'
+  whiteSpace
+  _ <- string "title:"
+  whiteSpace
   t <- taskTitle
-  _ <- many $ char '\n' <|> char '\0'
+  whiteSpace
   reservedOp ","
-  _ <- many $ char '\n' <|> char '\0'
-  _ <- string "description: "
-  _ <- many $ char '\n' <|> char '\0'
+
+  whiteSpace
+  _ <- string "description:"
+  whiteSpace
   d <- taskDescription
-  _ <- many $ char '\n' <|> char '\0'
+  whiteSpace
   reservedOp ","
 
-  _ <- many $ char '\n' <|> char '\0'
-  _ <- string "state: "
-  _ <- many $ char '\n' <|> char '\0'
+  whiteSpace
+  _ <- string "state:"
+  whiteSpace
   s <- taskState
-  _ <- many $ char '\n' <|> char '\0'
+  whiteSpace
   reservedOp ","
 
-  _ <- many $ char '\n' <|> char '\0'
-  _ <- string "members: "
-  _ <- many $ char '\n' <|> char '\0'
+  whiteSpace
+  _ <- string "members:"
+  whiteSpace
   m <- taskMembers
-  _ <- many $ char '\n' <|> char '\0'
+  whiteSpace
   reservedOp ","
 
-  _ <- many $ char '\n' <|> char '\0'
-  _ <- string "tag: "
-  _ <- many $ char '\n' <|> char '\0'
+  whiteSpace
+  _ <- string "tag:"
+  whiteSpace
   tg <- taskTag
-  _ <- many $ char '\n' <|> char '\0'
+  whiteSpace
   reservedOp ","
 
-  _ <- many $ char '\n' <|> char '\0'
-  _ <- string "tag: "
-  _ <- many $ char '\n' <|> char '\0'
+  whiteSpace
+  _ <- string "subTasks:"
+  whiteSpace
   st <- taskSubTasks
 
-  _ <- many $ char '\n' <|> char '\0'
-
+  whiteSpace
   reservedOp "}"
-  _ <- many $ char '\n' <|> char '\0'
+  whiteSpace
   return $
     Task
       { title = t,
@@ -139,82 +151,90 @@ taskState =
     <|> TIState <$> identifier
 
 taskMembers =
-  try
-    ( TMembersId
-        <$> many (char '\n' <|> char '\0')
-        <* identifier
-        <* many (char '\n' <|> char '\0')
-    )
-    <|> TMembersValue <$> listOfMembers
+  try $
+    TMembersValue <$> listOfMembers
+      <|> TMembersId
+        <$ whiteSpace
+        <*> identifier
+        <* whiteSpace
 
 taskSubTasks =
-  try
-    ( TSubTasksId
-        <$> many (char '\n' <|> char '\0')
-        <* identifier
-        <* many (char '\n' <|> char '\0')
-    )
-    <|> TSubTasksValue <$> lists
+  try $
+    TSubTasksValue <$> lists
+      <|> ( TSubTasksId
+              <$ whiteSpace
+              <*> identifier
+              <* whiteSpace
+          )
 
 lists = listOfMembers <|> listOfTasks
 
 listOfMembers = do
-  _ <- many $ char '\n' <|> char '\0'
-  _ <- string "List:Member ["
-  _ <- many $ char '\n' <|> char '\0'
+  whiteSpace
+  _ <- string "List:Member"
+  whiteSpace
+  _ <- string "["
+  whiteSpace
   m <- sepBy member (char ',')
-  _ <- many $ char '\n' <|> char '\0'
+  whiteSpace
   _ <- string "]"
-  _ <- many $ char '\n' <|> char '\0'
+  whiteSpace
   return $ ListMember m
 
+listOfTasks :: Parser List
 listOfTasks = do
-  _ <- many $ char '\n' <|> char '\0'
-  _ <- string "List:Task ["
-  _ <- many $ char '\n' <|> char '\0'
+  whiteSpace
+  _ <- string "List:Task"
+  whiteSpace
+  _ <- string "["
+  whiteSpace
   m <- sepBy task' (char ',')
-  _ <- many $ char '\n' <|> char '\0'
+  whiteSpace
   _ <- string "]"
-  _ <- many $ char '\n' <|> char '\0'
+  whiteSpace
   return $ ListTask m
 
-tags =
-  try
-    ( Tag <$> identifierWithSpace
-    )
-    <|> do
-      _ <- many $ char '\n' <|> char '\0'
-      _ <- string "NoTag"
-      _ <- many $ char '\n' <|> char '\0'
-      return NoTag
+tag' :: Parser Tag
+tag' =
+  try $
+    Tag <$> identifierWithSpace
+      <|> do
+        whiteSpace
+        _ <- string "NoTag"
+        whiteSpace
+        return NoTag
 
-taskTag = TVTag <$> tags <|> TITag <$> identifier
+taskTag :: Parser TagTask
+taskTag = TVTag <$> tag' <|> TITag <$> identifier
 
+member :: Parser Member
 member =
-  try
-    ( NoAssigned
-        <$ many (char '\n' <|> char '\0')
-        <* string "NoAssigned"
-        <* many (char '\n' <|> char '\0')
-    )
-    <|> do
-      _ <- many $ char '\n' <|> char '\0'
-      _ <- string "Member {"
-      _ <- many $ char '\n' <|> char '\0'
-      _ <- string "name: "
-      _ <- many $ char '\n' <|> char '\0'
-      n <- memberName
-      _ <- many $ char '\n' <|> char '\0'
-      reservedOp ","
+  do
+    whiteSpace
+    _ <- string "Member"
+    whiteSpace
+    _ <- string "{"
+    whiteSpace
 
-      _ <- many $ char '\n' <|> char '\0'
-      _ <- string "role: "
-      _ <- many $ char '\n' <|> char '\0'
-      r <- memberRole
-      _ <- many $ char '\n' <|> char '\0'
-      _ <- string "}"
-      _ <- many $ char '\n' <|> char '\0'
-      return $ Member n r
+    _ <- string "name: "
+    whiteSpace
+    n <- memberName
+    whiteSpace
+    reservedOp ","
+    whiteSpace
+
+    _ <- string "role: "
+    whiteSpace
+    r <- memberRole
+    whiteSpace
+
+    _ <- string "}"
+    whiteSpace
+    return $ Member n r
+    <|> NoAssigned
+      <$ whiteSpace
+      <* string "NoAssigned"
+      <* whiteSpace
 
 memberName =
   MVName <$> identifierWithSpace
@@ -226,12 +246,12 @@ memberRole =
 
 identifierWithSpace :: Parser String
 identifierWithSpace = do
-  _ <- many $ char '\n' <|> char '\0'
+  whiteSpace
   _ <- char '\"'
   v <- letter
   r <- many (letter <|> digit <|> space)
   _ <- char '\"'
-  _ <- many $ char '\n' <|> char '\0'
+  whiteSpace
   return $ v : r
 
 str2type :: String -> Type
