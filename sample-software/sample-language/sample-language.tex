@@ -14,8 +14,11 @@
     fontsize=\footnotesize,
     linenos,
     breaklines=true,  
-    breakanywhere=true 
+    breakanywhere=true
 }
+\usepackage{geometry}
+\geometry{left=3cm, right=3cm}
+
 
 \title{Sample language - 4 Sprints Pacman}
 \author{Hufflepuff}
@@ -88,9 +91,74 @@ func isFinished -> Bool {
 
 -- Ejecución de ejemplo:imprimir tareas y actualizar el estado de una tarea
 do {
-isFinished(taskMovementPacman("Movimiento basico de Pacman"));
--- o puede ser -- 
-map(sprint1Tasks, printTaskDetails);
+  isFinished(taskMovementPacman("Movimiento basico de Pacman"));
+  -- o puede ser -- 
+  map(sprint1Tasks, printTaskDetails);
+}
+\end{minted}
+
+\section{SPRINT 2}
+\begin{minted}{Haskell}
+-- SPRINT 2
+func sprint2Tasks -> List:Task {
+  return {
+    List:Task [
+      Task {
+        title: "Spike: Investigación de patrones de movimiento de fantasmas",
+        description: "Yo como usuario, quiero definir los patrones de movimiento para cada fantasma basándose en estudios de versiones anteriores de Pac-Man y adaptaciones modernas. Explorar algoritmos de IA para mejorar la autonomía de los movimientos.",
+        state: "Completed",
+        members: List:Member [Member {name: "Santiago", role: "Developer"}],
+        tag: "Spike",
+        subTasks: List:Task [
+          Task {
+            title: "Spike: Revisión de documentación histórica de Pac-Man",
+            description: "Yo como usuario, quiero analizar la documentación y recursos existentes sobre los patrones de movimiento de los fantasmas en las versiones clásicas del juego.",
+            state: "Completed",
+            members: List:Member [Member {name: "Leonardo", role: "Developer"}],
+            tag: "Spike",
+            subTasks: List:Task []
+          },
+          Task {
+            title: "Experimentación con algoritmos de IA",
+            description: "Yo como usuario, quiero implementar prototipos de algoritmos de inteligencia artificial para simular movimientos autónomos y adaptativos de los fantasmas.",
+            state: "Completed",
+            members: List:Member [Member {name: "Axel", role: "Developer"}],
+            tag: "Backend",
+            subTasks: List:Task []
+          }
+        ]
+      },
+      Task {
+        title: "Mecánicas de interacción",
+        description: "Yo como desarrollador, quiero las mecánicas de interacción entre Pac-Man y los fantasmas, incluyendo la pérdida de vidas cuando Pac-Man es tocado y la capacidad de comer fantasmas al consumir puntos de poder.",
+        state: "Completado",
+        members: List:Member [Member {name: "Sebas", role: "Developer"}],
+        tag: "Backend",
+        subTasks: List:Task []
+      },
+      Task {
+        title: "Pruebas iniciales de las mecánicas de Pac-man",
+        description: "Yo como desarrollador, quiero que se realicen pruebas iniciales para asegurar que las mecánicas implementadas funcionan correctamente en diversos escenarios y no hay errores lógicos con respecto a la logica de la IA implementada.",
+        state: "Completado",
+        members: List:Member [Member {name: "Diego", role: "QA Tester"}],
+        tag: "QA",
+        subTasks: List:Task []
+      }
+    ]
+  }
+}
+
+-- Imprimir tareas
+func printTaskDetails -> String {
+  params { task: Task }
+  return {
+    "Título: " + task.title + ", Descripción: " + task.description + ", Estado: " + task.state 
+  }
+}
+
+-- Ejecución de ejemplo: imprimir detalles de las tareas
+do {
+  map(sprint2Tasks, printTaskDetails);
 }
 \end{minted}
 
