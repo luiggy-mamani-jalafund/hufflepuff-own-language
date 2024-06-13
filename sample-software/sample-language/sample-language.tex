@@ -162,4 +162,82 @@ do {
 }
 \end{minted}
 
+\section{SPRINT 3}
+\begin{minted}{Haskell}
+-- SPRINT 3
+func sprint3Tasks -> List:Task {
+  return {
+    List:Task [
+      Task {
+        title: "Diseño completo de niveles",
+        description: "Yo como usuario, quiero finalizar el diseño y la implementación de todos los niveles del juego.",
+        state: checkTaskCompletion("Diseño completo de niveles", "Todos los niveles revisados y aprobados"),
+        members: List:Member [Member {name: "Sebas", role: "Designer"}],
+        tag: "Fronted",
+        subTasks: List:Task []
+      },
+      Task {
+        title: "Implementación de la UI básica",
+        description: "Yo como desarrollador, quiero tener desarrollado y completado la interfaz de usuario, incluyendo pantallas de inicio, menús de configuración, y pantallas de puntuación alta.",
+        state: checkTaskCompletion("Implementación de la UI básica", "UI probada en múltiples dispositivos"),
+        members: List:Member [Member {name: "Luiggy", role: "Developer"}],
+        tag: "UI",
+        subTasks: List:Task []
+      },
+      Task {
+        title: "Pruebas de UI y Niveles",
+        description: "Yo como desarrollador, quiero que se realicen pruebas exhaustivas para asegurar que los niveles están bien diseñados y que la UI funciona como se espera en diferentes plataformas y resoluciones.",
+        state: checkTaskCompletion("Pruebas de UI y Niveles", "Sin errores críticos"),
+        members: List:Member [Member {name: "Axel", role: "QA Tester"}],
+        tag: "QA",
+        subTasks: List:Task []
+      }
+    ]
+  }
+}
+
+-- Verificacion tareas completadas
+func checkTaskCompletion -> State {
+  params { taskTitle: StringId, condition: StringParagraph }
+  pattern {
+    case (condition == "Todos los niveles revisados y aprobados", taskTitle) {
+      "Completed"
+    }
+    case (condition == "UI probada en múltiples dispositivos", taskTitle) {
+      "Completed"
+    }
+    case (condition == "Sin errores críticos", taskTitle) {
+      "Completed"
+    }
+    default {
+      "InProgress"
+    }
+  }
+}
+
+-- Obtener nombre de miembros
+func getMemberName -> String {
+  params { member: Member }
+  return { member.name }
+}
+
+-- Imprimir tareas completadas
+func printCompletedTaskDetails -> String {
+  params { task: Task }
+  pattern {
+    case (task.state == "Completed") {
+        "Título: " + task.title + ", Descripción: " + task.description + ", Estado: " + task.state + ", Miembros: " + map(task.members, getMemberName)
+    }
+    default {
+        "Tarea no completada: " + task.title
+    }
+  }
+}
+
+-- Ejecución de ejemplo: imprimir detalles de las tareas completadas
+do {
+  map(sprint3Tasks, printCompletedTaskDetails);
+}
+\end{minted}
+
 \end{document}
