@@ -322,7 +322,32 @@ func createScrumProject -> Task {
             state: "NoAssigned",
             members: List:Member [],
             tag: "ProjectScrum",
-            subTasks: 
+            subTasks: List:Task [
+                Task {
+                    title: "Sprint 1",
+                    description: "First sprint of the project",
+                    state: "NoAssigned",
+                    members: List:Member [],
+                    tag: "Sprint",
+                    subTasks: List:Task []
+                },
+                Task {
+                    title: "Sprint 2",
+                    description: "Second sprint of the project",
+                    state: "NoAssigned",
+                    members: List:Member [],
+                    tag: "Sprint",
+                    subTasks: List:Task []
+                },
+                Task {
+                    title: "Sprint 3",
+                    description: "Third sprint of the project",
+                    state: "NoAssigned",
+                    members: List:Member [],
+                    tag: "Sprint",
+                    subTasks: List:Task []
+                }
+            ]
         }
     }
 }

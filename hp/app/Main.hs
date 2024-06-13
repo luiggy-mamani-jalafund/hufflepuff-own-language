@@ -17,7 +17,7 @@ import Lib
     casePattern,
     casePatternVal,
     casePatternVals,
-    code
+    code,
   )
 import Text.Parsec
 

@@ -55,7 +55,7 @@ data Value
 -- TASK DATA
 data Tag = Tag StrId | NoTag deriving (Show)
 
-type State = StrId
+type TaskState = StrId
 
 data Task = Task
   { title :: TitleTask,
@@ -81,7 +81,7 @@ data DescriptionTask
   deriving (Show)
 
 data StateTask
-  = TVState State
+  = TVState TaskState
   | TIState Identifier
   | TTState Identifier
   deriving (Show)
@@ -154,7 +154,7 @@ data List
   | ListBool [Bool]
   | ListTask [Task]
   | ListTag [Tag]
-  | ListState [State]
+  | ListState [TaskState]
   | ListMember [Member]
   | ListList [List]
   deriving (Show)
@@ -238,6 +238,7 @@ data Statement
   = SFuncCall FuncCall
   | SValue Value
   | STTA TakeTaskAttribute
+  | STMA TakeMemberAttribute
   | SBoolExp BoolExpression
   | SBoolCondition Condition
   | SCycle Cycle

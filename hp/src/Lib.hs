@@ -109,6 +109,8 @@ statement =
     <|> try (SValue <$> value')
     <|> try (SCycle <$> cycle')
     <|> try (SFuncCall <$> funcCall)
+    <|> try (STTA <$> takeTaskAttribute)
+    <|> try (STMA <$> takeMemberAttribute)
 
 value' :: Parser Value
 value' =
@@ -167,7 +169,7 @@ task' = do
   st <- taskSubTasks
 
   whiteSpace
-  reservedOp "}"
+  _ <- string "}"
   whiteSpace
   return $
     Task
@@ -194,7 +196,7 @@ taskDescription =
 taskState :: Parser StateTask
 taskState =
   try (TTState <$> ttaState)
-    <|> try (TVState . StrId <$> strId)
+    <|> try (TVState <$> state')
     <|> try (TIState <$> identifier)
 
 taskMembers :: Parser MembersTask
@@ -229,7 +231,65 @@ lists :: Parser List
 lists =
   try listOfTasks
     <|> try listOfMembers
+    <|> try listOfStates
+    <|> try listOfTags
+    <|> try listOfStrId
+    <|> try listOfStrIdSpaces
+    <|> try listOfStrParagraph
     <|> try listOfBool
+    <|> try listOfLists
+
+listOfLists :: Parser List
+listOfLists = do
+  whiteSpace
+  _ <- string "List:List"
+  whiteSpace
+  _ <- string "["
+  whiteSpace
+  i <- sepBy lists (char ',')
+  whiteSpace
+  _ <- string "]"
+  whiteSpace
+  return $ ListList i
+
+listOfStrId :: Parser List
+listOfStrId = do
+  whiteSpace
+  _ <- string "List:StringId"
+  whiteSpace
+  _ <- string "["
+  whiteSpace
+  i <- sepBy (StrId <$> strId) (char ',')
+  whiteSpace
+  _ <- string "]"
+  whiteSpace
+  return $ ListStringId i
+
+listOfStrIdSpaces :: Parser List
+listOfStrIdSpaces = do
+  whiteSpace
+  _ <- string "List:StringIdSpace"
+  whiteSpace
+  _ <- string "["
+  whiteSpace
+  i <- sepBy (StrIdSpaces <$> strId) (char ',')
+  whiteSpace
+  _ <- string "]"
+  whiteSpace
+  return $ ListStringIdSpace i
+
+listOfStrParagraph :: Parser List
+listOfStrParagraph = do
+  whiteSpace
+  _ <- string "List:StringParagraph"
+  whiteSpace
+  _ <- string "["
+  whiteSpace
+  i <- sepBy (StrParagraph <$> strId) (char ',')
+  whiteSpace
+  _ <- string "]"
+  whiteSpace
+  return $ ListStringParagraph i
 
 listOfMembers :: Parser List
 listOfMembers = do
@@ -257,6 +317,32 @@ listOfTasks = do
   whiteSpace
   return $ ListTask i
 
+listOfTags :: Parser List
+listOfTags = do
+  whiteSpace
+  _ <- string "List:Tag"
+  whiteSpace
+  _ <- string "["
+  whiteSpace
+  i <- sepBy tag' (char ',')
+  whiteSpace
+  _ <- string "]"
+  whiteSpace
+  return $ ListTag i
+
+listOfStates :: Parser List
+listOfStates = do
+  whiteSpace
+  _ <- string "List:State"
+  whiteSpace
+  _ <- string "["
+  whiteSpace
+  i <- sepBy state' (char ',')
+  whiteSpace
+  _ <- string "]"
+  whiteSpace
+  return $ ListState i
+
 listOfBool :: Parser List
 listOfBool = do
   whiteSpace
@@ -279,6 +365,9 @@ tag' =
         _ <- string "NoTag"
         whiteSpace
         return NoTag
+
+state' :: Parser TaskState
+state' = StrId <$> strId
 
 member :: Parser Member
 member =
@@ -513,7 +602,11 @@ boolExp =
     <|> BExp <$ whiteSpace <*> boolVal <* whiteSpace
 
 comparison :: Parser Comparison
-comparison = try boolComparison <|> try strComparison
+comparison =
+  try boolComparison
+    <|> try strComparison
+    <|> try taskComparison
+    <|> try memberComparison
 
 boolVal :: Parser Bool
 boolVal = try boolTrue <|> try boolFalse
@@ -547,6 +640,26 @@ boolComparison = do
   s2 <- boolVal
   whiteSpace
   return $ CBool s1 cmp s2
+
+taskComparison :: Parser Comparison
+taskComparison = do
+  s1 <- task'
+  whiteSpace
+  cmp <- boolComparator
+  whiteSpace
+  s2 <- task'
+  whiteSpace
+  return $ CTask s1 cmp s2
+
+memberComparison :: Parser Comparison
+memberComparison = do
+  s1 <- member
+  whiteSpace
+  cmp <- boolComparator
+  whiteSpace
+  s2 <- member
+  whiteSpace
+  return $ CMember s1 cmp s2
 
 cycle' :: Parser Cycle
 cycle' = mapCycle
