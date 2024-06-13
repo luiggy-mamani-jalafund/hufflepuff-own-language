@@ -240,4 +240,79 @@ do {
 }
 \end{minted}
 
+\section{SPRINT 4}
+\begin{minted}{Haskell}
+-- SPRINT 4
+func sprint4Tasks -> List:Task {
+  return {
+    List:Task [
+      Task {
+        title: "Efectos de sonido",
+        description: "Yo como desarrollador, quiero añadir efectos de sonido para las acciones de Pac-Man y las interacciones con los fantasmas y puntos especiales.",
+        state: checkTaskState("Integración de efectos de sonido", "Efectos implementados y probados"),
+        members: List:Member [Member {name: "Santiago", role: "Developer"}],
+        tag: "Backend",
+        subTasks: List:Task [
+          Task {
+            title: "Creación de efectos",
+            description: "Yo como desarrollador, quiero diseñar y desarrollar los efectos sonoros específicos para cada acción del juego.",
+            state: "Completed",
+            members: List:Member [Member {name: "Axel", role: "Developer"}],
+            tag: "Backend",
+            subTasks: List:Task []
+          }
+        ]
+      },
+      Task {
+        title: "Implementación de música de fondo",
+        description: "Yo como desarrollador, quiero componer y adaptar música de fondo que mejore la experiencia de juego sin ser intrusiva.",
+        state: "InProgress",
+        members: List:Member [Member {name: "Sebas", role: "Developer"}],
+        tag: "Backend",
+        subTasks: List:Task []
+      },
+      Task {
+        title: "Pruebas de integración de sonido",
+        description: "Yo como desarrollador, quiero que se verifique que los efectos de sonido y la música de fondo funcionen correctamente integrados con el juego.",
+        state: "InProgress",
+        members: List:Member [Member {name: "Diego", role: "QA Tester"}],
+        tag: "QA",
+        subTasks: List:Task []
+      }
+    ]
+  }
+}
+
+-- Verificar y actualizar el estado de las tareas
+func checkTaskState -> State {
+  params { taskTitle: StringId, condition: StringParagraph }
+  pattern {
+    case (condition == "Efectos implementados y probados", taskTitle) {
+      "Completed"
+    }
+    default {
+      "InProgress"
+    }
+  }
+}
+
+-- Imprimir los detalles de las tareas
+func printTaskDetails -> String {
+  params { task: Task }
+  pattern {
+    case (task.state == "Completed") {
+        "Título: " + task.title + ", Descripción: " + task.description + ", Estado: Completado, Miembros: " + map(task.members, getMemberName)
+    }
+    default 
+        "Título: " + task.title + ", Descripción: " + task.description + ", Estado: En Progreso, Miembros: "
+    }
+  }
+}
+
+-- Ejecución de ejemplo: imprimir detalles de las tareas
+do {
+  map(sprint4Tasks, printTaskDetails);
+}
+\end{minted}
+
 \end{document}
