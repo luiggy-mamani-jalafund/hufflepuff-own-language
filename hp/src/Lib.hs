@@ -57,19 +57,19 @@ func = do
   whiteSpace
   funType <- dataType
   whiteSpace
-  reservedOp "{"
+  _ <- string "{"
   whiteSpace
   reserved "params"
   whiteSpace
-  reservedOp "{"
+  _ <- string "{"
   whiteSpace
   params <- funcParams
   whiteSpace
-  reservedOp "}"
+  _ <- string  "}"
   whiteSpace
   body <- funcBody
   whiteSpace
-  reservedOp "}"
+  _ <- string  "}"
   whiteSpace
   return $ Func funId (str2type funType) params body
 
