@@ -1,0 +1,97 @@
+\documentclass{article}
+\usepackage{minted}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{xcolor}  
+
+\definecolor{lightgray}{gray}{0.97}
+
+\setminted[Haskell]{
+    frame=lines,
+    framesep=2mm,
+    baselinestretch=1.2,
+    bgcolor=lightgray,
+    fontsize=\footnotesize,
+    linenos,
+    breaklines=true,  
+    breakanywhere=true 
+}
+
+\title{Sample language - 4 Sprints Pacman}
+\author{Hufflepuff}
+
+\begin{document}
+\maketitle
+
+\section{SPRINT 1}
+\begin{minted}{Haskell}
+-- SPRINT 1
+func sprint1Tasks -> List:Task {
+  return {
+    List:Task [
+      Task {
+        title: "Configuración del entorno de desarrollo",
+        description: "Yo como desarrollador, quiero tener instalado todas las herramientas necesarias como compiladores, entornos de desarrollo, y sistemas de control de versiones.",
+        state: "Completed",
+        members: List:Member [Member {name: "Axel", role: "Developer"}],
+        tag: "Backend",
+        subTasks: List:Task []
+      },
+      Task {
+        title: "Diseño inicial del laberinto",
+        description: "Yo como usuario, quiero crear un diseño básico del laberinto utilizando herramientas de diseño gráfico.",
+        state: "Completed",
+        members: List:Member [Member {name: "Diego", role: "Designer"}],
+        tag: "Frontend",
+        subTasks: List:Task []
+      }
+    ]
+  }
+}
+
+func taskMovementPacman -> Task {
+    params {
+        titleTask: StringParagraph
+    }
+    return {
+        Task {
+          title: titleTask,
+	        description: "Yo como desarrollador, quiero tener implementado el movimiento básico de Pacman en el laberinto.",
+	        state: "IsFinished",
+	        members: List:Member [Member {name: "Luiggy", role: "Developer"}],
+	        tag: "Backend",
+	        subTasks: List:Task []
+        }
+    }
+}
+
+-- Imprimir tareas
+func printTaskDetails -> String {
+  params { task: Task }
+  return {
+    "Título: " + task.title + ", Descripción: " + task.description + ", Estado: " + task.state
+  }
+}
+
+-- Verificar el estado de las tareas
+func isFinished -> Bool {
+  params { myTask: Task }
+  pattern {
+    case (myTask.state == "IsFinished") {
+      True
+    }
+    default {
+      False
+    }
+  }
+}
+
+-- Ejecución de ejemplo:imprimir tareas y actualizar el estado de una tarea
+do {
+isFinished(taskMovementPacman("Movimiento basico de Pacman"));
+-- o puede ser -- 
+map(sprint1Tasks, printTaskDetails);
+}
+\end{minted}
+
+\end{document}
