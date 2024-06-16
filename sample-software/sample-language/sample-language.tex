@@ -28,8 +28,9 @@
 
 \section{SPRINT 1}
 \begin{minted}{Haskell}
--- SPRINT 1
+// SPRINT 1
 func sprint1Tasks -> List:Task {
+  params {}
   return {
     List:Task [
       Task {
@@ -68,15 +69,15 @@ func taskMovementPacman -> Task {
     }
 }
 
--- Imprimir tareas
-func printTaskDetails -> String {
+// Imprimir tareas
+func printTasksTitle -> String {
   params { task: Task }
   return {
-    "Título: " + task.title + ", Descripción: " + task.description + ", Estado: " + task.state
+    task.title
   }
 }
 
--- Verificar el estado de las tareas
+// Verificar el estado de las tareas
 func isFinished -> Bool {
   params { myTask: Task }
   pattern {
@@ -89,18 +90,19 @@ func isFinished -> Bool {
   }
 }
 
--- Ejecución de ejemplo:imprimir tareas y actualizar el estado de una tarea
+// Ejecución de ejemplo:imprimir tareas y actualizar el estado de una tarea
 do {
   isFinished(taskMovementPacman("Movimiento basico de Pacman"));
-  -- o puede ser -- 
-  map(sprint1Tasks, printTaskDetails);
+  // Como el do solo puede una funcion a la vez, otro ejemplo de ejecucion es:
+  map(sprint1Tasks, printTasksTitle);
 }
 \end{minted}
 
 \section{SPRINT 2}
 \begin{minted}{Haskell}
--- SPRINT 2
+// SPRINT 2
 func sprint2Tasks -> List:Task {
+  params {}
   return {
     List:Task [
       Task {
@@ -148,24 +150,25 @@ func sprint2Tasks -> List:Task {
   }
 }
 
--- Imprimir tareas
-func printTaskDetails -> String {
+// Imprimir tareas
+func printTasks -> String {
   params { task: Task }
   return {
-    "Título: " + task.title + ", Descripción: " + task.description + ", Estado: " + task.state 
+    task 
   }
 }
 
--- Ejecución de ejemplo: imprimir detalles de las tareas
+// Ejecución de ejemplo: imprimir detalles de las tareas
 do {
-  map(sprint2Tasks, printTaskDetails);
+  map(sprint2Tasks, printTasks)
 }
 \end{minted}
 
 \section{SPRINT 3}
 \begin{minted}{Haskell}
--- SPRINT 3
+// SPRINT 3
 func sprint3Tasks -> List:Task {
+  params {}
   return {
     List:Task [
       Task {
@@ -196,7 +199,7 @@ func sprint3Tasks -> List:Task {
   }
 }
 
--- Verificacion tareas completadas
+// Verificacion tareas completadas
 func checkTaskCompletion -> State {
   params { taskTitle: StringId, condition: StringParagraph }
   pattern {
@@ -215,13 +218,13 @@ func checkTaskCompletion -> State {
   }
 }
 
--- Obtener nombre de miembros
+// Obtener nombre de miembros
 func getMemberName -> String {
   params { member: Member }
   return { member.name }
 }
 
--- Imprimir tareas completadas
+// Imprimir tareas completadas
 func printCompletedTaskDetails -> String {
   params { task: Task }
   pattern {
@@ -234,16 +237,17 @@ func printCompletedTaskDetails -> String {
   }
 }
 
--- Ejecución de ejemplo: imprimir detalles de las tareas completadas
+// Ejecución de ejemplo: imprimir detalles de las tareas completadas
 do {
-  map(sprint3Tasks, printCompletedTaskDetails);
+  map(sprint3Tasks, printCompletedTaskDetails)
 }
 \end{minted}
 
 \section{SPRINT 4}
 \begin{minted}{Haskell}
--- SPRINT 4
+// SPRINT 4
 func sprint4Tasks -> List:Task {
+  params {}
   return {
     List:Task [
       Task {
@@ -283,7 +287,7 @@ func sprint4Tasks -> List:Task {
   }
 }
 
--- Verificar y actualizar el estado de las tareas
+// Verificar y actualizar el estado de las tareas
 func checkTaskState -> State {
   params { taskTitle: StringId, condition: StringParagraph }
   pattern {
@@ -296,22 +300,22 @@ func checkTaskState -> State {
   }
 }
 
--- Imprimir los detalles de las tareas
+// Imprimir los detalles de las tareas
 func printTaskDetails -> String {
   params { task: Task }
   pattern {
     case (task.state == "Completed") {
         "Título: " + task.title + ", Descripción: " + task.description + ", Estado: Completado, Miembros: " + map(task.members, getMemberName)
     }
-    default 
+    default {
         "Título: " + task.title + ", Descripción: " + task.description + ", Estado: En Progreso, Miembros: "
     }
   }
 }
 
--- Ejecución de ejemplo: imprimir detalles de las tareas
+// Ejecución de ejemplo: imprimir detalles de las tareas
 do {
-  map(sprint4Tasks, printTaskDetails);
+  map(sprint4Tasks, printTaskDetails)
 }
 \end{minted}
 
