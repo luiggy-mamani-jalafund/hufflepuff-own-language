@@ -275,10 +275,15 @@ func verifiedIfTaskIsInProgress -> Bool {
 
 // Function execution
 do {
-  verifiedIfTaskIsInProgress(createTaskForBackgroundMusic(
-    "Background music implementation", 
-    "As a developer, I want to compose and adapt background music that enhances the gaming experience without being intrusive.", 
-    "InProgress", 
-    "Backend"
-    ))
+  let someTitle:StringIdSpace = "some title"
+  let areTaskInProgress:Bool = verifiedIfTaskIsInProgress(
+        createTaskForBackgroundMusic(
+            someTitle, 
+            "As a developer, I want to compose and adapt background music that enhances the gaming experience without being intrusive.", 
+            "InProgress", 
+            "Backend"
+        )
+      )
+  print("Task Status: ")
+  print(areTaskInProgress)
 }
