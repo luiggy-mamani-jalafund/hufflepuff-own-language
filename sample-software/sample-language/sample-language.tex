@@ -34,16 +34,16 @@ func sprint1Tasks -> List:Task {
   return {
     List:Task [
       Task {
-        title: "Configuración del entorno de desarrollo",
-        description: "Yo como desarrollador, quiero tener instalado todas las herramientas necesarias como compiladores, entornos de desarrollo, y sistemas de control de versiones.",
+        title: "Development environment setup",
+        description: "As a developer, I want to have all necessary tools like compilers, development environments, and version control systems installed.",
         state: "DONE",
         members: List:Member [Member {name: "Axel", role: "Developer"}],
         tag: "Backend",
         subTasks: List:Task []
       },
       Task {
-        title: "Diseño inicial del laberinto",
-        description: "Yo como usuario, quiero crear un diseño básico del laberinto utilizando herramientas de diseño gráfico.",
+        title: "Initial maze design",
+        description: "As a user, I want to create a basic maze design using graphic design tools.",
         state: "DONE",
         members: List:Member [Member {name: "Diego", role: "Designer"}],
         tag: "Frontend",
@@ -53,7 +53,7 @@ func sprint1Tasks -> List:Task {
   }
 }
 
-// Crear tarea para el movimiento de Pacman
+// Create task for Pacman movement
 func taskMovementPacman -> Task {
     params {
         titleTask: StringParagraph
@@ -61,7 +61,7 @@ func taskMovementPacman -> Task {
     return {
         Task {
           title: titleTask,
-	        description: "Yo como desarrollador, quiero tener implementado el movimiento básico de Pacman en el laberinto.",
+	        description: "As a developer, I want to implement the basic movement of Pacman in the maze.",
 	        state: "DONE",
 	        members: List:Member [Member {name: "Luiggy", role: "Developer"}],
 	        tag: "Backend",
@@ -70,7 +70,7 @@ func taskMovementPacman -> Task {
     }
 }
 
-// Imprimir tareas
+// Print task titles
 func printTasksTitle -> String {
   params { task: Task }
   return {
@@ -78,7 +78,7 @@ func printTasksTitle -> String {
   }
 }
 
-// Verificar el estado de las tareas
+// Check task status
 func taskIsDone -> Bool {
   params { myTask: Task }
   return {
@@ -87,10 +87,10 @@ func taskIsDone -> Bool {
   }
 }
 
-// Ejecucion de funciones 
+// Function execution
 do {
-  taskIsDone(taskMovementPacman("Movimiento basico de Pacman"))
-  // Como el do solo puede una funcion a la vez, otro ejemplo de ejecucion es:
+  taskIsDone(taskMovementPacman("Basic Pacman movement"))
+  // Since do can only handle one function at a time, another example of execution is:
   map(sprint1Tasks, printTasksTitle)
 }
 \end{minted}
@@ -103,15 +103,15 @@ func sprint2Tasks -> List:Task {
   return {
     List:Task [
       Task {
-        title: "Spike: Investigación de patrones de movimiento de fantasmas",
-        description: "Yo como usuario, quiero definir los patrones de movimiento para cada fantasma basándose en estudios de versiones anteriores de Pac-Man y adaptaciones modernas. Explorar algoritmos de IA para mejorar la autonomía de los movimientos.",
+        title: "Spike: Research ghost movement patterns",
+        description: "As a user, I want to define the movement patterns for each ghost based on studies of previous Pac-Man versions and modern adaptations. Explore AI algorithms to improve movement autonomy.",
         state: "DONE",
         members: List:Member [Member {name: "Santiago", role: "Developer"}],
         tag: "Spike",
         subTasks: List:Task [
           Task {
-            title: "Experimentación con algoritmos de IA",
-            description: "Yo como usuario, quiero implementar prototipos de algoritmos de inteligencia artificial para simular movimientos autónomos y adaptativos de los fantasmas.",
+            title: "Experimenting with AI algorithms",
+            description: "As a user, I want to implement AI algorithm prototypes to simulate autonomous and adaptive ghost movements.",
             state: "DONE",
             members: List:Member [Member {name: "Axel", role: "Developer"}],
             tag: "Backend",
@@ -120,8 +120,8 @@ func sprint2Tasks -> List:Task {
         ]
       },
       Task {
-        title: "Mecánicas de interacción",
-        description: "Yo como desarrollador, quiero las mecánicas de interacción entre Pac-Man y los fantasmas, incluyendo la pérdida de vidas cuando Pac-Man es tocado y la capacidad de comer fantasmas al consumir puntos de poder.",
+        title: "Interaction mechanics",
+        description: "As a developer, I want the interaction mechanics between Pac-Man and the ghosts, including losing lives when Pac-Man is touched and the ability to eat ghosts when consuming power pellets.",
         state: "DONE",
         members: List:Member [Member {name: "Sebas", role: "Developer"}],
         tag: "Backend",
@@ -131,7 +131,7 @@ func sprint2Tasks -> List:Task {
   }
 }
 
-// Crear tarea para pruebas de QA con pattern matching
+// Create task for QA testing with pattern matching
 func createTaskForTesting -> Task {
     params {
         titleTask: StringParagraph,
@@ -163,11 +163,11 @@ func createTaskForTesting -> Task {
     }
 }
 
-// Ejecución de funciones
+// Function execution
 do {
   createTaskForTesting(
-    "Pruebas iniciales de las mecánicas de Pac-man", 
-    "Yo como desarrollador, quiero que se realicen pruebas iniciales para asegurar que las mecánicas implementadas funcionan correctamente en diversos escenarios y no hay errores lógicos con respecto a la logica de la IA implementada.", 
+    "Initial testing of Pac-Man mechanics", 
+    "As a developer, I want to conduct initial tests to ensure the implemented mechanics work correctly in various scenarios and there are no logical errors regarding the implemented AI logic.", 
     "ToDo", 
     "QA"
     )
@@ -182,16 +182,16 @@ func sprint3Tasks -> List:Task {
   return {
     List:Task [
       Task {
-        title: "Diseño completo de niveles",
-        description: "Yo como usuario, quiero finalizar el diseño y la implementación de todos los niveles del juego.",
+        title: "Complete level design",
+        description: "As a user, I want to finalize the design and implementation of all game levels.",
         state: "DONE",
         members: List:Member [Member {name: "Sebas", role: "Designer"}],
-        tag: "Fronted",
+        tag: "Frontend",
         subTasks: List:Task []
       },
       Task {
-        title: "Implementación de la UI básica",
-        description: "Yo como desarrollador, quiero tener desarrollado y completado la interfaz de usuario, incluyendo pantallas de inicio, menús de configuración, y pantallas de puntuación alta.",
+        title: "Basic UI implementation",
+        description: "As a developer, I want to have the user interface developed and completed, including start screens, settings menus, and high score screens.",
         state: "DONE",
         members: List:Member [Member {name: "Luiggy", role: "Developer"}],
         tag: "UI",
@@ -201,7 +201,7 @@ func sprint3Tasks -> List:Task {
   }
 }
 
-// Crear tarea para pruebas de QA
+// Create task for QA testing
 func createTaskForTesting -> Task {
     params {
         titleTask: StringParagraph,
@@ -221,7 +221,7 @@ func createTaskForTesting -> Task {
     }
 }
 
-// Verificacion tareas si es de QA 
+// Verify if the task is for QA
 func verifiedIfTaskIsForQA -> Bool {
   params { myTask: Task }
   return {
@@ -230,11 +230,11 @@ func verifiedIfTaskIsForQA -> Bool {
   }
 }
 
-// Ejecución de funciones 
+// Function execution
 do {
   verifiedIfTaskIsForQA(createTaskForTesting(
-    "Pruebas de UI y Niveles", 
-    "Yo como desarrollador, quiero que se realicen pruebas exhaustivas para asegurar que los niveles están bien diseñados y que la UI funciona como se espera en diferentes plataformas y resoluciones.", 
+    "UI and Level Testing", 
+    "As a developer, I want thorough tests to ensure levels are well designed and the UI works as expected on different platforms and resolutions.", 
     "ToDo", 
     "QA"
     ))
@@ -249,15 +249,15 @@ func sprint4Tasks -> List:Task {
   return {
     List:Task [
       Task {
-        title: "Efectos de sonido",
-        description: "Yo como desarrollador, quiero añadir efectos de sonido para las acciones de Pac-Man y las interacciones con los fantasmas y puntos especiales.",
+        title: "Sound effects",
+        description: "As a developer, I want to add sound effects for Pac-Man's actions and interactions with ghosts and special points.",
         state: "DONE",
         members: List:Member [Member {name: "Santiago", role: "Developer"}],
         tag: "Backend",
         subTasks: List:Task [
           Task {
-            title: "Creación de efectos",
-            description: "Yo como desarrollador, quiero diseñar y desarrollar los efectos sonoros específicos para cada acción del juego.",
+            title: "Sound effects creation",
+            description: "As a developer, I want to design and develop specific sound effects for each game action.",
             state: "DONE",
             members: List:Member [Member {name: "Axel", role: "Developer"}],
             tag: "Backend",
@@ -266,8 +266,8 @@ func sprint4Tasks -> List:Task {
         ]
       },
       Task {
-        title: "Pruebas de integración de sonido",
-        description: "Yo como desarrollador, quiero que se verifique que los efectos de sonido y la música de fondo funcionen correctamente integrados con el juego.",
+        title: "Sound integration testing",
+        description: "As a developer, I want to ensure sound effects and background music are correctly integrated with the game.",
         state: "InProgress",
         members: List:Member [Member {name: "Diego", role: "QA Tester"}],
         tag: "QA",
@@ -277,7 +277,7 @@ func sprint4Tasks -> List:Task {
   }
 }
 
-// Crear tarea para la música de fondo
+// Create task for background music
 func createTaskForBackgroundMusic -> Task {
     params {
         titleTask: StringParagraph,
@@ -297,7 +297,7 @@ func createTaskForBackgroundMusic -> Task {
     }
 }
 
-// Verificar si la tarea esta en progreso
+// Verify if the task is in progress
 func verifiedIfTaskIsInProgress -> Bool {
   params { myTask: Task }
   return {
@@ -306,11 +306,11 @@ func verifiedIfTaskIsInProgress -> Bool {
   }
 }
 
-// Ejecucion de funciones 
+// Function execution
 do {
   verifiedIfTaskIsInProgress(createTaskForBackgroundMusic(
-    "Implementación de música de fondo", 
-    "Yo como desarrollador, quiero componer y adaptar música de fondo que mejore la experiencia de juego sin ser intrusiva.", 
+    "Background music implementation", 
+    "As a developer, I want to compose and adapt background music that enhances the gaming experience without being intrusive.", 
     "InProgress", 
     "Backend"
     ))
