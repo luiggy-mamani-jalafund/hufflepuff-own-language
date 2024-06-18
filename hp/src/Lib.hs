@@ -272,7 +272,7 @@ listOfStrIdSpaces = do
   whiteSpace
   _ <- string "["
   whiteSpace
-  i <- sepBy (StrIdSpaces <$> strId) (char ',')
+  i <- sepBy (StrIdSpaces <$> strIdSpaces) (char ',')
   whiteSpace
   _ <- string "]"
   whiteSpace
@@ -285,7 +285,7 @@ listOfStrParagraph = do
   whiteSpace
   _ <- string "["
   whiteSpace
-  i <- sepBy (StrParagraph <$> strId) (char ',')
+  i <- sepBy (StrParagraph <$> strParagraph) (char ',')
   whiteSpace
   _ <- string "]"
   whiteSpace
@@ -551,7 +551,7 @@ strIdSpaces = do
   whiteSpace
   _ <- char '\"'
   v <- letter
-  r <- many (alphaNum <|> space)
+  r <- many (alphaNum <|> space <|> char ':')
   _ <- char '\"'
   whiteSpace
   return $ v : r
@@ -560,7 +560,7 @@ strParagraph :: Parser String
 strParagraph = do
   whiteSpace
   _ <- char '\"'
-  v <- many (alphaNum <|> space <|> oneOf ".,;?¿!¡")
+  v <- many (alphaNum <|> space <|> oneOf ".,;?¿!¡-:'")
   _ <- char '\"'
   whiteSpace
   return v
@@ -765,11 +765,11 @@ funcCall = do
   whiteSpace
   i <- identifier
   whiteSpace
-  reservedOp "("
+  _ <- string "("
   whiteSpace
   p <- funcCallParams
   whiteSpace
-  reservedOp ")"
+  _ <- string ")"
   return $ FuncCall i p
 
 funcCallParams :: Parser [FuncCallParam]
