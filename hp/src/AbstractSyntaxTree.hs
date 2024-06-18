@@ -184,6 +184,7 @@ data FuncCall = FuncCall Identifier [FuncCallParam] deriving (Show)
 data FuncCallParam
   = FCParamValue Value
   | FCParam FuncCall
+  | FCIdentifier Identifier
   deriving (Show)
 
 -- BOOLEAN EXPRESSION
@@ -244,7 +245,22 @@ data Statement
   | SCycle Cycle
   deriving (Show)
 
--- START
-data Code = Code [Func] DoStatement deriving (Show)
+-- DO NOTATION
+newtype DoNotation
+  = DoNotation [DoStatement]
+  deriving (Show)
 
-newtype DoStatement = DoStatement FuncCall deriving (Show)
+data DoStatement
+  = DoAssignment Identifier Type Statement
+  | DoPrint Print
+  deriving (Show)
+
+data Print
+  = PrintRef Identifier
+  | PrintStatement Statement
+  deriving (Show)
+
+-- CODE
+data Code
+  = Code [Func] DoNotation
+  deriving (Show)

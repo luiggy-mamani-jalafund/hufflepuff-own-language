@@ -26,7 +26,9 @@ languageDef =
           "case",
           "default",
           "do",
-          "map"
+          "map",
+          "let",
+          "print"
         ],
       P.reservedOpNames =
         [ ":",
@@ -39,6 +41,7 @@ languageDef =
           "[",
           "]",
           "->",
+          "=",
           "==",
           "!=",
           "<",

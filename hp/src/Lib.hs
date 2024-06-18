@@ -27,21 +27,9 @@ code = do
   whiteSpace
   f <- funcs
   whiteSpace
-  d <- doStatement
+  d <- doNotation
   whiteSpace
   return $ Code f d
-
-doStatement :: Parser DoStatement
-doStatement = do
-  reserved "do"
-  whiteSpace
-  reservedOp "{"
-  whiteSpace
-  c <- funcCall
-  whiteSpace
-  reservedOp "}"
-  whiteSpace
-  return $ DoStatement c
 
 funcs :: Parser [Func]
 funcs = many func
@@ -65,11 +53,11 @@ func = do
   whiteSpace
   params <- funcParams
   whiteSpace
-  _ <- string  "}"
+  _ <- string "}"
   whiteSpace
   body <- funcBody
   whiteSpace
-  _ <- string  "}"
+  _ <- string "}"
   whiteSpace
   return $ Func funId (str2type funType) params body
 
@@ -779,6 +767,7 @@ funcCallParam :: Parser FuncCallParam
 funcCallParam =
   try funcCallParamVal
     <|> try funcCallParamFC
+    <|> try funcCallId
 
 funcCallParamVal :: Parser FuncCallParam
 funcCallParamVal = do
@@ -793,3 +782,62 @@ funcCallParamFC = do
   v <- funcCall
   whiteSpace
   return $ FCParam v
+
+funcCallId :: Parser FuncCallParam
+funcCallId = do
+  whiteSpace
+  v <- identifier
+  whiteSpace
+  return $ FCIdentifier v
+
+doNotation :: Parser DoNotation
+doNotation = do
+  reserved "do"
+  whiteSpace
+  reservedOp "{"
+  whiteSpace
+  c <- doStatements
+  whiteSpace
+  reservedOp "}"
+  whiteSpace
+  return $ DoNotation c
+
+doStatements :: Parser [DoStatement]
+doStatements = many doStatement
+
+doStatement :: Parser DoStatement
+doStatement = try doAssignment <|> try doPrint
+
+doAssignment :: Parser DoStatement
+doAssignment = do
+  whiteSpace
+  reserved "let"
+  whiteSpace
+  i <- identifier
+  _ <- string ":"
+  t <- dataType
+  whiteSpace
+  _ <- string "="
+  whiteSpace
+  s <- statement
+  whiteSpace
+  return $ DoAssignment i (str2type t) s
+
+doPrint :: Parser DoStatement
+doPrint = do
+  whiteSpace
+  reserved "print"
+  whiteSpace
+  _ <- string "("
+  whiteSpace
+  s <- try printStatement <|> try printRef
+  whiteSpace
+  _ <- string ")"
+  whiteSpace
+  return $ DoPrint s
+
+printStatement :: Parser Print
+printStatement = PrintStatement <$> statement
+
+printRef :: Parser Print
+printRef = PrintRef <$> identifier
