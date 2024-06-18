@@ -71,7 +71,7 @@ func taskMovementPacman -> Task {
 }
 
 // Print task titles
-func printTasksTitle -> String {
+func printTasksTitle -> StringIdSpace {
   params { task: Task }
   return {
     task.title
@@ -149,6 +149,7 @@ func createTaskForTesting -> Task {
           tag: tag,
           subTasks: List:Task []
         }
+      }
       default {
         Task {
           title: "Task for testing",
@@ -160,7 +161,6 @@ func createTaskForTesting -> Task {
           }
         }
       }
-    }
 }
 
 // Function execution

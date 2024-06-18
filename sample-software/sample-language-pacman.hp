@@ -41,7 +41,7 @@ func taskMovementPacman -> Task {
 }
 
 // Print task titles
-func printTasksTitle -> String {
+func printTasksTitle -> StringIdSpace {
   params { task: Task }
   return {
     task.title
@@ -63,8 +63,6 @@ do {
   // Since do can only handle one function at a time, another example of execution is:
   map(sprint1Tasks, printTasksTitle)
 }
-
-
 
 
 
@@ -120,6 +118,7 @@ func createTaskForTesting -> Task {
           tag: tag,
           subTasks: List:Task []
         }
+      }
       default {
         Task {
           title: "Task for testing",
@@ -131,7 +130,6 @@ func createTaskForTesting -> Task {
           }
         }
       }
-    }
 }
 
 // Function execution
@@ -143,7 +141,6 @@ do {
     "QA"
     )
 }
-
 
 
 
@@ -210,7 +207,6 @@ do {
     "QA"
     ))
 }
-
 
 
 
