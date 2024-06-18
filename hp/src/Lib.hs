@@ -21,7 +21,7 @@ module Lib
 where
 
 import AbstractSyntaxTree
-import LexerP
+import Lexer
 import Text.Parsec
 import Text.Parsec.String  (Parser)
 import SymbolTable
@@ -238,7 +238,7 @@ task' symTable = do
     Task
       { title = t,
         description = d,
-        status = s,
+        state = s,
         members = m,
         tag = tg,
         subTasks = st

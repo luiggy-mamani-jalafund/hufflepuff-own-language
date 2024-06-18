@@ -17,16 +17,16 @@ import Lib
     casePattern,
     casePatternVal,
     casePatternVals,
-    code,
+    parseCode,
   )
 import Text.Parsec
 
 main :: IO ()
 main = do
-  -- let input = "title:StringId,nose:StringId"
-  input <- readFile "/home/fundacion/University/Fifth/ProgrammingLenguages/hufflepuff-own-language/hp/code"
-  -- print input
-  print $ parse code "Error" input
+  input <- readFile "./code"
+  case parse parseCode "Error" input of
+    Left err -> print err
+    Right (parsedCode, finalSymbolTable) -> do
+      print parsedCode
+      print finalSymbolTable 
 
--- print input
--- print $ parse (sepBy (many (letter <|> space)) (char ',')) "Error" "StringIdSpace ,description,state,Tag"

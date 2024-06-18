@@ -28,6 +28,7 @@ library
       AbstractSyntaxTree
       Lexer
       Lib
+      SymbolTable
   other-modules:
       Paths_hp
   autogen-modules:
