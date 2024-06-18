@@ -89,9 +89,12 @@ func taskIsDone -> Bool {
 
 // Function execution
 do {
-  taskIsDone(taskMovementPacman("Basic Pacman movement"))
+  let isDone:Bool = taskIsDone(taskMovementPacman("Basic Pacman movement"))
+  print(isDone)
   // Since do can only handle one function at a time, another example of execution is:
-  map(sprint1Tasks, printTasksTitle)
+  print(
+    map(sprint1Tasks, printTasksTitle)
+  )
 }
 \end{minted}
 
@@ -165,12 +168,14 @@ func createTaskForTesting -> Task {
 
 // Function execution
 do {
-  createTaskForTesting(
-    "Initial testing of Pac-Man mechanics", 
-    "As a developer, I want to conduct initial tests to ensure the implemented mechanics work correctly in various scenarios and there are no logical errors regarding the implemented AI logic.", 
-    "ToDo", 
-    "QA"
+  print(
+    createTaskForTesting(
+      "Initial testing of Pac-Man mechanics", 
+      "As a developer, I want to conduct initial tests to ensure the implemented mechanics work correctly in various scenarios and there are no logical errors regarding the implemented AI logic.", 
+      "ToDo", 
+      "QA"
     )
+  )
 }
 \end{minted}
 
@@ -232,12 +237,16 @@ func verifiedIfTaskIsForQA -> Bool {
 
 // Function execution
 do {
-  verifiedIfTaskIsForQA(createTaskForTesting(
-    "UI and Level Testing", 
-    "As a developer, I want thorough tests to ensure levels are well designed and the UI works as expected on different platforms and resolutions.", 
-    "ToDo", 
-    "QA"
-    ))
+  print(
+    verifiedIfTaskIsForQA(
+      createTaskForTesting(
+        "UI and Level Testing", 
+        "As a developer, I want thorough tests to ensure levels are well designed and the UI works as expected on different platforms and resolutions.", 
+        "ToDo", 
+        "QA"
+      )
+    )
+  )
 }
 \end{minted}
 
