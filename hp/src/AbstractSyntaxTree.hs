@@ -1,3 +1,4 @@
+{-# OPTIONS_GHC -Wno-partial-fields #-}
 module AbstractSyntaxTree (module AbstractSyntaxTree) where
 
 -- TERMINALS
@@ -5,8 +6,8 @@ data Literal
   = LStringId StrId
   | LStringIdSpaces StrIdSpaces
   | LStringParagraph StrParagraph
-  | LTTAStrings TTAStrings
-  | LTMAStrings TakeMemberAttribute
+  | LTakeTaskAttribute TakeTaskAttributeLiteral
+  | LTakeMemberAttribute TakeMemberAttribute
   deriving (Show)
 
 newtype StrId = StrId String deriving (Show)
@@ -37,12 +38,6 @@ data Type
   | TListTag
   deriving (Show, Read)
 
-data Strings
-  = String Literal
-  | TTAString TTAStrings
-  | TMAString TakeMemberAttribute
-  deriving (Show)
-
 data Value
   = ValLiteral Literal
   | ValTask Task
@@ -69,53 +64,53 @@ data Task = Task
 
 -- TASK ATTRIBUTTE
 data TitleTask
-  = TVTitle StrIdSpaces
-  | TITitle Identifier
-  | TTTitle Identifier
+  = TaskValueTitle StrIdSpaces
+  | TaskIdentifierTitle Identifier
+  | TaskTakeTitle Identifier
   deriving (Show)
 
 data DescriptionTask
-  = TVDescription StrParagraph
-  | TIDescription Identifier
-  | TTDescription Identifier
+  = TaskValueDescription StrParagraph
+  | TaskIdentifierDescription Identifier
+  | TaskTakeDescription Identifier
   deriving (Show)
 
 data StateTask
-  = TVState TaskState
-  | TIState Identifier
-  | TTState Identifier
+  = TaskValueState TaskState
+  | TaskIdentifierState Identifier
+  | TaskTakeState Identifier
   deriving (Show)
 
 data TagTask
-  = TVTag Tag
-  | TITag Identifier
-  | TTTag Identifier
+  = TaskValueTag Tag
+  | TaskIdentifierTag Identifier
+  | TaskTakeTag Identifier
   deriving (Show)
 
 data MembersTask
-  = TVMembers List
-  | TIMembers Identifier
-  | TTMembers Identifier
+  = TaskValueMembers List
+  | TaskIdentifierMembers Identifier
+  | TaskTakeMembers Identifier
   deriving (Show)
 
 data SubTasksTask
-  = TVSubTasks List
-  | TISubTasks Identifier
-  | TTSubTasks Identifier
+  = TaskValueSubTasks List
+  | TaskIdentifierSubTasks Identifier
+  | TaskTakeSubTasks Identifier
   deriving (Show)
 
 -- TAKE TASK ATTRIBUTE
 data TakeTaskAttribute
-  = TTAStrings TTAStrings
-  | TTAMembers Identifier
-  | TTASubTasks Identifier
+  = TakeTaskAttributeStrings TakeTaskAttributeLiteral
+  | TakeTaskAttributeMembers Identifier
+  | TakeTaskAttributeSubTasks Identifier
   deriving (Show)
 
-data TTAStrings
-  = TTATitle Identifier
-  | TTADescription Identifier
-  | TTAState Identifier
-  | TTATag Identifier
+data TakeTaskAttributeLiteral
+  = TakeTaskAttributeTitle Identifier
+  | TakeTaskAttributeDescription Identifier
+  | TakeTaskAttributeState Identifier
+  | TakeTaskAttributeTag Identifier
   deriving (Show)
 
 -- MEMBER DATA
@@ -132,18 +127,18 @@ data Member
   deriving (Show)
 
 data MemberName
-  = MVName Name
-  | MIName Identifier
+  = MemberValueName Name
+  | MemberIdentifierName Identifier
   deriving (Show)
 
 data MemberRole
-  = MVRole Role
-  | MIRole Identifier
+  = MemberValueRole Role
+  | MemberIdentifierRole Identifier
   deriving (Show)
 
 data TakeMemberAttribute
-  = TMAName Identifier
-  | TMARole Identifier
+  = TakeMemberAttributeName Identifier
+  | TakeMemberAttributeRole Identifier
   deriving (Show)
 
 -- LIST DATA
@@ -160,37 +155,37 @@ data List
   deriving (Show)
 
 -- FUNCTION
-data Func = Func Identifier Type [FunParam] FuncBody deriving (Show)
+data Func = Func Identifier Type [FuncParam] FuncBody deriving (Show)
 
-data FunParam = FunParam Identifier Type deriving (Show, Read)
+data FuncParam = FuncParam Identifier Type deriving (Show, Read)
 
 data FuncBody
   = FuncReturn Statement
   | FuncPattern [PatternCase] PatternDefault
   deriving (Show)
 
-data PatternCase = Case [PatternCaseValue] Statement deriving (Show)
+data PatternCase = PatternCase [PatternCaseValue] Statement deriving (Show)
 
 data PatternCaseValue
-  = PCaseValue Value
-  | PCaseEmpty
+  = PatternCaseValue Value
+  | PatternCaseEmpty
   deriving (Show)
 
-newtype PatternDefault = PDefault Statement deriving (Show)
+newtype PatternDefault = PatternDefault Statement deriving (Show)
 
 -- FUNCTION CALL
 data FuncCall = FuncCall Identifier [FuncCallParam] deriving (Show)
 
 data FuncCallParam
-  = FCParamValue Value
-  | FCParam FuncCall
-  | FCIdentifier Identifier
+  = FuncCallParamValue Value
+  | FuncCallParam FuncCall
+  | FuncCallIdentifier Identifier
   deriving (Show)
 
 -- BOOLEAN EXPRESSION
 data BoolExpression
-  = BExp Bool
-  | BComparison Comparison
+  = BoolValue Bool
+  | BoolComparison Comparison
   deriving (Show)
 
 data BoolComparator
@@ -205,10 +200,10 @@ data BoolComparator
   deriving (Show)
 
 data Comparison
-  = CString Literal BoolComparator Literal
-  | CBool Bool BoolComparator Bool
-  | CTask Task BoolComparator Task
-  | CMember Member BoolComparator Member
+  = ComparisonString Literal BoolComparator Literal
+  | ComparisonBool Bool BoolComparator Bool
+  | ComparisonTask Task BoolComparator Task
+  | ComparisonMember Member BoolComparator Member
   deriving (Show)
 
 -- CONDITION STATEMENT
@@ -238,8 +233,8 @@ data CycleList
 data Statement
   = SFuncCall FuncCall
   | SValue Value
-  | STTA TakeTaskAttribute
-  | STMA TakeMemberAttribute
+  | STakeTaskAttribute TakeTaskAttribute
+  | STakeMemberAttribute TakeMemberAttribute
   | SBoolExp BoolExpression
   | SBoolCondition Condition
   | SCycle Cycle

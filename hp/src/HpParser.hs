@@ -61,7 +61,7 @@ func = do
   whiteSpace
   return $ Func funId (str2type funType) params body
 
-funcParam :: Parser FunParam
+funcParam :: Parser FuncParam
 funcParam = do
   whiteSpace
   i <- identifier
@@ -70,9 +70,9 @@ funcParam = do
   whiteSpace
   paramType <- dataType
   whiteSpace
-  return $ FunParam i (str2type paramType)
+  return $ FuncParam i (str2type paramType)
 
-funcParams :: Parser [FunParam]
+funcParams :: Parser [FuncParam]
 funcParams = sepBy funcParam (char ',')
 
 funcBody :: Parser FuncBody
@@ -97,8 +97,8 @@ statement =
     <|> try (SValue <$> value')
     <|> try (SCycle <$> cycle')
     <|> try (SFuncCall <$> funcCall)
-    <|> try (STTA <$> takeTaskAttribute)
-    <|> try (STMA <$> takeMemberAttribute)
+    <|> try (STakeTaskAttribute <$> takeTaskAttribute)
+    <|> try (STakeMemberAttribute <$> takeMemberAttribute)
 
 value' :: Parser Value
 value' =
@@ -171,28 +171,28 @@ task' = do
 
 taskTitle :: Parser TitleTask
 taskTitle =
-  try (TTTitle <$> ttaTitle)
-    <|> try (TVTitle . StrIdSpaces <$> strIdSpaces)
-    <|> try (TITitle <$> identifier)
+  try (TaskTakeTitle <$> ttaTitle)
+    <|> try (TaskValueTitle . StrIdSpaces <$> strIdSpaces)
+    <|> try (TaskIdentifierTitle <$> identifier)
 
 taskDescription :: Parser DescriptionTask
 taskDescription =
-  try (TTDescription <$> ttaDescription)
-    <|> try (TVDescription . StrParagraph <$> strParagraph)
-    <|> try (TIDescription <$> identifier)
+  try (TaskTakeDescription <$> ttaDescription)
+    <|> try (TaskValueDescription . StrParagraph <$> strParagraph)
+    <|> try (TaskIdentifierDescription <$> identifier)
 
 taskState :: Parser StateTask
 taskState =
-  try (TTState <$> ttaState)
-    <|> try (TVState <$> state')
-    <|> try (TIState <$> identifier)
+  try (TaskTakeState <$> ttaState)
+    <|> try (TaskValueState <$> state')
+    <|> try (TaskIdentifierState <$> identifier)
 
 taskMembers :: Parser MembersTask
 taskMembers =
-  try (TTMembers <$> ttaMembers)
-    <|> try (TVMembers <$> listOfMembers)
+  try (TaskTakeMembers <$> ttaMembers)
+    <|> try (TaskValueMembers <$> listOfMembers)
     <|> try
-      ( TIMembers
+      ( TaskIdentifierMembers
           <$ whiteSpace
           <*> identifier
           <* whiteSpace
@@ -200,16 +200,16 @@ taskMembers =
 
 taskTag :: Parser TagTask
 taskTag =
-  try (TTTag <$> ttaTag)
-    <|> try (TVTag <$> tag')
-    <|> try (TITag <$> identifier)
+  try (TaskTakeTag <$> ttaTag)
+    <|> try (TaskValueTag <$> tag')
+    <|> try (TaskIdentifierTag <$> identifier)
 
 taskSubTasks :: Parser SubTasksTask
 taskSubTasks =
-  try (TTSubTasks <$> ttaSubTasks)
-    <|> try (TVSubTasks <$> lists)
+  try (TaskTakeSubTasks <$> ttaSubTasks)
+    <|> try (TaskValueSubTasks <$> lists)
     <|> try
-      ( TISubTasks
+      ( TaskIdentifierSubTasks
           <$ whiteSpace
           <*> identifier
           <* whiteSpace
@@ -401,7 +401,7 @@ tmaName = do
   i <- identifier
   _ <- string ".name"
   whiteSpace
-  return $ TMAName i
+  return $ TakeMemberAttributeName i
 
 tmaRole :: Parser TakeMemberAttribute
 tmaRole = do
@@ -409,20 +409,20 @@ tmaRole = do
   i <- identifier
   _ <- string ".role"
   whiteSpace
-  return $ TMARole i
+  return $ TakeMemberAttributeRole i
 
 takeTaskAttribute :: Parser TakeTaskAttribute
 takeTaskAttribute =
-  try (TTAStrings <$> ttaStrings)
-    <|> try (TTAMembers <$> ttaMembers)
-    <|> try (TTASubTasks <$> ttaSubTasks)
+  try (TakeTaskAttributeStrings <$> ttaStrings)
+    <|> try (TakeTaskAttributeMembers <$> ttaMembers)
+    <|> try (TakeTaskAttributeSubTasks <$> ttaSubTasks)
 
-ttaStrings :: Parser TTAStrings
+ttaStrings :: Parser TakeTaskAttributeLiteral
 ttaStrings =
-  try (TTAState <$> ttaState)
-    <|> try (TTATitle <$> ttaTitle)
-    <|> try (TTADescription <$> ttaDescription)
-    <|> try (TTATag <$> ttaTag)
+  try (TakeTaskAttributeState <$> ttaState)
+    <|> try (TakeTaskAttributeTitle <$> ttaTitle)
+    <|> try (TakeTaskAttributeDescription <$> ttaDescription)
+    <|> try (TakeTaskAttributeTag <$> ttaTag)
 
 ttaTitle :: Parser String
 ttaTitle = do
@@ -509,21 +509,21 @@ boolComparator =
 
 memberName :: Parser MemberName
 memberName =
-  MVName . StrIdSpaces <$> strIdSpaces
-    <|> MIName <$> identifier
+  MemberValueName . StrIdSpaces <$> strIdSpaces
+    <|> MemberIdentifierName <$> identifier
 
 memberRole :: Parser MemberRole
 memberRole =
-  MVRole . StrIdSpaces <$> strIdSpaces
-    <|> MIRole <$> identifier
+  MemberValueRole . StrIdSpaces <$> strIdSpaces
+    <|> MemberIdentifierRole <$> identifier
 
 literal :: Parser Literal
 literal =
   try (LStringId . StrId <$> strId)
     <|> try (LStringIdSpaces . StrIdSpaces <$> strIdSpaces)
     <|> try (LStringParagraph . StrParagraph <$> strParagraph)
-    <|> try (LTTAStrings <$> ttaStrings)
-    <|> try (LTMAStrings <$> takeMemberAttribute)
+    <|> try (LTakeTaskAttribute <$> ttaStrings)
+    <|> try (LTakeMemberAttribute <$> takeMemberAttribute)
 
 strId :: Parser String
 strId = do
@@ -586,8 +586,8 @@ condition = do
 
 boolExp :: Parser BoolExpression
 boolExp =
-  BComparison <$ whiteSpace <*> comparison <* whiteSpace
-    <|> BExp <$ whiteSpace <*> boolVal <* whiteSpace
+  BoolComparison <$ whiteSpace <*> comparison <* whiteSpace
+    <|> BoolValue <$ whiteSpace <*> boolVal <* whiteSpace
 
 comparison :: Parser Comparison
 comparison =
@@ -617,7 +617,7 @@ strComparison = do
   whiteSpace
   s2 <- literal
   whiteSpace
-  return $ CString s1 cmp s2
+  return $ ComparisonString s1 cmp s2
 
 boolComparison :: Parser Comparison
 boolComparison = do
@@ -627,7 +627,7 @@ boolComparison = do
   whiteSpace
   s2 <- boolVal
   whiteSpace
-  return $ CBool s1 cmp s2
+  return $ ComparisonBool s1 cmp s2
 
 taskComparison :: Parser Comparison
 taskComparison = do
@@ -637,7 +637,7 @@ taskComparison = do
   whiteSpace
   s2 <- task'
   whiteSpace
-  return $ CTask s1 cmp s2
+  return $ ComparisonTask s1 cmp s2
 
 memberComparison :: Parser Comparison
 memberComparison = do
@@ -647,7 +647,7 @@ memberComparison = do
   whiteSpace
   s2 <- member
   whiteSpace
-  return $ CMember s1 cmp s2
+  return $ ComparisonMember s1 cmp s2
 
 cycle' :: Parser Cycle
 cycle' = mapCycle
@@ -711,7 +711,7 @@ casePattern = do
   whiteSpace
   _ <- string "}"
   whiteSpace
-  return $ Case c s
+  return $ PatternCase c s
 
 defaultPattern :: Parser PatternDefault
 defaultPattern = do
@@ -724,7 +724,7 @@ defaultPattern = do
   whiteSpace
   reservedOp "}"
   whiteSpace
-  return $ PDefault s
+  return $ PatternDefault s
 
 casePatternVal :: Parser PatternCaseValue
 casePatternVal =
@@ -736,14 +736,14 @@ casePatternEmpty = do
   whiteSpace
   _ <- string "_"
   whiteSpace
-  return PCaseEmpty
+  return PatternCaseEmpty
 
 casePatternValue :: Parser PatternCaseValue
 casePatternValue = do
   whiteSpace
   v <- value'
   whiteSpace
-  return $ PCaseValue v
+  return $ PatternCaseValue v
 
 casePatternVals :: Parser [PatternCaseValue]
 casePatternVals = sepBy casePatternVal (char ',')
@@ -774,21 +774,21 @@ funcCallParamVal = do
   whiteSpace
   v <- value'
   whiteSpace
-  return $ FCParamValue v
+  return $ FuncCallParamValue v
 
 funcCallParamFC :: Parser FuncCallParam
 funcCallParamFC = do
   whiteSpace
   v <- funcCall
   whiteSpace
-  return $ FCParam v
+  return $ FuncCallParam v
 
 funcCallId :: Parser FuncCallParam
 funcCallId = do
   whiteSpace
   v <- identifier
   whiteSpace
-  return $ FCIdentifier v
+  return $ FuncCallIdentifier v
 
 doNotation :: Parser DoNotation
 doNotation = do
