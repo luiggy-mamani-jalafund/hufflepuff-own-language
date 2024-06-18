@@ -791,7 +791,7 @@ strIdSpaces symTable = do
   whiteSpace
   _ <- char '\"'
   v <- letter
-  r <- many (alphaNum <|> space)
+  r <- many (alphaNum <|> space <|> char ':')
   _ <- char '\"'
   whiteSpace
   return (v : r, symTable)
@@ -801,7 +801,7 @@ strParagraph :: SymbolTable -> Parser (String, SymbolTable)
 strParagraph symTable = do
   whiteSpace
   _ <- char '\"'
-  v <- many (alphaNum <|> space <|> oneOf ".,;?¿!¡")
+  v <- many (alphaNum <|> space <|> oneOf ".,;?¿!¡-:'")
   _ <- char '\"'
   whiteSpace
   return (v, symTable)
@@ -1056,11 +1056,11 @@ funcCall symTable = do
   whiteSpace
   i <- identifier
   whiteSpace
-  reservedOp "("
+  _ <- string "("
   whiteSpace
   (p, symTable1) <- funcCallParams symTable
   whiteSpace
-  reservedOp ")"
+  _ <- string ")"
   return (FuncCall i p, symTable1)
 
 
