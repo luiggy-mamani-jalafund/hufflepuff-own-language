@@ -562,11 +562,11 @@ condition :: Parser Condition
 condition = do
   reserved "if"
   whiteSpace
-  reservedOp "("
+  _ <- string "("
   whiteSpace
   e <- boolExp
   whiteSpace
-  reservedOp ")"
+  _ <- string ")"
   whiteSpace
 
   reserved "then"
@@ -657,13 +657,13 @@ mapCycle = do
   whiteSpace
   reserved "map"
   whiteSpace
-  reservedOp "("
+  _ <- string "("
   whiteSpace
   i <- identifier
   reservedOp ","
   l <- mapList
   whiteSpace
-  reservedOp ")"
+  _ <- string ")"
   whiteSpace
   return $
     Cycle
@@ -699,17 +699,17 @@ casePattern = do
   whiteSpace
   reserved "case"
   whiteSpace
-  reservedOp "("
+  _ <- string "("
   whiteSpace
   c <- casePatternVals
   whiteSpace
-  reservedOp ")"
+  _ <- string ")"
   whiteSpace
-  reservedOp "{"
+  _ <- string "{"
   whiteSpace
   s <- statement
   whiteSpace
-  reservedOp "}"
+  _ <- string "}"
   whiteSpace
   return $ Case c s
 

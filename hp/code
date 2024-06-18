@@ -1,76 +1,68 @@
-func sprint4Tasks -> List:Task {
+// SPRINT 1
+func sprint1Tasks -> List:Task {
   params {}
   return {
     List:Task [
       Task {
-        title: "Sound effects",
-        description: "As a developer, I want to add sound effects for Pac-Man's actions and interactions with ghosts and special points.",
+        title: "Development environment setup",
+        description: "As a developer, I want to have all necessary tools like compilers, development environments, and version control systems installed.",
         state: "DONE",
-        members: List:Member [Member {name: "Santiago", role: "Developer"}],
+        members: List:Member [Member {name: "Axel", role: "Developer"}],
         tag: "Backend",
-        subTasks: List:Task [
-          Task {
-            title: "Sound effects creation",
-            description: "As a developer, I want to design and develop specific sound effects for each game action.",
-            state: "DONE",
-            members: List:Member [Member {name: "Axel", role: "Developer"}],
-            tag: "Backend",
-            subTasks: List:Task []
-          }
-        ]
+        subTasks: List:Task []
       },
       Task {
-        title: "Sound integration testing",
-        description: "As a developer, I want to ensure sound effects and background music are correctly integrated with the game.",
-        state: "InProgress",
-        members: List:Member [Member {name: "Diego", role: "QA Tester"}],
-        tag: "QA",
+        title: "Initial maze design",
+        description: "As a user, I want to create a basic maze design using graphic design tools.",
+        state: "DONE",
+        members: List:Member [Member {name: "Diego", role: "Designer"}],
+        tag: "Frontend",
         subTasks: List:Task []
       }
     ]
   }
 }
 
-// Create task for background music
-func createTaskForBackgroundMusic -> Task {
+// Create task for Pacman movement
+func taskMovementPacman -> Task {
     params {
-        titleTask: StringIdSpace,
-        descriptionTask: StringParagraph,
-        stateTask: State,
-        tag: Tag
+        titleTask: StringParagraph
     }
     return {
         Task {
           title: titleTask,
-	        description: descriptionTask,
-	        state: stateTask,
-	        members: List:Member [Member {name: "Sebas", role: "Developer"}],
-	        tag: tag,
+	        description: "As a developer, I want to implement the basic movement of Pacman in the maze.",
+	        state: "DONE",
+	        members: List:Member [Member {name: "Luiggy", role: "Developer"}],
+	        tag: "Backend",
 	        subTasks: List:Task []
         }
     }
 }
 
-// Verify if the task is in progress
-func verifiedIfTaskIsInProgress -> Bool {
+// Print task titles
+func printTasksTitle -> StringIdSpace {
+  params { task: Task }
+  return {
+    task.title
+  }
+}
+
+// Check task status
+func taskIsDone -> Bool {
   params { myTask: Task }
   return {
-    if (myTask.tag == "InProgress") then True
+    if (myTask.state == "DONE") then True
     else False
   }
 }
 
 // Function execution
 do {
-  let someTitle:StringIdSpace = "some title"
-  let areTaskInProgress:Bool = verifiedIfTaskIsInProgress(
-        createTaskForBackgroundMusic(
-            someTitle, 
-            "As a developer, I want to compose and adapt background music that enhances the gaming experience without being intrusive.", 
-            "InProgress", 
-            "Backend"
-        )
-      )
-  print("Task Status: ")
-  print(areTaskInProgress)
+  let isDone:Bool = taskIsDone(taskMovementPacman("Basic Pacman movement"))
+  print(isDone)
+  // Since do can only handle one function at a time, another example of execution is:
+  print(
+    map(sprint1Tasks, printTasksTitle)
+  )
 }
