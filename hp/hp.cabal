@@ -26,8 +26,8 @@ source-repository head
 library
   exposed-modules:
       AbstractSyntaxTree
+      HpParser
       Lexer
-      Lib
   other-modules:
       Paths_hp
   autogen-modules:

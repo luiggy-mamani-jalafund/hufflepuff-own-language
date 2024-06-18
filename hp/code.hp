@@ -59,7 +59,9 @@ func taskIsDone -> Bool {
 
 // Function execution
 do {
-  let isDone:Bool = taskIsDone(taskMovementPacman("Basic Pacman movement"))
+  let isDone:Bool = taskIsDone(
+      taskMovementPacman("Basic Pacman movement")
+    )
   print(isDone)
   // Since do can only handle one function at a time, another example of execution is:
   print(
