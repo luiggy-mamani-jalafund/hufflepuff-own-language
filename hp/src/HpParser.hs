@@ -306,29 +306,39 @@ taskSubTasks symTable =
         return (id, symTable)
       )
 
-lists :: Parser List
-lists =
-  try listOfTasks
-    <|> try listOfMembers
-    <|> try listOfStates
-    <|> try listOfTags
-    <|> try listOfStrId
-    <|> try listOfStrFree
-    <|> try listOfBool
-    <|> try listOfLists
+lists :: SymbolTable -> Parser (List, SymbolTable)
+lists symTable =
+  try (listOfTasks symTable)
+  <|> try (listOfMembers symTable)
+  <|> try (listOfStates symTable)
+  <|> try (listOfTags symTable)
+  <|> try (listOfStrId symTable)
+  <|> try (listOfStrFree symTable)
+  <|> try (listOfBool symTable)
+  <|> try (listOfLists symTable)
 
-listOfLists :: Parser List
-listOfLists = do
+listOfLists :: SymbolTable -> Parser (List, SymbolTable)
+listOfLists symTable = do
   whiteSpace
   _ <- string "List:List"
   whiteSpace
   _ <- string "["
   whiteSpace
-  i <- sepBy lists (char ',')
+  (i, symTable') <- sepByAccum lists symTable
   whiteSpace
   _ <- string "]"
   whiteSpace
-  return $ ListList i
+  return (ListList i, symTable')
+
+sepByAccum :: (SymbolTable -> Parser (a, SymbolTable)) -> SymbolTable -> Parser ([a], SymbolTable)
+sepByAccum p s = do
+  res <- optionMaybe (p s)
+  case res of
+    Nothing -> return ([], s)
+    Just (x, s1) -> do
+      _ <- optionMaybe (char ',')
+      (xs, s2) <- sepByAccum p s1
+      return (x:xs, s2)
 
 listOfStrId :: Parser List
 listOfStrId = do
@@ -342,6 +352,7 @@ listOfStrId = do
   _ <- string "]"
   whiteSpace
   return $ ListStringId i
+
 
 listOfStrFree :: Parser List
 listOfStrFree = do
