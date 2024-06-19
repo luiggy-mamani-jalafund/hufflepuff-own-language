@@ -440,6 +440,7 @@ listOfBool symTable = do
   let symTable'' = insertList (show listBo) listBo symTable
   return (ListBool boold, symTable'')
 
+-- no adaptar
 tag' :: Parser Tag
 tag' =
   try $
@@ -450,11 +451,12 @@ tag' =
         whiteSpace
         return NoTag
 
+-- no adaptar
 state' :: Parser TaskState
 state' = StringId <$> strId
 
-member :: Parser Member
-member =
+member :: SymbolTable -> Parser (Member, SymbolTable)
+member symTable =
   do
     whiteSpace
     _ <- string "Member"
@@ -464,33 +466,35 @@ member =
 
     _ <- string "name: "
     whiteSpace
-    n <- memberName
+    (n, symTable1) <- memberName symTable
     whiteSpace
     reservedOp ","
     whiteSpace
 
     _ <- string "role: "
     whiteSpace
-    r <- memberRole
+    (r, symTable2) <- memberRole symTable1
     whiteSpace
 
     _ <- string "}"
     whiteSpace
-    return $
-      Member
-        { name = n,
-          role = r
-        }
-    <|> NoAssigned
-      <$ whiteSpace
-      <* string "NoAssigned"
-      <* whiteSpace
+    let membetDef = Member { name = n, role = r }
+    let symTable3 = insertMember (show n) membetDef symTable2
 
+    return (membetDef, symTable3)
+    <|> (do
+      whiteSpace
+      _ <- string "NoAssigned"
+      whiteSpace
+      return (NoAssigned, symTable))
+
+-- No es necesario adaptar
 takeMemberAttribute :: Parser TakeMemberAttribute
 takeMemberAttribute =
   try tmaName
     <|> try tmaRole
 
+-- no adaptar
 tmaName :: Parser TakeMemberAttribute
 tmaName = do
   whiteSpace
@@ -499,6 +503,7 @@ tmaName = do
   whiteSpace
   return $ TakeMemberAttributeName i
 
+-- no adaptar
 tmaRole :: Parser TakeMemberAttribute
 tmaRole = do
   whiteSpace
@@ -507,12 +512,14 @@ tmaRole = do
   whiteSpace
   return $ TakeMemberAttributeRole i
 
+-- No adaptar
 takeTaskAttribute :: Parser TakeTaskAttribute
 takeTaskAttribute =
   try (TakeTaskAttributeStrings <$> takeTaskAttributeStrings)
     <|> try (TakeTaskAttributeMembers <$> takeTaskAttributeMembers)
     <|> try (TakeTaskAttributeSubTasks <$> takeTaskAttributeSubTasks)
 
+-- No adaptar
 takeTaskAttributeStrings :: Parser TakeTaskAttributeLiteral
 takeTaskAttributeStrings =
   try (TakeTaskAttributeState <$> takeTaskAttributeState)
@@ -520,6 +527,7 @@ takeTaskAttributeStrings =
     <|> try (TakeTaskAttributeDescription <$> takeTaskAttributeDescription)
     <|> try (TakeTaskAttributeTag <$> takeTaskAttributeTag)
 
+-- No adaptar
 takeTaskAttributeTitle :: Parser String
 takeTaskAttributeTitle = do
   whiteSpace
@@ -528,6 +536,7 @@ takeTaskAttributeTitle = do
   whiteSpace
   return i
 
+-- No adaptar
 takeTaskAttributeDescription :: Parser String
 takeTaskAttributeDescription = do
   whiteSpace
@@ -536,6 +545,7 @@ takeTaskAttributeDescription = do
   whiteSpace
   return i
 
+-- No adaptar
 takeTaskAttributeState :: Parser String
 takeTaskAttributeState = do
   whiteSpace
@@ -544,6 +554,7 @@ takeTaskAttributeState = do
   whiteSpace
   return i
 
+-- no adaptar
 takeTaskAttributeTag :: Parser String
 takeTaskAttributeTag = do
   whiteSpace
@@ -552,6 +563,7 @@ takeTaskAttributeTag = do
   whiteSpace
   return i
 
+-- No adaptar
 takeTaskAttributeMembers :: Parser String
 takeTaskAttributeMembers = do
   whiteSpace
@@ -560,6 +572,7 @@ takeTaskAttributeMembers = do
   whiteSpace
   return i
 
+-- No adaptar
 takeTaskAttributeSubTasks :: Parser String
 takeTaskAttributeSubTasks = do
   whiteSpace
@@ -568,6 +581,7 @@ takeTaskAttributeSubTasks = do
   whiteSpace
   return i
 
+-- No adaptar
 boolComparator :: Parser BoolComparator
 boolComparator =
   Eq
