@@ -727,49 +727,66 @@ str2type str = read $ 'T' : strType
   where
     strType = filter (/= ':') str
 
-condition :: Parser Condition
-condition = do
+condition :: SymbolTable -> Parser (Condition, SymbolTable)
+condition symTable = do
   reserved "if"
   whiteSpace
   _ <- string "("
   whiteSpace
-  e <- boolExpression
+  (e, symTable1) <- boolExpression symTable
   whiteSpace
   _ <- string ")"
   whiteSpace
 
   reserved "then"
   whiteSpace
-  s1 <- statement
+  (s1, symTable2) <- statement symTable1
   whiteSpace
   reserved "else"
   whiteSpace
-  s2 <- statement
+  (s2, symTable3) <- statement symTable2
   whiteSpace
-  return $
-    Condition
-      { ifCondition = e,
-        thenStatement = s1,
-        elseStatament = s2
-      }
+  let conditionDef = Condition { ifCondition = e, thenStatement = s1, elseStatament = s2 }
+  return (conditionDef, symTable3)
 
-boolExpression :: Parser BoolExpression
-boolExpression =
-  BoolComparison <$ whiteSpace <*> comparison <* whiteSpace
-    <|> BoolValue <$ whiteSpace <*> boolValue <* whiteSpace
+boolExpression :: SymbolTable -> Parser (BoolExpression, SymbolTable)
+boolExpression symTable =
+  try (do
+    whiteSpace
+    (comp, symTable1) <- comparison symTable
+    whiteSpace
+    let boolExp = BoolComparison comp
+    return (boolExp, symTable1))
+    <|> try (do
+      whiteSpace
+      boolVal <- boolValue
+      whiteSpace
+      let boolExpr = BoolValue boolVal
+      let symTable' = insertBoolExpression (show boolExpr) boolExpr symTable
+      return (boolExpr, symTable'))
 
-comparison :: Parser Comparison
-comparison =
-  try boolComparison
-    <|> try strComparison
-    <|> try taskComparison
-    <|> try memberComparison
+comparison :: SymbolTable -> Parser (Comparison, SymbolTable)
+comparison symTable =
+  try (do
+    bolcomp <- boolComparison
+    return (bolcomp, symTable))
+    <|> try (do
+      strComp <- strComparison
+      return (strComp, symTable))
+    <|> try (do
+      (taskComp, symTable') <- taskComparison symTable
+      return (taskComp, symTable'))
+    <|> try (do
+      (memberComp, symTable') <- memberComparison symTable
+      return (memberComp, symTable'))
 
+-- No adaptar
 boolValue :: Parser Bool
 boolValue =
   try (True <$ string "True")
     <|> try (False <$ string "False")
 
+-- No adaptar
 strComparison :: Parser Comparison
 strComparison = do
   s1 <- literal
@@ -780,6 +797,7 @@ strComparison = do
   whiteSpace
   return $ ComparisonString s1 cmp s2
 
+-- No adaptar
 boolComparison :: Parser Comparison
 boolComparison = do
   s1 <- boolValue
@@ -790,25 +808,25 @@ boolComparison = do
   whiteSpace
   return $ ComparisonBool s1 cmp s2
 
-taskComparison :: Parser Comparison
-taskComparison = do
-  s1 <- task'
+taskComparison :: SymbolTable -> Parser (Comparison, SymbolTable)
+taskComparison symTable = do
+  (s1, symTable1) <- task' symTable
   whiteSpace
   cmp <- boolComparator
   whiteSpace
-  s2 <- task'
+  (s2, symTable2) <- task' symTable1
   whiteSpace
-  return $ ComparisonTask s1 cmp s2
+  return (ComparisonTask s1 cmp s2, symTable2)
 
-memberComparison :: Parser Comparison
-memberComparison = do
-  s1 <- member
+memberComparison :: SymbolTable -> Parser (Comparison, SymbolTable)
+memberComparison symTable = do
+  (s1, symTable1) <- member symTable
   whiteSpace
   cmp <- boolComparator
   whiteSpace
-  s2 <- member
+  (s2, symTable2) <- member symTable1
   whiteSpace
-  return $ ComparisonMember s1 cmp s2
+  return (ComparisonMember s1 cmp s2, symTable2)
 
 cycle' :: Parser Cycle
 cycle' = mapCycle
