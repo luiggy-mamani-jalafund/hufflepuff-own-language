@@ -122,27 +122,53 @@ funcReturn symTable = do
   reservedOp "}"
   return (FuncReturn s, symTable')
 
-statement :: Parser Statement
-statement =
-  try (SBoolCondition <$> condition)
-    <|> try (SBoolExp <$> boolExpression)
-    <|> try (SValue <$> value')
-    <|> try (SCycle <$> cycle')
-    <|> try (SFuncCall <$> funcCall)
-    <|> try (STakeTaskAttribute <$> takeTaskAttribute)
-    <|> try (STakeMemberAttribute <$> takeMemberAttribute)
+statement :: SymbolTable -> Parser (Statement, SymbolTable)
+statement symTable = 
+  try (do
+    (cond, symTable') <- condition symTable
+    return (SBoolCondition cond, symTable'))
+  <|> try (do
+    (boolExp, symTable') <- boolExpression symTable
+    return (SBoolExp boolExp, symTable'))
+  <|> try (do
+    (val, symTable') <- value' symTable
+    return (SValue val, symTable'))
+  <|> try (do
+    (cycle, symTable') <- cycle' symTable
+    return (SCycle cycle, symTable'))
+  <|> try (do
+    (funcCall, symTable') <- funcCall symTable
+    return (SFuncCall funcCall, symTable'))
+  <|> try (do
+    taskAttr <- takeTaskAttribute
+    return (STakeTaskAttribute taskAttr, symTable))
+  <|> try (do
+    memberAttr <- takeMemberAttribute
+    return (STakeMemberAttribute memberAttr, symTable))
 
-value' :: Parser Value
-value' =
-  try (ValLiteral <$> literal)
-    <|> try (ValTask <$> task')
-    <|> try (ValMember <$> member)
-    <|> try (ValList <$> lists)
-    <|> try (ValTag <$> tag')
-    <|> try (ValBool <$> boolValue)
+value' :: SymbolTable -> Parser (Value, SymbolTable)
+value' symTable = 
+  try (do
+    literal <- literal
+    return (ValLiteral literal, symTable))
+  <|> try (do
+    (task, symTable') <- task' symTable
+    return (ValTask task, symTable'))
+  <|> try (do
+    (member, symTable') <- member symTable
+    return (ValMember member, symTable'))
+  <|> try (do
+    (list, symTable') <- lists symTable
+    return (ValList list, symTable'))
+  <|> try (do
+    tag <- tag' 
+    return (ValTag tag, symTable))
+  <|> try (do
+    boolVal <- boolValue 
+    return (ValBool boolVal, symTable))
 
-task' :: Parser Task
-task' = do
+task' :: SymbolTable -> Parser (Task, SymbolTable) 
+task' symTable = do
   whiteSpace
   _ <- string "Task"
   whiteSpace
@@ -151,55 +177,54 @@ task' = do
   whiteSpace
   _ <- string "title:"
   whiteSpace
-  t <- taskTitle
+  (t, symTable1) <- taskTitle symTable
   whiteSpace
   reservedOp ","
 
   whiteSpace
   _ <- string "description:"
   whiteSpace
-  d <- taskDescription
+  (d, symTable2) <- taskDescription symTable1
   whiteSpace
   reservedOp ","
 
   whiteSpace
   _ <- string "state:"
   whiteSpace
-  s <- taskState
+  (s, symTable3) <- taskState symTable2
   whiteSpace
   reservedOp ","
 
   whiteSpace
   _ <- string "members:"
   whiteSpace
-  m <- taskMembers
+  (m, symTable4) <- taskMembers symTable3
   whiteSpace
   reservedOp ","
 
   whiteSpace
   _ <- string "tag:"
   whiteSpace
-  tg <- taskTag
+  (tg, symTable5) <- taskTag symTable4
   whiteSpace
   reservedOp ","
 
   whiteSpace
   _ <- string "subTasks:"
   whiteSpace
-  st <- taskSubTasks
+  (st, symTable6) <- taskSubTasks symTable5
 
   whiteSpace
   _ <- string "}"
   whiteSpace
-  return $
-    Task
-      { title = t,
-        description = d,
-        state = s,
-        members = m,
-        tag = tg,
-        subTasks = st
-      }
+  let task = Task { title = t, 
+                    description = d, 
+                    state = s, 
+                    members = m, 
+                    tag = tg, 
+                    subTasks = st }
+  let symTable7 = insertTask (show t) task symTable6 -- Define identifier type in future
+  return (task, symTable7)
 
 taskTitle :: Parser TitleTask
 taskTitle =
