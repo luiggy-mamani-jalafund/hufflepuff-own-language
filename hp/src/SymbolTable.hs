@@ -23,6 +23,7 @@ data SymbolInfo
     | ListInfo Identifier List
     | BoolExpressionInfo BoolExpression
     | LiteralInfo Literal
+    | DoAssignmentInfo Identifier Type Statement
     deriving (Show)
 
 newtype SymbolTable = SymbolTable (M.Map Identifier SymbolInfo)
@@ -58,6 +59,10 @@ insertBoolExpression name boolExpr (SymbolTable table) =
 insertLiteral :: Identifier -> Literal -> SymbolTable -> SymbolTable
 insertLiteral name lit (SymbolTable table) =
     SymbolTable (M.insert name (LiteralInfo lit) table)
+
+insertDoAssignment :: Identifier -> Type -> Statement -> SymbolTable -> SymbolTable
+insertDoAssignment name typ stmt (SymbolTable table) = 
+    SymbolTable (M.insert name (DoAssignmentInfo name typ stmt) table)
 
 lookupSymbol :: Identifier -> SymbolTable -> Maybe SymbolInfo
 lookupSymbol name (SymbolTable table) = M.lookup name table
