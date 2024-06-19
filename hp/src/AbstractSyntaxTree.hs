@@ -139,7 +139,7 @@ data TakeMemberAttribute
 -- LIST DATA
 data List
   = ListStringId [StringIdentifier]
-  | ListStringFree [StringFree]
+  | ListString [StringFree]
   | ListBool [Bool]
   | ListTask [Task]
   | ListTag [Tag]

@@ -264,7 +264,7 @@ listOfStrFree = do
   whiteSpace
   _ <- string "]"
   whiteSpace
-  return $ ListStringFree i
+  return $ ListString i
 
 listOfMembers :: Parser List
 listOfMembers = do
@@ -526,8 +526,19 @@ strId = do
   whiteSpace
   return v
 
+strEmpty :: Parser String
+strEmpty = do
+  whiteSpace
+  _ <- char '\"'
+  _ <- char '\"'
+  whiteSpace
+  return ""
+
 strFree :: Parser String
-strFree = do
+strFree = try strEmpty <|> try strFree'
+
+strFree' :: Parser String
+strFree' = do
   whiteSpace
   _ <- char '\"'
   v <- many (alphaNum <|> space <|> oneOf symbols)
