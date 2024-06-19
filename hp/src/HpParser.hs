@@ -22,18 +22,35 @@ import AbstractSyntaxTree
 import Lexer
 import Text.Parsec
 import Text.Parsec.String (Parser)
+import SymbolTable
 
-code :: Parser Code
-code = do
-  whiteSpace
-  f <- funcs
-  whiteSpace
-  d <- doNotation
-  whiteSpace
-  return $ Code f d
+parseCode :: Parser (Code, SymbolTable)
+parseCode = do
+  let initialSymbolTable = emptyTable
+  code initialSymbolTable
 
-funcs :: Parser [Func]
-funcs = many func
+code :: SymbolTable -> Parser (Code, SymbolTable)
+code symTable = do
+  whiteSpace
+  (f, symTable1) <- funcs symTable
+  whiteSpace
+  (d, symTable2) <- doNotation symTable1
+  whiteSpace
+  return (Code f d, symTable2)
+
+funcs :: SymbolTable -> Parser ([Func], SymbolTable)
+funcs symTable = do
+  (fs, symTable') <- manyAccum func symTable
+  return (fs, symTable')
+
+manyAccum :: (SymbolTable -> Parser (a, SymbolTable)) -> SymbolTable -> Parser ([a], SymbolTable)
+manyAccum p symTable = do
+  result <- optionMaybe (p symTable)
+  case result of
+    Nothing -> return ([], symTable)
+    Just (x, symTable') -> do
+      (xs, symTable'') <- manyAccum p symTable'
+      return (x : xs, symTable'')
 
 func :: Parser Func
 func = do
