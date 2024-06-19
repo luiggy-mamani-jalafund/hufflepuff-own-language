@@ -52,8 +52,8 @@ manyAccum p symTable = do
       (xs, symTable'') <- manyAccum p symTable'
       return (x : xs, symTable'')
 
-func :: Parser Func
-func = do
+func :: SymbolTable -> Parser (Func, SymbolTable)
+func symTable = do
   whiteSpace
   reserved "func"
   whiteSpace
@@ -69,18 +69,20 @@ func = do
   whiteSpace
   _ <- string "{"
   whiteSpace
-  params <- funcParams
+  (params, symTable') <- funcParams symTable
   whiteSpace
   _ <- string "}"
   whiteSpace
-  body <- funcBody
+  (body, symTable'') <- funcBody symTable'
   whiteSpace
   _ <- string "}"
   whiteSpace
-  return $ Func funId (str2type funType) params body
+  let func = Func funId (str2type funType) params body
+  let symTable''' = insertFunction funId (str2type funType) params body symTable''
+  return (func, symTable''')
 
-funcParam :: Parser FuncParam
-funcParam = do
+funcParam :: SymbolTable -> Parser (FuncParam, SymbolTable)
+funcParam symTable = do
   whiteSpace
   i <- identifier
   whiteSpace
@@ -88,25 +90,37 @@ funcParam = do
   whiteSpace
   paramType <- dataType
   whiteSpace
-  return $ FuncParam i (str2type paramType)
+  let param = FuncParam i (str2type paramType)
+  return (param, symTable)
 
-funcParams :: Parser [FuncParam]
-funcParams = sepBy funcParam (char ',')
+funcParams :: SymbolTable -> Parser ([FuncParam], SymbolTable)
+funcParams symTable = do
+  (params, symTable') <- sepByAccum funcParam symTable
+  return (params, symTable')
+  where
+    sepByAccum p s = do
+      res <- optionMaybe (p s)
+      case res of
+        Nothing -> return ([], s)
+        Just (x, s1) -> do
+          _ <- optionMaybe (char ',')
+          (xs, s2) <- sepByAccum p s1
+          return (x:xs, s2)
 
-funcBody :: Parser FuncBody
-funcBody = try funcReturn <|> try funcPattern
+funcBody :: SymbolTable -> Parser (FuncBody, SymbolTable)
+funcBody symTable = try (funcReturn symTable) <|> try (funcPattern symTable)
 
-funcReturn :: Parser FuncBody
-funcReturn = do
+funcReturn :: SymbolTable -> Parser (FuncBody, SymbolTable)
+funcReturn symTable = do
   whiteSpace
   reserved "return"
   whiteSpace
   reservedOp "{"
   whiteSpace
-  s <- statement
+  (s, symTable') <- statement symTable
   whiteSpace
   reservedOp "}"
-  return $ FuncReturn s
+  return (FuncReturn s, symTable')
 
 statement :: Parser Statement
 statement =
