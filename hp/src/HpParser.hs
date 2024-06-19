@@ -14,6 +14,7 @@ module HpParser
     casePatternVal,
     casePatternVals,
     code,
+    strFree,
   )
 where
 
@@ -172,13 +173,13 @@ task' = do
 taskTitle :: Parser TitleTask
 taskTitle =
   try (TaskTakeTitle <$> takeTaskAttributeTitle)
-    <|> try (TaskValueTitle . StrIdSpaces <$> strIdSpaces)
+    <|> try (TaskValueTitle . String <$> strFree)
     <|> try (TaskIdentifierTitle <$> identifier)
 
 taskDescription :: Parser DescriptionTask
 taskDescription =
   try (TaskTakeDescription <$> takeTaskAttributeDescription)
-    <|> try (TaskValueDescription . StrParagraph <$> strParagraph)
+    <|> try (TaskValueDescription . String <$> strFree)
     <|> try (TaskIdentifierDescription <$> identifier)
 
 taskState :: Parser StateTask
@@ -222,8 +223,7 @@ lists =
     <|> try listOfStates
     <|> try listOfTags
     <|> try listOfStrId
-    <|> try listOfStrIdSpaces
-    <|> try listOfStrParagraph
+    <|> try listOfStrFree
     <|> try listOfBool
     <|> try listOfLists
 
@@ -247,37 +247,24 @@ listOfStrId = do
   whiteSpace
   _ <- string "["
   whiteSpace
-  i <- sepBy (StrId <$> strId) (char ',')
+  i <- sepBy (StringId <$> strId) (char ',')
   whiteSpace
   _ <- string "]"
   whiteSpace
   return $ ListStringId i
 
-listOfStrIdSpaces :: Parser List
-listOfStrIdSpaces = do
+listOfStrFree :: Parser List
+listOfStrFree = do
   whiteSpace
-  _ <- string "List:StringIdSpace"
-  whiteSpace
-  _ <- string "["
-  whiteSpace
-  i <- sepBy (StrIdSpaces <$> strIdSpaces) (char ',')
-  whiteSpace
-  _ <- string "]"
-  whiteSpace
-  return $ ListStringIdSpace i
-
-listOfStrParagraph :: Parser List
-listOfStrParagraph = do
-  whiteSpace
-  _ <- string "List:StringParagraph"
+  _ <- string "List:String"
   whiteSpace
   _ <- string "["
   whiteSpace
-  i <- sepBy (StrParagraph <$> strParagraph) (char ',')
+  i <- sepBy (String <$> strFree) (char ',')
   whiteSpace
   _ <- string "]"
   whiteSpace
-  return $ ListStringParagraph i
+  return $ ListStringFree i
 
 listOfMembers :: Parser List
 listOfMembers = do
@@ -347,7 +334,7 @@ listOfBool = do
 tag' :: Parser Tag
 tag' =
   try $
-    Tag . StrId <$> strId
+    Tag . StringId <$> strId
       <|> do
         whiteSpace
         _ <- string "NoTag"
@@ -355,7 +342,7 @@ tag' =
         return NoTag
 
 state' :: Parser TaskState
-state' = StrId <$> strId
+state' = StringId <$> strId
 
 member :: Parser Member
 member =
@@ -509,46 +496,41 @@ boolComparator =
 
 memberName :: Parser MemberName
 memberName =
-  MemberValueName . StrIdSpaces <$> strIdSpaces
+  MemberValueName . String <$> strFree
     <|> MemberIdentifierName <$> identifier
 
 memberRole :: Parser MemberRole
 memberRole =
-  MemberValueRole . StrIdSpaces <$> strIdSpaces
+  MemberValueRole . StringId <$> strId
     <|> MemberIdentifierRole <$> identifier
 
 literal :: Parser Literal
 literal =
-  try (LStringId . StrId <$> strId)
-    <|> try (LStringIdSpaces . StrIdSpaces <$> strIdSpaces)
-    <|> try (LStringParagraph . StrParagraph <$> strParagraph)
+  try (LString . String <$> strFree)
+    <|> try (LStringIdentifier . StringId <$> strId)
     <|> try (LTakeTaskAttribute <$> takeTaskAttributeStrings)
     <|> try (LTakeMemberAttribute <$> takeMemberAttribute)
+
+strId' :: Parser String
+strId' = do
+  l <- alphaNum
+  v <- many (alphaNum <|> space)
+  return $ l : v
 
 strId :: Parser String
 strId = do
   whiteSpace
   _ <- char '\"'
-  v <- identifier
+  v <- strId'
   _ <- char '\"'
   whiteSpace
   return v
 
-strIdSpaces :: Parser String
-strIdSpaces = do
+strFree :: Parser String
+strFree = do
   whiteSpace
   _ <- char '\"'
-  v <- letter
-  r <- many (alphaNum <|> space <|> char ':')
-  _ <- char '\"'
-  whiteSpace
-  return $ v : r
-
-strParagraph :: Parser String
-strParagraph = do
-  whiteSpace
-  _ <- char '\"'
-  v <- many (alphaNum <|> space <|> oneOf ".,;?¿!¡-:'")
+  v <- many (alphaNum <|> space <|> oneOf symbols)
   _ <- char '\"'
   whiteSpace
   return v

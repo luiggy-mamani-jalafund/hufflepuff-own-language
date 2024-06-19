@@ -3,25 +3,21 @@ module AbstractSyntaxTree (module AbstractSyntaxTree) where
 
 -- TERMINALS
 data Literal
-  = LStringId StrId
-  | LStringIdSpaces StrIdSpaces
-  | LStringParagraph StrParagraph
+  = LStringIdentifier StringIdentifier
+  | LString StringFree
   | LTakeTaskAttribute TakeTaskAttributeLiteral
   | LTakeMemberAttribute TakeMemberAttribute
   deriving (Show)
 
-newtype StrId = StrId String deriving (Show)
+newtype StringIdentifier = StringId String deriving (Show)
 
-newtype StrIdSpaces = StrIdSpaces String deriving (Show)
-
-newtype StrParagraph = StrParagraph String deriving (Show)
+newtype StringFree = String String deriving (Show)
 
 type Identifier = String
 
 data Type
   = TStringId
-  | TStringIdSpace
-  | TStringParagraph
+  | TString
   | TState
   | TBool
   | TMember
@@ -30,8 +26,7 @@ data Type
   | TListTask
   | TListList
   | TListStringId
-  | TListStringIdSpace
-  | TListStringParagraph
+  | TListStringFree
   | TListState
   | TListBool
   | TListMember
@@ -48,9 +43,9 @@ data Value
   deriving (Show)
 
 -- TASK DATA
-data Tag = Tag StrId | NoTag deriving (Show)
+data Tag = Tag StringIdentifier | NoTag deriving (Show)
 
-type TaskState = StrId
+type TaskState = StringIdentifier
 
 data Task = Task
   { title :: TitleTask,
@@ -64,13 +59,13 @@ data Task = Task
 
 -- TASK ATTRIBUTTE
 data TitleTask
-  = TaskValueTitle StrIdSpaces
+  = TaskValueTitle StringFree
   | TaskIdentifierTitle Identifier
   | TaskTakeTitle Identifier
   deriving (Show)
 
 data DescriptionTask
-  = TaskValueDescription StrParagraph
+  = TaskValueDescription StringFree
   | TaskIdentifierDescription Identifier
   | TaskTakeDescription Identifier
   deriving (Show)
@@ -114,9 +109,9 @@ data TakeTaskAttributeLiteral
   deriving (Show)
 
 -- MEMBER DATA
-type Role = StrIdSpaces
+type Role = StringIdentifier
 
-type Name = StrIdSpaces
+type Name = StringFree
 
 data Member
   = Member
@@ -143,9 +138,8 @@ data TakeMemberAttribute
 
 -- LIST DATA
 data List
-  = ListStringId [StrId]
-  | ListStringIdSpace [StrIdSpaces]
-  | ListStringParagraph [StrParagraph]
+  = ListStringId [StringIdentifier]
+  | ListStringFree [StringFree]
   | ListBool [Bool]
   | ListTask [Task]
   | ListTag [Tag]

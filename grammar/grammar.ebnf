@@ -12,7 +12,7 @@
 
 <space> ::= ' '
 
-<symbol> ::= '.' | ',' | ';' | '?' | '¿' | '!' | '¡'
+<symbol> ::= '.' | ',' | ';' | '?' | '¿' | '!' | '¡' | '-' | ':' | '\''
 
 <alphanumeric> ::= <letter> | <digit>
 
@@ -27,7 +27,7 @@
 
 <string-identifier> ::= '"' <identifier> '"'
 
-<string-identifier-with-space> ::= '"' <alphanumeric> | <space> 
+<string-identifier-with-space> ::= '"' <alphanumeric> 
     {<alphanumeric> | <space>} '"'
 
 <string-paragraph> ::= '"' <alphanumeric> | <space> | <symbol> 

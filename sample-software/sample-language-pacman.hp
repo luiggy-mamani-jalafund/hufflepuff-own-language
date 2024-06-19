@@ -26,7 +26,7 @@ func sprint1Tasks -> List:Task {
 // Create task for Pacman movement
 func taskMovementPacman -> Task {
     params {
-        titleTask: StringParagraph
+        titleTask: String
     }
     return {
         Task {
@@ -41,7 +41,7 @@ func taskMovementPacman -> Task {
 }
 
 // Print task titles
-func printTasksTitle -> StringIdSpace {
+func printTasksTitle -> String {
   params { task: Task }
   return {
     task.title
@@ -106,8 +106,8 @@ func sprint2Tasks -> List:Task {
 // Create task for QA testing with pattern matching
 func createTaskForTesting -> Task {
     params {
-        titleTask: StringParagraph,
-        descriptionTask: StringParagraph,
+        titleTask: String,
+        descriptionTask: String,
         stateTask: State,
         tag: Tag
     }
@@ -176,8 +176,8 @@ func sprint3Tasks -> List:Task {
 // Create task for QA testing
 func createTaskForTesting -> Task {
     params {
-        titleTask: StringParagraph,
-        descriptionTask: StringParagraph,
+        titleTask: String,
+        descriptionTask: String,
         stateTask: State,
         tag: Tag
     }
@@ -255,8 +255,8 @@ func sprint4Tasks -> List:Task {
 // Create task for background music
 func createTaskForBackgroundMusic -> Task {
     params {
-        titleTask: StringParagraph,
-        descriptionTask: StringParagraph,
+        titleTask: String,
+        descriptionTask: String,
         stateTask: State,
         tag: Tag
     }
@@ -283,7 +283,7 @@ func verifiedIfTaskIsInProgress -> Bool {
 
 // Function execution
 do {
-  let someTitle:StringIdSpace = "some title"
+  let someTitle:String = "some title"
   let areTaskInProgress:Bool = verifiedIfTaskIsInProgress(
         createTaskForBackgroundMusic(
             someTitle, 

@@ -77,9 +77,8 @@ dataType :: Parser String
 dataType = choice (map (try . string) sortedDataTypes)
   where
     sortedDataTypes =
-      [ "StringIdSpace",
-        "StringParagraph",
-        "StringId",
+      [ "StringId",
+        "String",
         "State",
         "Bool",
         "Member",
@@ -87,11 +86,13 @@ dataType = choice (map (try . string) sortedDataTypes)
         "Task",
         "List:Task",
         "List:List",
-        "List:StringIdSpace",
-        "List:StringParagraph",
         "List:StringId",
+        "List:String",
         "List:State",
         "List:Bool",
         "List:Member",
         "List:Tag"
       ]
+
+symbols :: String
+symbols = ".,;?¿!¡-:'_{}[]()%$&/="
