@@ -617,18 +617,45 @@ boolComparator =
       <* string "||"
       <* whiteSpace
 
-memberName :: Parser MemberName
-memberName =
-  try (MemberTakeName <$> takeMemberAttributeName)
-    <|> try (MemberValueName . String <$> strFree)
-    <|> try (MemberIdentifierName <$> identifier)
+memberName :: SymbolTable -> Parser (MemberName, SymbolTable)
+memberName symTable =
+  try (do
+    memberTN <- takeMemberAttributeName
+    return (MemberTakeName memberTN, symTable)
+    )
+  <|>
+    try (do
+      str <- strFree
+      let membetName = MemberValueName (String str)
+      let symTable' = insertLiteral str (LString (String str)) symTable
+      return (membetName, symTable')  
+    )
+    <|> try (do
+      id <- identifier
+      let symTable' = insertVariable id TString Nothing symTable
+      return (MemberIdentifierName id, symTable')
+      )
 
-memberRole :: Parser MemberRole
-memberRole =
-  try (MemberTakeRole <$> takeMemberAttributeRole)
-    <|> try (MemberValueRole . StringId <$> strId)
-    <|> try (MemberIdentifierRole <$> identifier)
+memberRole :: SymbolTable -> Parser (MemberRole, SymbolTable)
+memberRole symTable =
+  try (do
+    memberTR <- MemberTakeRole <$> takeMemberAttributeRole
+    return (memberTR, symTable)
+    )
+  <|>
+    try (do 
+      str <- strId
+      let memberRole = MemberValueRole (StringId str)
+      let symbolTable' = insertLiteral str (LStringIdentifier (StringId str)) symTable
+      return (memberRole, symbolTable')
+      )
+    <|> try (do
+      id <- identifier
+      let memberRole = MemberIdentifierRole id
+      let symbolTable' = insertVariable id TStringId Nothing symTable 
+      return (memberRole, symbolTable'))
 
+-- No adaptar
 takeMemberAttributeName :: Parser String
 takeMemberAttributeName = do
   whiteSpace
@@ -637,6 +664,7 @@ takeMemberAttributeName = do
   whiteSpace
   return i
 
+-- No adaptar
 takeMemberAttributeRole :: Parser String
 takeMemberAttributeRole = do
   whiteSpace
@@ -645,6 +673,7 @@ takeMemberAttributeRole = do
   whiteSpace
   return i
 
+-- No adaptar
 literal :: Parser Literal
 literal =
   try (LString . String <$> strFree)
@@ -652,12 +681,14 @@ literal =
     <|> try (LTakeTaskAttribute <$> takeTaskAttributeStrings)
     <|> try (LTakeMemberAttribute <$> takeMemberAttribute)
 
+-- No adaptar
 strId' :: Parser String
 strId' = do
   l <- alphaNum
   v <- many (alphaNum <|> space)
   return $ l : v
 
+-- No adaptar
 strId :: Parser String
 strId = do
   whiteSpace
@@ -667,6 +698,7 @@ strId = do
   whiteSpace
   return v
 
+-- No adaptar
 strEmpty :: Parser String
 strEmpty = do
   whiteSpace
@@ -675,9 +707,11 @@ strEmpty = do
   whiteSpace
   return ""
 
+-- No adaptar
 strFree :: Parser String
 strFree = try strEmpty <|> try strFree'
 
+-- No adaptar
 strFree' :: Parser String
 strFree' = do
   whiteSpace
@@ -687,6 +721,7 @@ strFree' = do
   whiteSpace
   return v
 
+-- No adaptar
 str2type :: String -> Type
 str2type str = read $ 'T' : strType
   where
