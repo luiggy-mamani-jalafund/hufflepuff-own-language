@@ -1,9 +1,33 @@
 // SPRINT 4
-func sprint4Tasks -> List:String {
+func sprint4Tasks -> List:Task {
   params {}
   return {
-    List:String [
-      "sd", "sdv"
+    List:Task [
+      Task {
+        title: "Sound effects",
+        description: "As a developer, I want to add sound effects for Pac-Man's actions and interactions with ghosts and special points.",
+        state: "DONE",
+        members: List:Member [Member {name: "Santiago", role: "Developer"}],
+        tag: "Backend",
+        subTasks: List:Task [
+          Task {
+            title: "Sound effects creation",
+            description: "As a developer, I want to design and develop specific sound effects for each game action.",
+            state: "DONE",
+            members: List:Member [Member {name: "Axel", role: "Developer"}],
+            tag: "Backend",
+            subTasks: List:Task []
+          }
+        ]
+      },
+      Task {
+        title: "Sound integration testing",
+        description: "As a developer, I want to ensure sound effects and background music are correctly integrated with the game.",
+        state: "InProgress",
+        members: List:Member [Member {name: "Diego", role: "QA Tester"}],
+        tag: "QA",
+        subTasks: List:Task []
+      }
     ]
   }
 }

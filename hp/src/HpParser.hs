@@ -33,7 +33,7 @@ code = do
   return $ Code f d
 
 funcs :: Parser [Func]
-funcs = many1 func
+funcs = many func
 
 func :: Parser Func
 func = do
