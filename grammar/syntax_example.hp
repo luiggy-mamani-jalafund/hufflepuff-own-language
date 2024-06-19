@@ -14,7 +14,7 @@
 //                 |     |                    |
 //                 |     |__<identifier> ':'  |__<type>
 //                 |         |                   |
-//                 |         |__ title           |__ StringIdSpace
+//                 |         |__ title           |__ String
 //                 |__<param> ','
 //                    
 //     <function-body>
@@ -36,8 +36,8 @@
 // '}'
 func makeTask -> Task {
     params {
-        title: StringIdSpace,
-        description: StringParagraph,
+        title: String,
+        description: String,
         state: State,
         tag: Tag
     }
@@ -107,7 +107,7 @@ func isFinished -> Bool {
 // <function> ->
 // 'func' <identifier> '->' <type>
 //         |                 |
-//         |__setDone       |__Task
+//         |__setDone        |__Task
 // '{' 
 //     'params {' [<params>] '}' 
 //                 |
@@ -199,7 +199,7 @@ func setDoneTasks -> List:Task {
 // same function as the previous ones
 func taskFromName -> Task {
     params {
-        title: StringIdSpace,
+        title: String
     }
     return {
         Task {
@@ -219,7 +219,7 @@ func taskFromName -> Task {
 // same function as the previous one
 func createTasks -> List:Task {
     params {
-        titles: List:StringIdSpace,
+        titles: List:String
     }
     return {
         map (taskFromName, titles)
@@ -240,7 +240,7 @@ func createTasks -> List:Task {
 //                 |     |                    |
 //                 |     |__<identifier> ':'  |__<type>
 //                 |         |                   |
-//                 |         |__ title           |__ StringIdSpace
+//                 |         |__ title           |__ String
 //                 |__<param> ','
 //                    
 //     <function-body>
@@ -268,17 +268,17 @@ func createTasks -> List:Task {
 // '}'
 func createTaskWithDescription -> Task {
     params {
-        title: StringIdSpace,
+        title: String,
         state: State,
         member: Member
     }
     pattern {
-        case (_, "DONE", "NoAssigned") {
+        case (_, "DONE", "No Assigned") {
             Task {
                 title: title,
                 description: "This task was already finished with NoAssigned member",
                 state: "DONE",
-                members: List:Member [member],
+                members: List:Member [],
                 tag: "DefaultTag",
                 subTasks: List:Task []
             }
@@ -287,8 +287,8 @@ func createTaskWithDescription -> Task {
             Task {
                 title: title,
                 description: "This task is being developed",
-                state: "IN_PROGRESS",
-                members: List:Member [member],
+                state: "IN PROGRESS",
+                members: List:Member [],
                 tag: "DefaultTag",
                 subTasks: List:Task []
             }
@@ -298,7 +298,7 @@ func createTaskWithDescription -> Task {
                 title: title,
                 description: "Default description",
                 state: state,
-                members: List:Member [member],
+                members: List:Member [],
                 tag: "DefaultTag",
                 subTasks: List:Task []
             }
@@ -312,21 +312,21 @@ func createTaskWithDescription -> Task {
 // same function as the previous ones
 func createScrumProject -> Task {
     params {
-        projectTitle: StringIdSpace,
-        projectDescription: StringParagraph
+        projectTitle: String,
+        projectDescription: String
     }
     return {
         Task {
             title: projectTitle,
             description: projectDescription,
-            state: "NoAssigned",
+            state: "No Assigned",
             members: List:Member [],
             tag: "ProjectScrum",
             subTasks: List:Task [
                 Task {
                     title: "Sprint 1",
                     description: "First sprint of the project",
-                    state: "NoAssigned",
+                    state: "No Assigned",
                     members: List:Member [],
                     tag: "Sprint",
                     subTasks: List:Task []
@@ -334,7 +334,7 @@ func createScrumProject -> Task {
                 Task {
                     title: "Sprint 2",
                     description: "Second sprint of the project",
-                    state: "NoAssigned",
+                    state: "No Assigned",
                     members: List:Member [],
                     tag: "Sprint",
                     subTasks: List:Task []
@@ -366,8 +366,9 @@ func createScrumProject -> Task {
 //                                             |   |__<value>__"My scrum project"
 //                                             |___|__, <value>__"Lorem ipsum dolor sit..."
 do {
-    createScrumProject(
+    let project:Task = createScrumProject(
         "My scrum project",
         "Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime mollitia, molestiae quas"
     )
+    print (project)
 }

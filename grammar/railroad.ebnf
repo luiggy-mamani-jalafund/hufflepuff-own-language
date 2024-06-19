@@ -4,23 +4,21 @@ digit ::= '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'
 
 space ::= ' '
 
-symbol ::= '.' | ',' | ';' | '?' | '¿' | '!' | '¡'
+symbol ::= '.' | ',' | ';' | '?' | '¿' | '!' | '¡' | '-' | ':' | "'" | '_' | '{' | '}' | '[' | ']' | '(' | ')' | '%' | '$' | '&' | '/' | '='
 
 alphanumeric ::= letter | digit
 
 identifier ::= letter (alphanumeric)*
 
-string ::= string-identifier | string-identifier-with-space | string-paragraph | take-string-task-attribute | take-member-attribute
+string ::= string-identifier | string-free | take-string-task-attribute | take-member-attribute
 
-string-identifier ::= '"' identifier '"'
+string-identifier ::= '"' identifier (identifier | space)* '"'
 
-string-identifier-with-space ::= '"' (alphanumeric | space)* '"'
-
-string-paragraph ::= '"' (alphanumeric | space | symbol)* '"'
+string-free ::= '"' (alphanumeric | space | symbol)* '"'
 
 value ::= string | bool | task | tag | member | list
 
-type ::= 'StringId' | 'StringIdSpace' | 'StringParagraph' | 'State' | 'Bool' | 'Member' | 'Tag' | 'Task' | 'List:Task' | 'List:List' | 'List:StringId' | 'List:StringIdSpace' | 'List:StringParagraph' | 'List:State' | 'List:Bool' | 'List:Member' | 'List:Tag'
+type ::= 'StringId' | 'String' | 'State' | 'Bool' | 'Member' | 'Tag' | 'Task' | 'List:Task' | 'List:List' | 'List:StringId' | 'List:String' | 'List:State' | 'List:Bool' | 'List:Member' | 'List:Tag'
 
 state ::= string-identifier
 
@@ -42,9 +40,9 @@ bool-comparator ::= '==' | '!=' | '<' | '<=' | '>' | '>=' | '&&' | '||'
 
 task ::= 'Task {' 'title:' task-title ',' 'description:' task-description ',' 'state:' task-state ',' 'members:' task-members ',' 'tag:' task-tag ',' 'subTasks ' task-subTasks '}'
 
-task-title ::= string-identifier-with-space | identifier | take-title-task
+task-title ::= string-free | identifier | take-title-task
 
-task-description ::= string-paragraph | identifier | take-description-task
+task-description ::= string-free | identifier | take-description-task
 
 task-state ::= state | identifier | take-state-task
 
@@ -72,11 +70,11 @@ take-subTasks-task ::= identifier '.' 'subTasks'
 
 tag ::= string-identifier | 'NoTag'
 
-member ::= 'Member {' 'name:' string-identifier-with-space ',' 'role:' string-identifier '}' | 'NoAssigned'
+member ::= 'Member {' 'name:' member-name ',' 'role:' member-role '}' | 'NoAssigned'
 
-member-name ::= string-identifier-with-space | identifier
+member-name ::= string-free | identifier | take-name-member
 
-member-role ::= string-identifier | identifier
+member-role ::= string-identifier | identifier | take-role-member
 
 take-member-attribute ::= take-name-member | take-role-member
 
@@ -86,27 +84,25 @@ take-role-member ::= identifier '.' 'role'
 
 list ::= list-string | list-bool | list-task | list-tag | list-member | list-state | list-list
 
-list-string ::= list-string-id | list-string-id-space | list-string-paragraph
+list-string ::= list-string-id | list-string-free
 
-list-string-id ::= 'List:StringId' '[' string-identifier (',' string-identifier)* ']'
+list-string-id ::= 'List:StringId' '[' (string-identifier (',' string-identifier)*)? ']'
 
-list-string-id-space ::= 'List:StringIdSpace' '[' string-identifier-with-space (',' string-identifier-with-space)* ']'
+list-string-free ::= 'List:String' '[' (string-free (',' string-free)*)? ']'
 
-list-string-paragraph ::= 'List:StringParagraph' '[' string-paragraph (',' string-paragraph)* ']'
+list-bool ::= 'List:Bool' '[' (bool (',' bool)*)? ']'
 
-list-bool ::= 'List:Bool' '[' bool (',' bool)* ']'
+list-task ::= 'List:Task' '[' (task (',' task)*)? ']'
 
-list-task ::= 'List:Task' '[' task (',' task)* ']'
+list-tag ::= 'List:Tag' '[' (tag (',' tag)*)? ']'
 
-list-tag ::= 'List:Tag' '[' tag (',' tag)* ']'
+list-state ::= 'List:State' '[' (state (',' state)*)? ']'
 
-list-state ::= 'List:State' '[' state (',' state)* ']'
+list-member ::= 'List:Member' '[' (member (',' member)*)? ']'
 
-list-member ::= 'List:Member' '[' member (',' member)* ']'
+list-list ::= 'List:List' '[' (list (',' list)*)? ']'
 
-list-list ::= 'List:List' '[' list (',' list)* ']'
-
-function ::= 'func' identifier '->' type '{' 'params {' (params)? '}' function-body '}'
+function ::= 'func' identifier '->' type '{' 'params {' params '}' function-body '}'
 
 function-body ::= return-function | pattern-function
 
@@ -124,17 +120,15 @@ pattern-case-values ::= pattern-case-value (',' pattern-case-value)*
 
 pattern-case-value ::= '_' | value
 
-params ::= param (',' param)*
+params ::= (param (',' param)*)?
 
 param ::= identifier ':' type
 
 statement ::= function-call | value | take-task-attribute | condition-statement | cycle-statement
 
-function-call ::= identifier '(' (function-call-params)? ')'
+function-call ::= identifier '(' (function-call-value (',' function-call-value)*)? ')'
 
-function-call-params ::= function-call-value (',' function-call-value)*
-
-function-call-value ::= value | function-call
+function-call-value ::= value | function-call | identifier
 
 condition-statement ::= 'if' '(' boolean-expression ')' 'then' statement 'else' statement
 
@@ -142,6 +136,20 @@ cycle-statement ::= 'map' '(' identifier ',' cycle-list ')'
 
 cycle-list ::= list | identifier
 
-code ::= (function)+ do-statement
+code ::= code-functions do-notation
 
-do-statement ::= 'do' '{' function-call '}'
+do-notation ::= 'do' '{' (do-statement)* '}'
+
+do-statement ::= do-assignment | do-print
+
+do-assignment ::= 'let' identifier ':' type '=' statement
+
+do-print ::= 'print' '(' print-choice ')'
+
+print-choice ::= print-ref | print-statement
+
+print-ref ::= identifier
+
+print-statement ::= statement
+
+code-functions ::= (function)*
