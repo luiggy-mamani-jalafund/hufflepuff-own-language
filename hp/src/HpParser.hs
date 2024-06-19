@@ -828,11 +828,11 @@ memberComparison symTable = do
   whiteSpace
   return (ComparisonMember s1 cmp s2, symTable2)
 
-cycle' :: Parser Cycle
-cycle' = mapCycle
+cycle' :: SymbolTable -> Parser (Cycle, SymbolTable)
+cycle' = mapCycle 
 
-mapCycle :: Parser Cycle
-mapCycle = do
+mapCycle :: SymbolTable -> Parser (Cycle, SymbolTable)
+mapCycle symTable = do
   whiteSpace
   reserved "map"
   whiteSpace
@@ -840,76 +840,85 @@ mapCycle = do
   whiteSpace
   i <- identifier
   reservedOp ","
-  l <- mapList
+  (l, symTable1) <- mapList symTable
   whiteSpace
   _ <- string ")"
   whiteSpace
-  return $
-    Cycle
-      { mapF = i,
-        mapL = l
-      }
+  let cycleDef = Cycle { mapF = i, mapL = l }
+  let symTable2 = insertDoAssignment i TListString (SCycle cycleDef) symTable1
+  return (cycleDef, symTable2)
 
-mapList :: Parser CycleList
-mapList =
-  try (CycleList <$> lists)
-    <|> try (CycleId <$> identifier)
+mapList :: SymbolTable -> Parser (CycleList, SymbolTable)
+mapList symTable =
+  try (do
+    (list, symTable') <- lists symTable
+    return (CycleList list, symTable'))
+    <|> try (do
+      id <- identifier
+      let cycleList = CycleId id
+      let symTable' = insertVariable id TListString Nothing symTable
+      return (cycleList, symTable'))
 
-funcPattern :: Parser FuncBody
-funcPattern = do
+funcPattern :: SymbolTable -> Parser (FuncBody, SymbolTable)
+funcPattern symTable = do
   whiteSpace
   reserved "pattern"
   whiteSpace
   reservedOp "{"
   whiteSpace
-  c <- casePatterns
+  (c, simTable1) <- casePatterns symTable
   whiteSpace
-  d <- defaultPattern
+  (d, symTable2) <- defaultPattern simTable1
   whiteSpace
   reservedOp "}"
   whiteSpace
-  return $ FuncPattern c d
+  return (FuncPattern c d, symTable2)
 
-casePatterns :: Parser [PatternCase]
-casePatterns = many casePattern
+casePatterns :: SymbolTable -> Parser ([PatternCase], SymbolTable)
+casePatterns = manyAccum casePattern
 
-casePattern :: Parser PatternCase
-casePattern = do
+casePattern :: SymbolTable -> Parser (PatternCase, SymbolTable)
+casePattern symTable = do
   whiteSpace
   reserved "case"
   whiteSpace
   _ <- string "("
   whiteSpace
-  c <- casePatternVals
+  (c, symTable1) <- casePatternVals symTable
   whiteSpace
   _ <- string ")"
   whiteSpace
   _ <- string "{"
   whiteSpace
-  s <- statement
+  (s, symTable2) <- statement symTable1
   whiteSpace
   _ <- string "}"
   whiteSpace
-  return $ PatternCase c s
+  return (PatternCase c s, symTable2)
 
-defaultPattern :: Parser PatternDefault
-defaultPattern = do
+defaultPattern :: SymbolTable -> Parser (PatternDefault, SymbolTable)
+defaultPattern symTable = do
   whiteSpace
   reserved "default"
   whiteSpace
   reservedOp "{"
   whiteSpace
-  s <- statement
+  (s, symTable1) <- statement symTable
   whiteSpace
   reservedOp "}"
   whiteSpace
-  return $ PatternDefault s
+  return (PatternDefault s, symTable1)
 
-casePatternVal :: Parser PatternCaseValue
-casePatternVal =
-  try casePatternEmpty
-    <|> try casePatternValue
+casePatternVal :: SymbolTable -> Parser (PatternCaseValue, SymbolTable)
+casePatternVal symTable =
+  try (do 
+    val <- casePatternEmpty
+    return (val, symTable))
+    <|> try (do
+    (val, symTable') <- casePatternValue symTable
+    return (val, symTable'))
 
+-- No adaptar
 casePatternEmpty :: Parser PatternCaseValue
 casePatternEmpty = do
   whiteSpace
@@ -917,15 +926,15 @@ casePatternEmpty = do
   whiteSpace
   return PatternCaseEmpty
 
-casePatternValue :: Parser PatternCaseValue
-casePatternValue = do
+casePatternValue :: SymbolTable -> Parser (PatternCaseValue, SymbolTable)
+casePatternValue symTable = do
   whiteSpace
-  v <- value'
+  (v, symTable') <- value' symTable
   whiteSpace
-  return $ PatternCaseValue v
+  return (PatternCaseValue v, symTable')
 
-casePatternVals :: Parser [PatternCaseValue]
-casePatternVals = sepBy casePatternVal (char ',')
+casePatternVals :: SymbolTable -> Parser ([PatternCaseValue], SymbolTable)
+casePatternVals = sepByAccum casePatternVal
 
 funcCall :: Parser FuncCall
 funcCall = do
