@@ -340,8 +340,8 @@ sepByAccum p s = do
       (xs, s2) <- sepByAccum p s1
       return (x:xs, s2)
 
-listOfStrId :: Parser List
-listOfStrId = do
+listOfStrId :: SymbolTable -> Parser (List, SymbolTable)
+listOfStrId symTable = do
   whiteSpace
   _ <- string "List:StringId"
   whiteSpace
@@ -351,11 +351,11 @@ listOfStrId = do
   whiteSpace
   _ <- string "]"
   whiteSpace
-  return $ ListStringId i
+  return (ListStringId i, symTable)
 
 
-listOfStrFree :: Parser List
-listOfStrFree = do
+listOfStrFree :: SymbolTable -> Parser (List, SymbolTable)
+listOfStrFree symTable = do
   whiteSpace
   _ <- string "List:String"
   whiteSpace
@@ -365,72 +365,80 @@ listOfStrFree = do
   whiteSpace
   _ <- string "]"
   whiteSpace
-  return $ ListString i
+  return (ListString i, symTable)
 
-listOfMembers :: Parser List
-listOfMembers = do
+listOfMembers :: SymbolTable -> Parser (List, SymbolTable)
+listOfMembers symTable = do
   whiteSpace
   _ <- string "List:Member"
   whiteSpace
   _ <- string "["
   whiteSpace
-  i <- sepBy member (char ',')
+  (members, symTable') <- sepByAccum member symTable
   whiteSpace
   _ <- string "]"
   whiteSpace
-  return $ ListMember i
+  let list = ListMember members
+  let symTable'' = insertList (show list) list symTable'
+  return (list, symTable'')
 
-listOfTasks :: Parser List
-listOfTasks = do
+listOfTasks :: SymbolTable -> Parser (List, SymbolTable)
+listOfTasks symTable = do
   whiteSpace
   _ <- string "List:Task"
   whiteSpace
   _ <- string "["
   whiteSpace
-  i <- sepBy task' (char ',')
+  (tasks, symTable') <- sepByAccum task' symTable
   whiteSpace
   _ <- string "]"
   whiteSpace
-  return $ ListTask i
+  let symTable'' = insertList (show tasks) (ListTask tasks) symTable'
+  return (ListTask tasks, symTable'')
 
-listOfTags :: Parser List
-listOfTags = do
+listOfTags :: SymbolTable -> Parser (List, SymbolTable)
+listOfTags symTa = do
   whiteSpace
   _ <- string "List:Tag"
   whiteSpace
   _ <- string "["
   whiteSpace
-  i <- sepBy tag' (char ',')
+  tags <- sepBy tag' (char ',')
   whiteSpace
   _ <- string "]"
   whiteSpace
-  return $ ListTag i
+  let symTable'' = insertList (show tags) (ListTag tags) symTa
+  return (ListTag tags, symTable'')
 
-listOfStates :: Parser List
-listOfStates = do
+listOfStates :: SymbolTable -> Parser (List, SymbolTable)
+listOfStates symT = do
   whiteSpace
   _ <- string "List:State"
   whiteSpace
   _ <- string "["
   whiteSpace
-  i <- sepBy state' (char ',')
+  states <- sepBy state' (char ',')
   whiteSpace
   _ <- string "]"
   whiteSpace
-  return $ ListState i
+  let stateL = ListState states
+  let symTable'' = insertList (show stateL) stateL symT
+  return (stateL, symTable'')
 
-listOfBool :: Parser List
-listOfBool = do
+listOfBool :: SymbolTable -> Parser (List, SymbolTable)
+listOfBool symTable = do
   whiteSpace
   _ <- string "List:Bool"
   whiteSpace
   _ <- string "["
   whiteSpace
-  i <- sepBy boolValue (char ',')
+  boold <- sepBy boolValue (char ',')
   whiteSpace
   _ <- string "]"
   whiteSpace
-  return $ ListBool i
+  let listBo = ListBool boold
+  let symTable'' = insertList (show listBo) listBo symTable
+  return (ListBool boold, symTable'')
 
 tag' :: Parser Tag
 tag' =
