@@ -93,7 +93,7 @@ funcReturn = do
 statement :: Parser Statement
 statement =
   try (SBoolCondition <$> condition)
-    <|> try (SBoolExp <$> boolExp)
+    <|> try (SBoolExp <$> boolExpression)
     <|> try (SValue <$> value')
     <|> try (SCycle <$> cycle')
     <|> try (SFuncCall <$> funcCall)
@@ -107,7 +107,7 @@ value' =
     <|> try (ValMember <$> member)
     <|> try (ValList <$> lists)
     <|> try (ValTag <$> tag')
-    <|> try (ValBool <$> boolVal)
+    <|> try (ValBool <$> boolValue)
 
 task' :: Parser Task
 task' = do
@@ -171,25 +171,25 @@ task' = do
 
 taskTitle :: Parser TitleTask
 taskTitle =
-  try (TaskTakeTitle <$> ttaTitle)
+  try (TaskTakeTitle <$> takeTaskAttributeTitle)
     <|> try (TaskValueTitle . StrIdSpaces <$> strIdSpaces)
     <|> try (TaskIdentifierTitle <$> identifier)
 
 taskDescription :: Parser DescriptionTask
 taskDescription =
-  try (TaskTakeDescription <$> ttaDescription)
+  try (TaskTakeDescription <$> takeTaskAttributeDescription)
     <|> try (TaskValueDescription . StrParagraph <$> strParagraph)
     <|> try (TaskIdentifierDescription <$> identifier)
 
 taskState :: Parser StateTask
 taskState =
-  try (TaskTakeState <$> ttaState)
+  try (TaskTakeState <$> takeTaskAttributeState)
     <|> try (TaskValueState <$> state')
     <|> try (TaskIdentifierState <$> identifier)
 
 taskMembers :: Parser MembersTask
 taskMembers =
-  try (TaskTakeMembers <$> ttaMembers)
+  try (TaskTakeMembers <$> takeTaskAttributeMembers)
     <|> try (TaskValueMembers <$> listOfMembers)
     <|> try
       ( TaskIdentifierMembers
@@ -200,13 +200,13 @@ taskMembers =
 
 taskTag :: Parser TagTask
 taskTag =
-  try (TaskTakeTag <$> ttaTag)
+  try (TaskTakeTag <$> takeTaskAttributeTag)
     <|> try (TaskValueTag <$> tag')
     <|> try (TaskIdentifierTag <$> identifier)
 
 taskSubTasks :: Parser SubTasksTask
 taskSubTasks =
-  try (TaskTakeSubTasks <$> ttaSubTasks)
+  try (TaskTakeSubTasks <$> takeTaskAttributeSubTasks)
     <|> try (TaskValueSubTasks <$> lists)
     <|> try
       ( TaskIdentifierSubTasks
@@ -338,7 +338,7 @@ listOfBool = do
   whiteSpace
   _ <- string "["
   whiteSpace
-  i <- sepBy boolVal (char ',')
+  i <- sepBy boolValue (char ',')
   whiteSpace
   _ <- string "]"
   whiteSpace
@@ -413,59 +413,59 @@ tmaRole = do
 
 takeTaskAttribute :: Parser TakeTaskAttribute
 takeTaskAttribute =
-  try (TakeTaskAttributeStrings <$> ttaStrings)
-    <|> try (TakeTaskAttributeMembers <$> ttaMembers)
-    <|> try (TakeTaskAttributeSubTasks <$> ttaSubTasks)
+  try (TakeTaskAttributeStrings <$> takeTaskAttributeStrings)
+    <|> try (TakeTaskAttributeMembers <$> takeTaskAttributeMembers)
+    <|> try (TakeTaskAttributeSubTasks <$> takeTaskAttributeSubTasks)
 
-ttaStrings :: Parser TakeTaskAttributeLiteral
-ttaStrings =
-  try (TakeTaskAttributeState <$> ttaState)
-    <|> try (TakeTaskAttributeTitle <$> ttaTitle)
-    <|> try (TakeTaskAttributeDescription <$> ttaDescription)
-    <|> try (TakeTaskAttributeTag <$> ttaTag)
+takeTaskAttributeStrings :: Parser TakeTaskAttributeLiteral
+takeTaskAttributeStrings =
+  try (TakeTaskAttributeState <$> takeTaskAttributeState)
+    <|> try (TakeTaskAttributeTitle <$> takeTaskAttributeTitle)
+    <|> try (TakeTaskAttributeDescription <$> takeTaskAttributeDescription)
+    <|> try (TakeTaskAttributeTag <$> takeTaskAttributeTag)
 
-ttaTitle :: Parser String
-ttaTitle = do
+takeTaskAttributeTitle :: Parser String
+takeTaskAttributeTitle = do
   whiteSpace
   i <- identifier
   _ <- string ".title"
   whiteSpace
   return i
 
-ttaDescription :: Parser String
-ttaDescription = do
+takeTaskAttributeDescription :: Parser String
+takeTaskAttributeDescription = do
   whiteSpace
   i <- identifier
   _ <- string ".description"
   whiteSpace
   return i
 
-ttaState :: Parser String
-ttaState = do
+takeTaskAttributeState :: Parser String
+takeTaskAttributeState = do
   whiteSpace
   i <- identifier
   _ <- string ".state"
   whiteSpace
   return i
 
-ttaTag :: Parser String
-ttaTag = do
+takeTaskAttributeTag :: Parser String
+takeTaskAttributeTag = do
   whiteSpace
   i <- identifier
   _ <- string ".tag"
   whiteSpace
   return i
 
-ttaMembers :: Parser String
-ttaMembers = do
+takeTaskAttributeMembers :: Parser String
+takeTaskAttributeMembers = do
   whiteSpace
   i <- identifier
   _ <- string ".members"
   whiteSpace
   return i
 
-ttaSubTasks :: Parser String
-ttaSubTasks = do
+takeTaskAttributeSubTasks :: Parser String
+takeTaskAttributeSubTasks = do
   whiteSpace
   i <- identifier
   _ <- string ".subTasks"
@@ -522,7 +522,7 @@ literal =
   try (LStringId . StrId <$> strId)
     <|> try (LStringIdSpaces . StrIdSpaces <$> strIdSpaces)
     <|> try (LStringParagraph . StrParagraph <$> strParagraph)
-    <|> try (LTakeTaskAttribute <$> ttaStrings)
+    <|> try (LTakeTaskAttribute <$> takeTaskAttributeStrings)
     <|> try (LTakeMemberAttribute <$> takeMemberAttribute)
 
 strId :: Parser String
@@ -564,7 +564,7 @@ condition = do
   whiteSpace
   _ <- string "("
   whiteSpace
-  e <- boolExp
+  e <- boolExpression
   whiteSpace
   _ <- string ")"
   whiteSpace
@@ -584,10 +584,10 @@ condition = do
         elseStatament = s2
       }
 
-boolExp :: Parser BoolExpression
-boolExp =
+boolExpression :: Parser BoolExpression
+boolExpression =
   BoolComparison <$ whiteSpace <*> comparison <* whiteSpace
-    <|> BoolValue <$ whiteSpace <*> boolVal <* whiteSpace
+    <|> BoolValue <$ whiteSpace <*> boolValue <* whiteSpace
 
 comparison :: Parser Comparison
 comparison =
@@ -596,18 +596,10 @@ comparison =
     <|> try taskComparison
     <|> try memberComparison
 
-boolVal :: Parser Bool
-boolVal = try boolTrue <|> try boolFalse
-
-boolTrue :: Parser Bool
-boolTrue = do
-  _ <- string "True"
-  return True
-
-boolFalse :: Parser Bool
-boolFalse = do
-  _ <- string "False"
-  return False
+boolValue :: Parser Bool
+boolValue =
+  try (True <$ string "True")
+    <|> try (False <$ string "False")
 
 strComparison :: Parser Comparison
 strComparison = do
@@ -621,11 +613,11 @@ strComparison = do
 
 boolComparison :: Parser Comparison
 boolComparison = do
-  s1 <- boolVal
+  s1 <- boolValue
   whiteSpace
   cmp <- boolComparator
   whiteSpace
-  s2 <- boolVal
+  s2 <- boolValue
   whiteSpace
   return $ ComparisonBool s1 cmp s2
 
