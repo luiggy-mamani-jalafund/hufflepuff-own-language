@@ -26,7 +26,7 @@ data Type
   | TListTask
   | TListList
   | TListStringId
-  | TListStringFree
+  | TListString
   | TListState
   | TListBool
   | TListMember
