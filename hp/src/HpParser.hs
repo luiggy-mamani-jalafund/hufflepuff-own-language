@@ -226,50 +226,84 @@ task' symTable = do
   let symTable7 = insertTask (show t) task symTable6 -- Define identifier type in future
   return (task, symTable7)
 
-taskTitle :: Parser TitleTask
-taskTitle =
-  try (TaskTakeTitle <$> takeTaskAttributeTitle)
-    <|> try (TaskValueTitle . String <$> strFree)
-    <|> try (TaskIdentifierTitle <$> identifier)
+taskTitle :: SymbolTable -> Parser (TitleTask, SymbolTable)
+taskTitle symTable =
+  try (do 
+    t <- takeTaskAttributeTitle
+    return (TaskTakeTitle t, symTable))
+    <|> try (do
+      srt <- strFree 
+      return (TaskValueTitle (String srt), symTable))
+    <|> try (do
+      id <- TaskIdentifierTitle <$> identifier
+      return (id, symTable))
 
-taskDescription :: Parser DescriptionTask
-taskDescription =
-  try (TaskTakeDescription <$> takeTaskAttributeDescription)
-    <|> try (TaskValueDescription . String <$> strFree)
-    <|> try (TaskIdentifierDescription <$> identifier)
+taskDescription :: SymbolTable -> Parser (DescriptionTask, SymbolTable)
+taskDescription symTable =
+  try (do
+    d <- takeTaskAttributeDescription 
+    return (TaskTakeDescription d, symTable))
+    <|> try (do
+      str <- strFree
+      return (TaskValueDescription (String str), symTable))
+    <|> try (do
+      id <- TaskIdentifierDescription <$> identifier
+      return (id, symTable))
 
-taskState :: Parser StateTask
-taskState =
-  try (TaskTakeState <$> takeTaskAttributeState)
-    <|> try (TaskValueState <$> state')
-    <|> try (TaskIdentifierState <$> identifier)
+taskState :: SymbolTable -> Parser (StateTask, SymbolTable)
+taskState symbTable =
+  try (do 
+    s <- takeTaskAttributeState 
+    return (TaskTakeState s, symbTable))
+    <|> try (do
+      state <- state'
+      return (TaskValueState state, symbTable))
+    <|> try (do
+      id <- TaskIdentifierState <$> identifier
+      return (id, symbTable))
 
-taskMembers :: Parser MembersTask
-taskMembers =
-  try (TaskTakeMembers <$> takeTaskAttributeMembers)
-    <|> try (TaskValueMembers <$> listOfMembers)
+taskMembers :: SymbolTable -> Parser (MembersTask, SymbolTable)
+taskMembers symTable =
+  try (do
+    attrib <- takeTaskAttributeMembers
+    return (TaskTakeMembers attrib, symTable))
+    <|> try (do 
+      (list, symTable') <- listOfMembers symTable
+      return (TaskValueMembers list, symTable'))
     <|> try
-      ( TaskIdentifierMembers
-          <$ whiteSpace
-          <*> identifier
-          <* whiteSpace
+      ( do
+        whiteSpace
+        ident <- TaskIdentifierMembers <$> identifier
+        whiteSpace
+        return (ident, symTable)
       )
 
-taskTag :: Parser TagTask
-taskTag =
-  try (TaskTakeTag <$> takeTaskAttributeTag)
-    <|> try (TaskValueTag <$> tag')
-    <|> try (TaskIdentifierTag <$> identifier)
+taskTag :: SymbolTable -> Parser (TagTask, SymbolTable)
+taskTag symTable =
+  try (do
+    attrib <- takeTaskAttributeTag 
+    return (TaskTakeTag attrib, symTable))
+    <|> try (do
+      tag <- tag'
+      return (TaskValueTag tag, symTable))
+    <|> try (do
+      id <- TaskIdentifierTag <$> identifier
+      return (id, symTable))
 
-taskSubTasks :: Parser SubTasksTask
-taskSubTasks =
-  try (TaskTakeSubTasks <$> takeTaskAttributeSubTasks)
-    <|> try (TaskValueSubTasks <$> lists)
+taskSubTasks :: SymbolTable -> Parser (SubTasksTask, SymbolTable)
+taskSubTasks symTable =
+  try (do
+    attrib <- takeTaskAttributeSubTasks 
+    return (TaskTakeSubTasks attrib, symTable))
+    <|> try (do
+      (list, symTable') <- lists symTable
+      return (TaskValueSubTasks list, symTable'))
     <|> try
-      ( TaskIdentifierSubTasks
-          <$ whiteSpace
-          <*> identifier
-          <* whiteSpace
+      ( do
+        whiteSpace
+        id <- TaskIdentifierSubTasks <$> identifier
+        whiteSpace
+        return (id, symTable)
       )
 
 lists :: Parser List
