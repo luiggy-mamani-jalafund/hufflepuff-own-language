@@ -124,11 +124,13 @@ data Member
 data MemberName
   = MemberValueName Name
   | MemberIdentifierName Identifier
+  | MemberTakeName Identifier
   deriving (Show)
 
 data MemberRole
   = MemberValueRole Role
   | MemberIdentifierRole Identifier
+  | MemberTakeRole Identifier
   deriving (Show)
 
 data TakeMemberAttribute

@@ -33,7 +33,7 @@ code = do
   return $ Code f d
 
 funcs :: Parser [Func]
-funcs = many func
+funcs = many1 func
 
 func :: Parser Func
 func = do
@@ -496,13 +496,31 @@ boolComparator =
 
 memberName :: Parser MemberName
 memberName =
-  MemberValueName . String <$> strFree
-    <|> MemberIdentifierName <$> identifier
+  try (MemberTakeName <$> takeMemberAttributeName)
+    <|> try (MemberValueName . String <$> strFree)
+    <|> try (MemberIdentifierName <$> identifier)
 
 memberRole :: Parser MemberRole
 memberRole =
-  MemberValueRole . StringId <$> strId
-    <|> MemberIdentifierRole <$> identifier
+  try (MemberTakeRole <$> takeMemberAttributeRole)
+    <|> try (MemberValueRole . StringId <$> strId)
+    <|> try (MemberIdentifierRole <$> identifier)
+
+takeMemberAttributeName :: Parser String
+takeMemberAttributeName = do
+  whiteSpace
+  i <- identifier
+  _ <- string ".name"
+  whiteSpace
+  return i
+
+takeMemberAttributeRole :: Parser String
+takeMemberAttributeRole = do
+  whiteSpace
+  i <- identifier
+  _ <- string ".role"
+  whiteSpace
+  return i
 
 literal :: Parser Literal
 literal =
