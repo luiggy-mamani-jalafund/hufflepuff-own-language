@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleContexts #-}
 module HpParser
   ( func,
     funcParam,
@@ -13,14 +14,14 @@ module HpParser
     casePattern,
     casePatternVal,
     casePatternVals,
-    code,
     strFree,
+    parseCode
   )
 where
 
 import AbstractSyntaxTree
 import Lexer
-import Text.Parsec
+import Text.Parsec hiding (manyAccum)
 import Text.Parsec.String (Parser)
 import SymbolTable
 

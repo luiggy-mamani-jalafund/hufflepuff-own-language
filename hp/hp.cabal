@@ -28,6 +28,7 @@ library
       AbstractSyntaxTree
       HpParser
       Lexer
+      SymbolTable
   other-modules:
       Paths_hp
   autogen-modules:
@@ -37,7 +38,11 @@ library
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:
       base >=4.7 && <5
+    , containers
+    , mtl
     , parsec
+    , parsec-numbers
+    , parsec3-numbers
   default-language: Haskell2010
 
 executable hp-exe
@@ -51,8 +56,12 @@ executable hp-exe
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
+    , containers
     , hp
+    , mtl
     , parsec
+    , parsec-numbers
+    , parsec3-numbers
   default-language: Haskell2010
 
 test-suite hp-test
@@ -67,6 +76,10 @@ test-suite hp-test
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
+    , containers
     , hp
+    , mtl
     , parsec
+    , parsec-numbers
+    , parsec3-numbers
   default-language: Haskell2010
