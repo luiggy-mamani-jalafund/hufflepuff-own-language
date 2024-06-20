@@ -936,68 +936,74 @@ casePatternValue symTable = do
 casePatternVals :: SymbolTable -> Parser ([PatternCaseValue], SymbolTable)
 casePatternVals = sepByAccum casePatternVal
 
-funcCall :: Parser FuncCall
-funcCall = do
+funcCall :: SymbolTable -> Parser (FuncCall, SymbolTable)
+funcCall symTable = do
   whiteSpace
   i <- identifier
   whiteSpace
   _ <- string "("
   whiteSpace
-  p <- funcCallParams
+  (p, symT1) <- funcCallParams symTable
   whiteSpace
   _ <- string ")"
-  return $ FuncCall i p
+  return (FuncCall i p, symT1)
 
-funcCallParams :: Parser [FuncCallParam]
-funcCallParams = sepBy funcCallParam (char ',')
+funcCallParams :: SymbolTable -> Parser ([FuncCallParam], SymbolTable)
+funcCallParams = sepByAccum funcCallParam
 
-funcCallParam :: Parser FuncCallParam
-funcCallParam =
-  try funcCallParamVal
-    <|> try funcCallParamFC
-    <|> try funcCallId
+funcCallParam :: SymbolTable -> Parser (FuncCallParam, SymbolTable)
+funcCallParam symTable =
+  try (funcCallParamVal symTable)
+  <|> try (funcCallParamFC symTable)
+  <|> try (funcCallId symTable)
 
-funcCallParamVal :: Parser FuncCallParam
-funcCallParamVal = do
+funcCallParamVal :: SymbolTable -> Parser (FuncCallParam, SymbolTable)
+funcCallParamVal symbolTable = do
   whiteSpace
-  v <- value'
+  (v, symTable1) <- value' symbolTable
   whiteSpace
-  return $ FuncCallParamValue v
+  return (FuncCallParamValue v, symTable1)
 
-funcCallParamFC :: Parser FuncCallParam
-funcCallParamFC = do
+funcCallParamFC :: SymbolTable -> Parser (FuncCallParam, SymbolTable)
+funcCallParamFC symTabl = do
   whiteSpace
-  v <- funcCall
+  (v, symTabl1) <- funcCall symTabl
   whiteSpace
-  return $ FuncCallParam v
+  return (FuncCallParam v, symTabl1)
 
-funcCallId :: Parser FuncCallParam
-funcCallId = do
+funcCallId :: SymbolTable -> Parser (FuncCallParam, SymbolTable)
+funcCallId symTab = do
   whiteSpace
-  v <- identifier
+  id <- identifier
   whiteSpace
-  return $ FuncCallIdentifier v
+  return (FuncCallIdentifier id, symTab)
 
-doNotation :: Parser DoNotation
-doNotation = do
+doNotation :: SymbolTable -> Parser (DoNotation, SymbolTable)
+doNotation symTable = do
   reserved "do"
   whiteSpace
   reservedOp "{"
   whiteSpace
-  c <- doStatements
+  (c, symTable1) <- doStatements symTable
   whiteSpace
   reservedOp "}"
   whiteSpace
-  return $ DoNotation c
+  return (DoNotation c, symTable1)
 
-doStatements :: Parser [DoStatement]
-doStatements = many doStatement
+doStatements :: SymbolTable -> Parser ([DoStatement], SymbolTable)
+doStatements = manyAccum doStatement
 
-doStatement :: Parser DoStatement
-doStatement = try doAssignment <|> try doPrint
+doStatement :: SymbolTable -> Parser (DoStatement, SymbolTable)
+doStatement symTable = 
+  try (do
+    (stamt, symTable') <- doAssignment symTable
+    return (stamt, symTable')) 
+    <|> try (do
+      (stmt, symTable') <- doPrint symTable
+      return (stmt, symTable'))
 
-doAssignment :: Parser DoStatement
-doAssignment = do
+doAssignment :: SymbolTable -> Parser (DoStatement, SymbolTable)
+doAssignment symTable = do
   whiteSpace
   reserved "let"
   whiteSpace
@@ -1007,25 +1013,31 @@ doAssignment = do
   whiteSpace
   _ <- string "="
   whiteSpace
-  s <- statement
+  (s, symTable1) <- statement symTable
   whiteSpace
-  return $ DoAssignment i (str2type t) s
+  let assignment = DoAssignment i (str2type t) s
+  let symTable2 = insertDoAssignment i (str2type t) s symTable1
+  return (assignment, symTable2)
 
-doPrint :: Parser DoStatement
-doPrint = do
+doPrint :: SymbolTable -> Parser (DoStatement, SymbolTable)
+doPrint symTable = do
   whiteSpace
   reserved "print"
   whiteSpace
   _ <- string "("
   whiteSpace
-  s <- try printStatement <|> try printRef
+  (s, symtabl1) <- try (printStatement symTable) <|> try (printRef symTable)
   whiteSpace
   _ <- string ")"
   whiteSpace
-  return $ DoPrint s
+  return (DoPrint s, symtabl1)
 
-printStatement :: Parser Print
-printStatement = PrintStatement <$> statement
+printStatement :: SymbolTable -> Parser (Print, SymbolTable)
+printStatement symTable = do
+  (s, symTable') <- statement symTable
+  return (PrintStatement s, symTable')
 
-printRef :: Parser Print
-printRef = PrintRef <$> identifier
+printRef :: SymbolTable -> Parser (Print, SymbolTable)
+printRef symTable = do
+  i <- identifier
+  return (PrintRef i, symTable)
