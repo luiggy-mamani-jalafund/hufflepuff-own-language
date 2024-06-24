@@ -388,7 +388,6 @@ tag' =
   try ( NoTag <$ whiteSpace <* string "NoTag" <* whiteSpace)
   <|> try (Tag . StringId <$> strId)
 
--- no adaptar
 state' :: Parser TaskState
 state' = StringId <$> strId
 
@@ -425,38 +424,31 @@ member symTable =
       whiteSpace
       return (NoAssigned, symTable))
 
--- No es necesario adaptar
 takeMemberAttribute :: Parser TakeMemberAttribute
-takeMemberAttribute =
-  try tmaName
-    <|> try tmaRole
+takeMemberAttribute = try tmaName <|> try tmaRole
 
--- no adaptar
 tmaName :: Parser TakeMemberAttribute
-tmaName = do
-  whiteSpace
-  i <- identifier
-  _ <- string ".name"
-  whiteSpace
-  return $ TakeMemberAttributeName i
+tmaName =
+  TakeMemberAttributeName
+  <$ whiteSpace
+  <*> identifier
+  <* string ".name"
+  <* whiteSpace
 
--- no adaptar
 tmaRole :: Parser TakeMemberAttribute
-tmaRole = do
-  whiteSpace
-  i <- identifier
-  _ <- string ".role"
-  whiteSpace
-  return $ TakeMemberAttributeRole i
+tmaRole =
+  TakeMemberAttributeRole
+  <$ whiteSpace
+  <*> identifier
+  <* string ".role"
+  <* whiteSpace
 
--- No adaptar
 takeTaskAttribute :: Parser TakeTaskAttribute
 takeTaskAttribute =
   try (TakeTaskAttributeStrings <$> takeTaskAttributeStrings)
     <|> try (TakeTaskAttributeMembers <$> takeTaskAttributeMembers)
     <|> try (TakeTaskAttributeSubTasks <$> takeTaskAttributeSubTasks)
 
--- No adaptar
 takeTaskAttributeStrings :: Parser TakeTaskAttributeLiteral
 takeTaskAttributeStrings =
   try (TakeTaskAttributeState <$> takeTaskAttributeState)
@@ -464,153 +456,71 @@ takeTaskAttributeStrings =
     <|> try (TakeTaskAttributeDescription <$> takeTaskAttributeDescription)
     <|> try (TakeTaskAttributeTag <$> takeTaskAttributeTag)
 
--- No adaptar
+takeAttributeId :: String -> Parser String
+takeAttributeId i
+  = whiteSpace
+  *> identifier
+  <* string i
+  <* whiteSpace
+
 takeTaskAttributeTitle :: Parser String
-takeTaskAttributeTitle = do
-  whiteSpace
-  i <- identifier
-  _ <- string ".title"
-  whiteSpace
-  return i
+takeTaskAttributeTitle = takeAttributeId ".title"
 
--- No adaptar
 takeTaskAttributeDescription :: Parser String
-takeTaskAttributeDescription = do
-  whiteSpace
-  i <- identifier
-  _ <- string ".description"
-  whiteSpace
-  return i
+takeTaskAttributeDescription = takeAttributeId ".description"
 
--- No adaptar
 takeTaskAttributeState :: Parser String
-takeTaskAttributeState = do
-  whiteSpace
-  i <- identifier
-  _ <- string ".state"
-  whiteSpace
-  return i
+takeTaskAttributeState = takeAttributeId ".state"
 
--- no adaptar
 takeTaskAttributeTag :: Parser String
-takeTaskAttributeTag = do
-  whiteSpace
-  i <- identifier
-  _ <- string ".tag"
-  whiteSpace
-  return i
+takeTaskAttributeTag = takeAttributeId ".tag"
 
--- No adaptar
 takeTaskAttributeMembers :: Parser String
-takeTaskAttributeMembers = do
-  whiteSpace
-  i <- identifier
-  _ <- string ".members"
-  whiteSpace
-  return i
+takeTaskAttributeMembers = takeAttributeId ".members"
 
--- No adaptar
 takeTaskAttributeSubTasks :: Parser String
-takeTaskAttributeSubTasks = do
-  whiteSpace
-  i <- identifier
-  _ <- string ".subTasks"
-  whiteSpace
-  return i
+takeTaskAttributeSubTasks = takeAttributeId ".subTasks"
 
--- No adaptar
+boolComparatorId :: String -> Parser ()
+boolComparatorId v = whiteSpace <* string v <* whiteSpace
+
 boolComparator :: Parser BoolComparator
 boolComparator =
-  Eq
-    <$ whiteSpace
-    <* string "=="
-    <* whiteSpace
-    <|> Neq
-      <$ whiteSpace
-      <* string "!="
-      <* whiteSpace
-    <|> Lt
-      <$ whiteSpace
-      <* string "<"
-      <* whiteSpace
-    <|> Le
-      <$ whiteSpace
-      <* string "<="
-      <* whiteSpace
-    <|> Gt
-      <$ whiteSpace
-      <* string ">"
-      <* whiteSpace
-    <|> Ge
-      <$ whiteSpace
-      <* string ">="
-      <* whiteSpace
-    <|> And
-      <$ whiteSpace
-      <* string "&&"
-      <* whiteSpace
-    <|> Or
-      <$ whiteSpace
-      <* string "||"
-      <* whiteSpace
+  try (Eq <$ boolComparatorId "==")
+    <|> try (Neq <$ boolComparatorId "!=")
+    <|> try (Lt <$ boolComparatorId  "<")
+    <|> try (Le <$ boolComparatorId "<=")
+    <|> try (Gt <$ boolComparatorId  ">")
+    <|> try (Ge <$ boolComparatorId ">=")
+    <|> try (And <$ boolComparatorId "&&")
+    <|> try (Or <$ boolComparatorId "||")
 
 memberName :: SymbolTable -> Parser (MemberName, SymbolTable)
 memberName symTable =
-  try (do
-    memberTN <- takeMemberAttributeName
-    return (MemberTakeName memberTN, symTable)
-    )
+  try ((\tn -> (MemberTakeName tn, symTable)) <$> takeMemberAttributeName)
   <|>
-    try (do
-      str <- strFree
-      let membetName = MemberValueName (String str)
-      let symTable' = insertLiteral str (LString (String str)) symTable
-      return (membetName, symTable')
-    )
-    <|> try (do
-      id <- identifier
-      let symTable' = insertVariable id TString Nothing symTable
-      return (MemberIdentifierName id, symTable')
-      )
+  try ((\v -> let symTable' = insertLiteral v (LString (String v)) symTable
+                     in (MemberValueName (String v), symTable')) <$> strFree)
+  <|>
+  try ((\id -> let symTable' = insertVariable id TString Nothing symTable
+                    in (MemberIdentifierName id, symTable')) <$> identifier)
 
 memberRole :: SymbolTable -> Parser (MemberRole, SymbolTable)
 memberRole symTable =
-  try (do
-    memberTR <- MemberTakeRole <$> takeMemberAttributeRole
-    return (memberTR, symTable)
-    )
+  try ((\tr -> (tr, symTable)) . MemberTakeRole <$> takeMemberAttributeRole) 
   <|>
-    try (do
-      str <- strId
-      let memberRole = MemberValueRole (StringId str)
-      let symbolTable' = insertLiteral str (LStringIdentifier (StringId str)) symTable
-      return (memberRole, symbolTable')
-      )
-    <|> try (do
-      id <- identifier
-      let memberRole = MemberIdentifierRole id
-      let symbolTable' = insertVariable id TStringId Nothing symTable
-      return (memberRole, symbolTable'))
+  try ((\v -> let symTable' = insertLiteral v (LStringIdentifier (StringId v)) symTable
+                     in (MemberValueRole (StringId v), symTable')) <$> strId) 
+  <|>
+  try ((\id -> let symTable' = insertVariable id TStringId Nothing symTable
+                    in (MemberIdentifierRole id, symTable')) <$> identifier)
 
--- No adaptar
 takeMemberAttributeName :: Parser String
-takeMemberAttributeName = do
-  whiteSpace
-  i <- identifier
-  _ <- string ".name"
-  whiteSpace
-  return i
+takeMemberAttributeName = takeAttributeId ".name"
 
--- No adaptar
 takeMemberAttributeRole :: Parser String
-takeMemberAttributeRole = do
-  whiteSpace
-  i <- identifier
-  _ <- string ".role"
-  whiteSpace
-  return i
+takeMemberAttributeRole = takeAttributeId ".role"
 
--- No adaptar
 literal :: Parser Literal
 literal =
   try (LString . String <$> strFree)
