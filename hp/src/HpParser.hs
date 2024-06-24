@@ -37,13 +37,10 @@ parseCode =
    in code initialSymbolTable
 
 code :: SymbolTable -> Parser (Code, SymbolTable)
-code symTable = do
-  whiteSpace
-  (f, symTable1) <- funcs symTable
-  whiteSpace
-  (d, symTable2) <- doNotation symTable1
-  whiteSpace
-  return (Code f d, symTable2)
+code symTable =
+  whiteSpace *> funcs symTable >>= \(f, symTable1) ->
+    whiteSpace *> doNotation symTable1 >>= \(d, symTable2) ->
+      whiteSpace *> return (Code f d, symTable2)
 
 funcs :: SymbolTable -> Parser ([Func], SymbolTable)
 funcs = manyAccum func
