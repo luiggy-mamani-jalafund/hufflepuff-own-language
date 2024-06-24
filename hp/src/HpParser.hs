@@ -1,8 +1,10 @@
 {-# LANGUAGE FlexibleContexts #-}
-{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 {-# HLINT ignore "Use first" #-}
 {-# OPTIONS_GHC -Wno-name-shadowing #-}
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+
 {-# HLINT ignore "Use tuple-section" #-}
+{-# HLINT ignore "Use $>" #-}
 module HpParser
   ( func,
     funcParam,
@@ -19,20 +21,20 @@ module HpParser
     casePatternVal,
     casePatternVals,
     strFree,
-    parseCode
+    parseCode,
   )
 where
 
 import AbstractSyntaxTree
 import Lexer
+import SymbolTable
 import Text.Parsec hiding (manyAccum)
 import Text.Parsec.String (Parser)
-import SymbolTable
 
 parseCode :: Parser (Code, SymbolTable)
-parseCode = do
+parseCode =
   let initialSymbolTable = emptyTable
-  code initialSymbolTable
+   in code initialSymbolTable
 
 code :: SymbolTable -> Parser (Code, SymbolTable)
 code symTable = do
@@ -44,9 +46,7 @@ code symTable = do
   return (Code f d, symTable2)
 
 funcs :: SymbolTable -> Parser ([Func], SymbolTable)
-funcs symTable = do
-  (fs, symTable') <- manyAccum func symTable
-  return (fs, symTable')
+funcs = manyAccum func
 
 manyAccum :: (SymbolTable -> Parser (a, SymbolTable)) -> SymbolTable -> Parser ([a], SymbolTable)
 manyAccum p symTable = do
@@ -110,7 +110,7 @@ funcParams symTable = do
         Just (x, s1) -> do
           _ <- optionMaybe (char ',')
           (xs, s2) <- sepByAccum p s1
-          return (x:xs, s2)
+          return (x : xs, s2)
 
 funcBody :: SymbolTable -> Parser (FuncBody, SymbolTable)
 funcBody symTable = try (funcReturn symTable) <|> try (funcPattern symTable)
@@ -129,22 +129,22 @@ funcReturn symTable = do
 
 statement :: SymbolTable -> Parser (Statement, SymbolTable)
 statement symTable =
-  try ((\(cond, symTable') -> (SBoolCondition cond, symTable')) <$> condition symTable) <|>
-  try ((\(boolExp, symTable') -> (SBoolExp boolExp, symTable')) <$> boolExpression symTable) <|>
-  try ((\(val, symTable') -> (SValue val, symTable')) <$> value' symTable) <|>
-  try ((\(cycle, symTable') -> (SCycle cycle, symTable')) <$> cycle' symTable) <|>
-  try ((\(funcCall, symTable') -> (SFuncCall funcCall, symTable')) <$> funcCall symTable) <|>
-  try ((\taskAttr -> (STakeTaskAttribute taskAttr, symTable)) <$> takeTaskAttribute) <|>
-  try ((\memberAttr -> (STakeMemberAttribute memberAttr, symTable)) <$> takeMemberAttribute)
+  try ((\(cond, symTable') -> (SBoolCondition cond, symTable')) <$> condition symTable)
+    <|> try ((\(boolExp, symTable') -> (SBoolExp boolExp, symTable')) <$> boolExpression symTable)
+    <|> try ((\(val, symTable') -> (SValue val, symTable')) <$> value' symTable)
+    <|> try ((\(cycle, symTable') -> (SCycle cycle, symTable')) <$> cycle' symTable)
+    <|> try ((\(funcCall, symTable') -> (SFuncCall funcCall, symTable')) <$> funcCall symTable)
+    <|> try ((\taskAttr -> (STakeTaskAttribute taskAttr, symTable)) <$> takeTaskAttribute)
+    <|> try ((\memberAttr -> (STakeMemberAttribute memberAttr, symTable)) <$> takeMemberAttribute)
 
 value' :: SymbolTable -> Parser (Value, SymbolTable)
 value' symTable =
-  try ((\literal -> (ValLiteral literal, symTable)) <$>literal) <|>
-  try ((\(task, symTable') -> (ValTask task, symTable'))<$> task' symTable) <|>
-  try ((\(member, symTable') -> (ValMember member, symTable'))<$> member symTable) <|>
-  try ((\(list, symTable') -> (ValList list, symTable')) <$>lists symTable) <|>
-  try ((\tag -> (ValTag tag, symTable)) <$>tag') <|>
-  try ((\boolVal -> (ValBool boolVal, symTable)) <$> boolValue)
+  try ((\literal -> (ValLiteral literal, symTable)) <$> literal)
+    <|> try ((\(task, symTable') -> (ValTask task, symTable')) <$> task' symTable)
+    <|> try ((\(member, symTable') -> (ValMember member, symTable')) <$> member symTable)
+    <|> try ((\(list, symTable') -> (ValList list, symTable')) <$> lists symTable)
+    <|> try ((\tag -> (ValTag tag, symTable)) <$> tag')
+    <|> try ((\boolVal -> (ValBool boolVal, symTable)) <$> boolValue)
 
 task' :: SymbolTable -> Parser (Task, SymbolTable)
 task' symTable = do
@@ -196,74 +196,77 @@ task' symTable = do
   whiteSpace
   _ <- string "}"
   whiteSpace
-  let task = Task { title = t,
-                    description = d,
-                    state = s,
-                    members = m,
-                    tag = tg,
-                    subTasks = st }
+  let task =
+        Task
+          { title = t,
+            description = d,
+            state = s,
+            members = m,
+            tag = tg,
+            subTasks = st
+          }
   let symTable7 = insertTask (show t) task symTable6 -- Define identifier type in future
   return (task, symTable7)
 
 taskTitle :: SymbolTable -> Parser (TitleTask, SymbolTable)
 taskTitle symTable =
-  try ((\t -> (t, symTable)) . TaskTakeTitle <$> takeTaskAttributeTitle) <|>
-   try ((\t -> (t, symTable)) . TaskValueTitle . String <$> strFree) <|>
-   try ((\t -> (t, symTable)) . TaskIdentifierTitle <$> identifier)
+  try ((\t -> (t, symTable)) . TaskTakeTitle <$> takeTaskAttributeTitle)
+    <|> try ((\t -> (t, symTable)) . TaskValueTitle . String <$> strFree)
+    <|> try ((\t -> (t, symTable)) . TaskIdentifierTitle <$> identifier)
 
 taskDescription :: SymbolTable -> Parser (DescriptionTask, SymbolTable)
 taskDescription symTable =
-  try ((\d -> (d, symTable)) . TaskTakeDescription <$> takeTaskAttributeDescription) <|>
-  try ((\d -> (d, symTable)) . TaskValueDescription . String <$> strFree) <|>
-  try ((\d -> (d, symTable)) . TaskIdentifierDescription <$> identifier)
+  try ((\d -> (d, symTable)) . TaskTakeDescription <$> takeTaskAttributeDescription)
+    <|> try ((\d -> (d, symTable)) . TaskValueDescription . String <$> strFree)
+    <|> try ((\d -> (d, symTable)) . TaskIdentifierDescription <$> identifier)
 
 taskState :: SymbolTable -> Parser (StateTask, SymbolTable)
 taskState symbTable =
-  try ((\s -> (s, symbTable)) .TaskTakeState<$> takeTaskAttributeState) <|>
-  try ((\s -> (s, symbTable)) .TaskValueState <$> state') <|>
-  try ((\s -> (s, symbTable)) . TaskIdentifierState <$> identifier)
+  try ((\s -> (s, symbTable)) . TaskTakeState <$> takeTaskAttributeState)
+    <|> try ((\s -> (s, symbTable)) . TaskValueState <$> state')
+    <|> try ((\s -> (s, symbTable)) . TaskIdentifierState <$> identifier)
 
 taskMembers :: SymbolTable -> Parser (MembersTask, SymbolTable)
 taskMembers symTable =
-  try ((\m -> (m, symTable)).TaskTakeMembers <$> takeTaskAttributeMembers) <|>
-  try ((\(l, symTable') -> (TaskValueMembers l, symTable')) <$> listOfMembers symTable) <|>
-  try ((\m -> (m, symTable)) <$> (TaskIdentifierMembers <$ whiteSpace <*> identifier <* whiteSpace))
+  try ((\m -> (m, symTable)) . TaskTakeMembers <$> takeTaskAttributeMembers)
+    <|> try ((\(l, symTable') -> (TaskValueMembers l, symTable')) <$> listOfMembers symTable)
+    <|> try ((\m -> (m, symTable)) <$> (TaskIdentifierMembers <$ whiteSpace <*> identifier <* whiteSpace))
 
 taskTag :: SymbolTable -> Parser (TagTask, SymbolTable)
 taskTag symTable =
-  try ((\t -> (t, symTable)) . TaskTakeTag<$> takeTaskAttributeTag) <|>
-  try ((\t -> (t, symTable)) . TaskValueTag<$> tag') <|>
-  try ((\t -> (t, symTable)) . TaskIdentifierTag <$> identifier)
+  try ((\t -> (t, symTable)) . TaskTakeTag <$> takeTaskAttributeTag)
+    <|> try ((\t -> (t, symTable)) . TaskValueTag <$> tag')
+    <|> try ((\t -> (t, symTable)) . TaskIdentifierTag <$> identifier)
 
 taskSubTasks :: SymbolTable -> Parser (SubTasksTask, SymbolTable)
 taskSubTasks symTable =
-  try ((\t -> (t, symTable)) . TaskTakeSubTasks <$> takeTaskAttributeSubTasks) <|>
-  try ((\(l, symTable') -> (TaskValueSubTasks l, symTable')) <$> lists symTable) <|>
-  try ((\t -> (t, symTable)) <$> (TaskIdentifierSubTasks <$ whiteSpace <*> identifier <* whiteSpace))
+  try ((\t -> (t, symTable)) . TaskTakeSubTasks <$> takeTaskAttributeSubTasks)
+    <|> try ((\(l, symTable') -> (TaskValueSubTasks l, symTable')) <$> lists symTable)
+    <|> try ((\t -> (t, symTable)) <$> (TaskIdentifierSubTasks <$ whiteSpace <*> identifier <* whiteSpace))
 
 lists :: SymbolTable -> Parser (List, SymbolTable)
 lists symTable =
   try (listOfTasks symTable)
-  <|> try (listOfMembers symTable)
-  <|> try (listOfStates symTable)
-  <|> try (listOfTags symTable)
-  <|> try (listOfStrId symTable)
-  <|> try (listOfStrFree symTable)
-  <|> try (listOfBool symTable)
-  <|> try (listOfLists symTable)
+    <|> try (listOfMembers symTable)
+    <|> try (listOfStates symTable)
+    <|> try (listOfTags symTable)
+    <|> try (listOfStrId symTable)
+    <|> try (listOfStrFree symTable)
+    <|> try (listOfBool symTable)
+    <|> try (listOfLists symTable)
 
 listOfLists :: SymbolTable -> Parser (List, SymbolTable)
 listOfLists symTable =
   (\(l, symTable') -> (ListList l, symTable'))
-  <$ whiteSpace
-  <* string "List:List"
-  <* whiteSpace
-  <* string "["
-  <* whiteSpace
-  <*> sepByAccum lists symTable
-  <* whiteSpace
-  <* string "]"
-  <* whiteSpace
+    <$ whiteSpace
+    <* string "List:List"
+    <* whiteSpace
+    <* string "["
+    <* whiteSpace
+    <*> sepByAccum lists symTable
+    <* whiteSpace
+    <* string "]"
+    <* whiteSpace
 
 sepByAccum :: (SymbolTable -> Parser (a, SymbolTable)) -> SymbolTable -> Parser ([a], SymbolTable)
 sepByAccum p s = do
@@ -273,64 +276,64 @@ sepByAccum p s = do
     Just (x, s1) -> do
       _ <- optionMaybe (char ',')
       (xs, s2) <- sepByAccum p s1
-      return (x:xs, s2)
+      return (x : xs, s2)
 
 listOfStrId :: SymbolTable -> Parser (List, SymbolTable)
 listOfStrId symTable =
   (\l -> (l, symTable))
-  . ListStringId
-  <$ whiteSpace
-  <* string "List:StringId"
-  <* whiteSpace
-  <* string "["
-  <* whiteSpace
-  <*> sepBy (StringId <$> strId) (char ',')
-  <* whiteSpace
-  <* string "]"
-  <* whiteSpace
+    . ListStringId
+    <$ whiteSpace
+    <* string "List:StringId"
+    <* whiteSpace
+    <* string "["
+    <* whiteSpace
+    <*> sepBy (StringId <$> strId) (char ',')
+    <* whiteSpace
+    <* string "]"
+    <* whiteSpace
 
 listOfStrFree :: SymbolTable -> Parser (List, SymbolTable)
 listOfStrFree symTable =
   (\l -> (l, symTable))
-  . ListString
-  <$ whiteSpace
-  <* string "List:String"
-  <* whiteSpace
-  <* string "["
-  <* whiteSpace
-  <*> sepBy (String <$> strFree) (char ',')
-  <* whiteSpace
-  <* string "]"
-  <* whiteSpace
+    . ListString
+    <$ whiteSpace
+    <* string "List:String"
+    <* whiteSpace
+    <* string "["
+    <* whiteSpace
+    <*> sepBy (String <$> strFree) (char ',')
+    <* whiteSpace
+    <* string "]"
+    <* whiteSpace
 
 listOfMembers :: SymbolTable -> Parser (List, SymbolTable)
 listOfMembers symTable =
-  (\(l,symTable') -> (list l, newSymTable (list l) symTable'))
-  <$ whiteSpace
-  <* string "List:Member"
-  <* whiteSpace
-  <* string "["
-  <* whiteSpace
-  <*> sepByAccum member symTable
-  <* whiteSpace
-  <* string "]"
-  <* whiteSpace
+  (\(l, symTable') -> (list l, newSymTable (list l) symTable'))
+    <$ whiteSpace
+    <* string "List:Member"
+    <* whiteSpace
+    <* string "["
+    <* whiteSpace
+    <*> sepByAccum member symTable
+    <* whiteSpace
+    <* string "]"
+    <* whiteSpace
   where
     newSymTable lt = insertList (show lt) lt
     list = ListMember
 
 listOfTasks :: SymbolTable -> Parser (List, SymbolTable)
 listOfTasks symTable =
-  (\(t,symTable') -> (lt t, newSymTable t symTable'))
-  <$ whiteSpace
-  <* string "List:Task"
-  <* whiteSpace
-  <* string "["
-  <* whiteSpace
-  <*> sepByAccum task' symTable
-  <* whiteSpace
-  <* string "]"
-  <* whiteSpace
+  (\(t, symTable') -> (lt t, newSymTable t symTable'))
+    <$ whiteSpace
+    <* string "List:Task"
+    <* whiteSpace
+    <* string "["
+    <* whiteSpace
+    <*> sepByAccum task' symTable
+    <* whiteSpace
+    <* string "]"
+    <* whiteSpace
   where
     lt = ListTask
     newSymTable t = insertList (show t) (lt t)
@@ -338,15 +341,15 @@ listOfTasks symTable =
 listOfTags :: SymbolTable -> Parser (List, SymbolTable)
 listOfTags symTa =
   (\t -> (lt t, newSymTable t symTa))
-  <$ whiteSpace
-  <* string "List:Tag"
-  <* whiteSpace
-  <* string "["
-  <* whiteSpace
-  <*> sepBy tag' (char ',')
-  <* whiteSpace
-  <* string "]"
-  <* whiteSpace
+    <$ whiteSpace
+    <* string "List:Tag"
+    <* whiteSpace
+    <* string "["
+    <* whiteSpace
+    <*> sepBy tag' (char ',')
+    <* whiteSpace
+    <* string "]"
+    <* whiteSpace
   where
     lt = ListTag
     newSymTable t = insertList (show t) (lt t)
@@ -354,15 +357,15 @@ listOfTags symTa =
 listOfStates :: SymbolTable -> Parser (List, SymbolTable)
 listOfStates symTa =
   (\s -> (ls s, newSymTable s symTa))
-  <$ whiteSpace
-  <* string "List:State"
-  <* whiteSpace
-  <* string "["
-  <* whiteSpace
-  <*> sepBy state' (char ',')
-  <* whiteSpace
-  <* string "]"
-  <* whiteSpace
+    <$ whiteSpace
+    <* string "List:State"
+    <* whiteSpace
+    <* string "["
+    <* whiteSpace
+    <*> sepBy state' (char ',')
+    <* whiteSpace
+    <* string "]"
+    <* whiteSpace
   where
     ls = ListState
     newSymTable s = insertList (show s) (ls s)
@@ -370,23 +373,23 @@ listOfStates symTa =
 listOfBool :: SymbolTable -> Parser (List, SymbolTable)
 listOfBool symTa =
   (\b -> (lb b, newSymTable b symTa))
-  <$ whiteSpace
-  <* string "List:Bool"
-  <* whiteSpace
-  <* string "["
-  <* whiteSpace
-  <*> sepBy boolValue (char ',')
-  <* whiteSpace
-  <* string "]"
-  <* whiteSpace
+    <$ whiteSpace
+    <* string "List:Bool"
+    <* whiteSpace
+    <* string "["
+    <* whiteSpace
+    <*> sepBy boolValue (char ',')
+    <* whiteSpace
+    <* string "]"
+    <* whiteSpace
   where
     lb = ListBool
     newSymTable b = insertList (show b) (lb b)
 
 tag' :: Parser Tag
 tag' =
-  try ( NoTag <$ whiteSpace <* string "NoTag" <* whiteSpace)
-  <|> try (Tag . StringId <$> strId)
+  try (NoTag <$ whiteSpace <* string "NoTag" <* whiteSpace)
+    <|> try (Tag . StringId <$> strId)
 
 state' :: Parser TaskState
 state' = StringId <$> strId
@@ -414,34 +417,25 @@ member symTable =
 
     _ <- string "}"
     whiteSpace
-    let membetDef = Member { name = n, role = r }
+    let membetDef = Member {name = n, role = r}
     let symTable3 = insertMember (show n) membetDef symTable2
 
     return (membetDef, symTable3)
-    <|> (do
-      whiteSpace
-      _ <- string "NoAssigned"
-      whiteSpace
-      return (NoAssigned, symTable))
+    <|> ( do
+            whiteSpace
+            _ <- string "NoAssigned"
+            whiteSpace
+            return (NoAssigned, symTable)
+        )
 
 takeMemberAttribute :: Parser TakeMemberAttribute
 takeMemberAttribute = try tmaName <|> try tmaRole
 
 tmaName :: Parser TakeMemberAttribute
-tmaName =
-  TakeMemberAttributeName
-  <$ whiteSpace
-  <*> identifier
-  <* string ".name"
-  <* whiteSpace
+tmaName = TakeMemberAttributeName <$> takeAttributeId ".name"
 
 tmaRole :: Parser TakeMemberAttribute
-tmaRole =
-  TakeMemberAttributeRole
-  <$ whiteSpace
-  <*> identifier
-  <* string ".role"
-  <* whiteSpace
+tmaRole = TakeMemberAttributeRole <$> takeAttributeId ".role"
 
 takeTaskAttribute :: Parser TakeTaskAttribute
 takeTaskAttribute =
@@ -457,11 +451,11 @@ takeTaskAttributeStrings =
     <|> try (TakeTaskAttributeTag <$> takeTaskAttributeTag)
 
 takeAttributeId :: String -> Parser String
-takeAttributeId i
-  = whiteSpace
-  *> identifier
-  <* string i
-  <* whiteSpace
+takeAttributeId i =
+  whiteSpace
+    *> identifier
+    <* string i
+    <* whiteSpace
 
 takeTaskAttributeTitle :: Parser String
 takeTaskAttributeTitle = takeAttributeId ".title"
@@ -488,9 +482,9 @@ boolComparator :: Parser BoolComparator
 boolComparator =
   try (Eq <$ boolComparatorId "==")
     <|> try (Neq <$ boolComparatorId "!=")
-    <|> try (Lt <$ boolComparatorId  "<")
+    <|> try (Lt <$ boolComparatorId "<")
     <|> try (Le <$ boolComparatorId "<=")
-    <|> try (Gt <$ boolComparatorId  ">")
+    <|> try (Gt <$ boolComparatorId ">")
     <|> try (Ge <$ boolComparatorId ">=")
     <|> try (And <$ boolComparatorId "&&")
     <|> try (Or <$ boolComparatorId "||")
@@ -498,22 +492,38 @@ boolComparator =
 memberName :: SymbolTable -> Parser (MemberName, SymbolTable)
 memberName symTable =
   try ((\tn -> (MemberTakeName tn, symTable)) <$> takeMemberAttributeName)
-  <|>
-  try ((\v -> let symTable' = insertLiteral v (LString (String v)) symTable
-                     in (MemberValueName (String v), symTable')) <$> strFree)
-  <|>
-  try ((\id -> let symTable' = insertVariable id TString Nothing symTable
-                    in (MemberIdentifierName id, symTable')) <$> identifier)
+    <|> try
+      ( ( \v ->
+            let symTable' = insertLiteral v (LString (String v)) symTable
+             in (MemberValueName (String v), symTable')
+        )
+          <$> strFree
+      )
+    <|> try
+      ( ( \id ->
+            let symTable' = insertVariable id TString Nothing symTable
+             in (MemberIdentifierName id, symTable')
+        )
+          <$> identifier
+      )
 
 memberRole :: SymbolTable -> Parser (MemberRole, SymbolTable)
 memberRole symTable =
-  try ((\tr -> (tr, symTable)) . MemberTakeRole <$> takeMemberAttributeRole) 
-  <|>
-  try ((\v -> let symTable' = insertLiteral v (LStringIdentifier (StringId v)) symTable
-                     in (MemberValueRole (StringId v), symTable')) <$> strId) 
-  <|>
-  try ((\id -> let symTable' = insertVariable id TStringId Nothing symTable
-                    in (MemberIdentifierRole id, symTable')) <$> identifier)
+  try ((\tr -> (tr, symTable)) . MemberTakeRole <$> takeMemberAttributeRole)
+    <|> try
+      ( ( \v ->
+            let symTable' = insertLiteral v (LStringIdentifier (StringId v)) symTable
+             in (MemberValueRole (StringId v), symTable')
+        )
+          <$> strId
+      )
+    <|> try
+      ( ( \id ->
+            let symTable' = insertVariable id TStringId Nothing symTable
+             in (MemberIdentifierRole id, symTable')
+        )
+          <$> identifier
+      )
 
 takeMemberAttributeName :: Parser String
 takeMemberAttributeName = takeAttributeId ".name"
@@ -528,51 +538,35 @@ literal =
     <|> try (LTakeTaskAttribute <$> takeTaskAttributeStrings)
     <|> try (LTakeMemberAttribute <$> takeMemberAttribute)
 
--- No adaptar
 strId' :: Parser String
-strId' = do
-  l <- alphaNum
-  v <- many (alphaNum <|> space)
-  return $ l : v
+strId' = (:) <$> alphaNum <*> many (alphaNum <|> space)
 
--- No adaptar
 strId :: Parser String
-strId = do
+strId =
   whiteSpace
-  _ <- char '\"'
-  v <- strId'
-  _ <- char '\"'
-  whiteSpace
-  return v
+    *> char '\"'
+    *> strId'
+    <* char '\"'
+    <* whiteSpace
 
--- No adaptar
 strEmpty :: Parser String
-strEmpty = do
-  whiteSpace
-  _ <- char '\"'
-  _ <- char '\"'
-  whiteSpace
-  return ""
+strEmpty =
+  ""
+    <$ whiteSpace
+    <* char '\"'
+    <* char '\"'
+    <* whiteSpace
 
--- No adaptar
 strFree :: Parser String
 strFree = try strEmpty <|> try strFree'
 
--- No adaptar
 strFree' :: Parser String
-strFree' = do
+strFree' =
   whiteSpace
-  _ <- char '\"'
-  v <- many (alphaNum <|> space <|> oneOf symbols)
-  _ <- char '\"'
-  whiteSpace
-  return v
-
--- No adaptar
-str2type :: String -> Type
-str2type str = read $ 'T' : strType
-  where
-    strType = filter (/= ':') str
+    *> char '\"'
+    *> many (alphaNum <|> space <|> oneOf symbols)
+    <* char '\"'
+    <* whiteSpace
 
 condition :: SymbolTable -> Parser (Condition, SymbolTable)
 condition symTable = do
@@ -593,67 +587,60 @@ condition symTable = do
   whiteSpace
   (s2, symTable3) <- statement symTable2
   whiteSpace
-  let conditionDef = Condition { ifCondition = e, thenStatement = s1, elseStatament = s2 }
+  let conditionDef = Condition {ifCondition = e, thenStatement = s1, elseStatament = s2}
   return (conditionDef, symTable3)
 
 boolExpression :: SymbolTable -> Parser (BoolExpression, SymbolTable)
 boolExpression symTable =
-  try (do
-    whiteSpace
-    (comp, symTable1) <- comparison symTable
-    whiteSpace
-    let boolExp = BoolComparison comp
-    return (boolExp, symTable1))
-    <|> try (do
-      whiteSpace
-      boolVal <- boolValue
-      whiteSpace
-      let boolExpr = BoolValue boolVal
-      let symTable' = insertBoolExpression (show boolExpr) boolExpr symTable
-      return (boolExpr, symTable'))
+  try
+    ( do
+        whiteSpace
+        (comp, symTable1) <- comparison symTable
+        whiteSpace
+        let boolExp = BoolComparison comp
+        return (boolExp, symTable1)
+    )
+    <|> try
+      ( do
+          whiteSpace
+          boolVal <- boolValue
+          whiteSpace
+          let boolExpr = BoolValue boolVal
+          let symTable' = insertBoolExpression (show boolExpr) boolExpr symTable
+          return (boolExpr, symTable')
+      )
 
 comparison :: SymbolTable -> Parser (Comparison, SymbolTable)
 comparison symTable =
-  try (do
-    bolcomp <- boolComparison
-    return (bolcomp, symTable))
-    <|> try (do
-      strComp <- strComparison
-      return (strComp, symTable))
-    <|> try (do
-      (taskComp, symTable') <- taskComparison symTable
-      return (taskComp, symTable'))
-    <|> try (do
-      (memberComp, symTable') <- memberComparison symTable
-      return (memberComp, symTable'))
+  try ((\r -> (r, symTable)) <$> boolComparison)
+    <|> try ((\r -> (r, symTable)) <$> strComparison)
+    <|> try (taskComparison symTable)
+    <|> try (memberComparison symTable)
 
--- No adaptar
 boolValue :: Parser Bool
 boolValue =
   try (True <$ string "True")
     <|> try (False <$ string "False")
 
--- No adaptar
 strComparison :: Parser Comparison
-strComparison = do
-  s1 <- literal
-  whiteSpace
-  cmp <- boolComparator
-  whiteSpace
-  s2 <- literal
-  whiteSpace
-  return $ ComparisonString s1 cmp s2
+strComparison =
+  ComparisonString
+    <$> literal
+    <* whiteSpace
+    <*> boolComparator
+    <* whiteSpace
+    <*> literal
+    <* whiteSpace
 
--- No adaptar
 boolComparison :: Parser Comparison
-boolComparison = do
-  s1 <- boolValue
-  whiteSpace
-  cmp <- boolComparator
-  whiteSpace
-  s2 <- boolValue
-  whiteSpace
-  return $ ComparisonBool s1 cmp s2
+boolComparison =
+  ComparisonBool
+    <$> boolValue
+    <* whiteSpace
+    <*> boolComparator
+    <* whiteSpace
+    <*> boolValue
+    <* whiteSpace
 
 taskComparison :: SymbolTable -> Parser (Comparison, SymbolTable)
 taskComparison symTable = do
@@ -691,20 +678,21 @@ mapCycle symTable = do
   whiteSpace
   _ <- string ")"
   whiteSpace
-  let cycleDef = Cycle { mapF = i, mapL = l }
+  let cycleDef = Cycle {mapF = i, mapL = l}
   let symTable2 = insertDoAssignment i TListString (SCycle cycleDef) symTable1
   return (cycleDef, symTable2)
 
 mapList :: SymbolTable -> Parser (CycleList, SymbolTable)
 mapList symTable =
-  try (do
-    (list, symTable') <- lists symTable
-    return (CycleList list, symTable'))
-    <|> try (do
-      id <- identifier
-      let cycleList = CycleId id
-      let symTable' = insertVariable id TListString Nothing symTable
-      return (cycleList, symTable'))
+  try
+    ((\(list, symTable') -> (CycleList list, symTable')) <$> lists symTable)
+    <|> try
+      ( do
+          id <- identifier
+          let cycleList = CycleId id
+          let symTable' = insertVariable id TListString Nothing symTable
+          return (cycleList, symTable')
+      )
 
 funcPattern :: SymbolTable -> Parser (FuncBody, SymbolTable)
 funcPattern symTable = do
@@ -758,27 +746,22 @@ defaultPattern symTable = do
 
 casePatternVal :: SymbolTable -> Parser (PatternCaseValue, SymbolTable)
 casePatternVal symTable =
-  try (do
-    val <- casePatternEmpty
-    return (val, symTable))
-    <|> try (do
-    (val, symTable') <- casePatternValue symTable
-    return (val, symTable'))
+  try ((\val -> (val, symTable)) <$> casePatternEmpty)
+    <|> try (casePatternValue symTable)
 
--- No adaptar
 casePatternEmpty :: Parser PatternCaseValue
-casePatternEmpty = do
-  whiteSpace
-  _ <- string "_"
-  whiteSpace
-  return PatternCaseEmpty
+casePatternEmpty =
+  PatternCaseEmpty
+    <$ whiteSpace
+    <* string "_"
+    <* whiteSpace
 
 casePatternValue :: SymbolTable -> Parser (PatternCaseValue, SymbolTable)
-casePatternValue symTable = do
-  whiteSpace
-  (v, symTable') <- value' symTable
-  whiteSpace
-  return (PatternCaseValue v, symTable')
+casePatternValue symTable =
+  (\(v, symTable') -> (PatternCaseValue v, symTable'))
+    <$ whiteSpace
+    <*> value' symTable
+    <* whiteSpace
 
 casePatternVals :: SymbolTable -> Parser ([PatternCaseValue], SymbolTable)
 casePatternVals = sepByAccum casePatternVal
@@ -801,53 +784,49 @@ funcCallParams = sepByAccum funcCallParam
 funcCallParam :: SymbolTable -> Parser (FuncCallParam, SymbolTable)
 funcCallParam symTable =
   try (funcCallParamVal symTable)
-  <|> try (funcCallParamFC symTable)
-  <|> try (funcCallId symTable)
+    <|> try (funcCallParamFC symTable)
+    <|> try (funcCallId symTable)
 
 funcCallParamVal :: SymbolTable -> Parser (FuncCallParam, SymbolTable)
-funcCallParamVal symbolTable = do
-  whiteSpace
-  (v, symTable1) <- value' symbolTable
-  whiteSpace
-  return (FuncCallParamValue v, symTable1)
+funcCallParamVal symbolTable =
+  (\(v, symTable') -> (FuncCallParamValue v, symTable'))
+    <$ whiteSpace
+    <*> value' symbolTable
+    <* whiteSpace
 
 funcCallParamFC :: SymbolTable -> Parser (FuncCallParam, SymbolTable)
-funcCallParamFC symTabl = do
-  whiteSpace
-  (v, symTabl1) <- funcCall symTabl
-  whiteSpace
-  return (FuncCallParam v, symTabl1)
+funcCallParamFC symTabl =
+  (\(v, symTable') -> (FuncCallParam v, symTable'))
+    <$ whiteSpace
+    <*> funcCall symTabl
+    <* whiteSpace
 
 funcCallId :: SymbolTable -> Parser (FuncCallParam, SymbolTable)
-funcCallId symTab = do
-  whiteSpace
-  id <- identifier
-  whiteSpace
-  return (FuncCallIdentifier id, symTab)
+funcCallId symTab =
+  (\v -> (FuncCallIdentifier v, symTab))
+    <$ whiteSpace
+    <*> identifier
+    <* whiteSpace
 
 doNotation :: SymbolTable -> Parser (DoNotation, SymbolTable)
-doNotation symTable = do
-  reserved "do"
-  whiteSpace
-  reservedOp "{"
-  whiteSpace
-  (c, symTable1) <- doStatements symTable
-  whiteSpace
-  reservedOp "}"
-  whiteSpace
-  return (DoNotation c, symTable1)
+doNotation symTable =
+  (\(v, symTable') -> (DoNotation v, symTable'))
+    <$ reserved "do"
+    <* whiteSpace
+    <* reservedOp "{"
+    <* whiteSpace
+    <*> doStatements symTable
+    <* whiteSpace
+    <* reservedOp "}"
+    <* whiteSpace
 
 doStatements :: SymbolTable -> Parser ([DoStatement], SymbolTable)
 doStatements = manyAccum doStatement
 
 doStatement :: SymbolTable -> Parser (DoStatement, SymbolTable)
 doStatement symTable =
-  try (do
-    (stamt, symTable') <- doAssignment symTable
-    return (stamt, symTable'))
-    <|> try (do
-      (stmt, symTable') <- doPrint symTable
-      return (stmt, symTable'))
+  try (doAssignment symTable)
+    <|> try (doPrint symTable)
 
 doAssignment :: SymbolTable -> Parser (DoStatement, SymbolTable)
 doAssignment symTable = do
@@ -867,24 +846,28 @@ doAssignment symTable = do
   return (assignment, symTable2)
 
 doPrint :: SymbolTable -> Parser (DoStatement, SymbolTable)
-doPrint symTable = do
-  whiteSpace
-  reserved "print"
-  whiteSpace
-  _ <- string "("
-  whiteSpace
-  (s, symtabl1) <- try (printStatement symTable) <|> try (printRef symTable)
-  whiteSpace
-  _ <- string ")"
-  whiteSpace
-  return (DoPrint s, symtabl1)
+doPrint symTable =
+  (\(v, symTable') -> (DoPrint v, symTable'))
+    <$ whiteSpace
+    <* reserved "print"
+    <* whiteSpace
+    <* string "("
+    <* whiteSpace
+    <*> (try (printStatement symTable) <|> try (printRef symTable))
+    <* whiteSpace
+    <* string ")"
+    <* whiteSpace
 
 printStatement :: SymbolTable -> Parser (Print, SymbolTable)
-printStatement symTable = do
-  (s, symTable') <- statement symTable
-  return (PrintStatement s, symTable')
+printStatement symTable =
+  (\(s, symTable') -> (PrintStatement s, symTable'))
+    <$> statement symTable
 
 printRef :: SymbolTable -> Parser (Print, SymbolTable)
 printRef symTable = do
-  i <- identifier
-  return (PrintRef i, symTable)
+  (\i -> (PrintRef i, symTable)) <$> identifier
+
+str2type :: String -> Type
+str2type str = read $ 'T' : strType
+  where
+    strType = filter (/= ':') str
