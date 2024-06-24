@@ -1,32 +1,13 @@
 module Main (main) where
 
-import Lexer
-import Lib
-  ( 
-    func,
-    funcBody,
-    funcParam,
-    funcParams,
-    member,
-    task',
-    taskMembers,
-    statement,
-    boolComparison,
-    literal,
-    takeTaskAttribute,
-    casePattern,
-    casePatternVal,
-    casePatternVals,
-    code,
-  )
-import Text.Parsec
+import HpParser (parseCode)
+import Text.Parsec ( parse )
 
 main :: IO ()
 main = do
-  -- let input = "title:StringId,nose:StringId"
-  input <- readFile "/home/fundacion/University/Fifth/ProgrammingLenguages/hufflepuff-own-language/hp/code"
-  -- print input
-  print $ parse code "Error" input
-
--- print input
--- print $ parse (sepBy (many (letter <|> space)) (char ',')) "Error" "StringIdSpace ,description,state,Tag"
+  path <- readFile "code.hp"
+  case parse parseCode "Error" path of
+    Left err -> print err
+    Right (parsedCode, finalSymbolTable) -> do
+      print parsedCode
+      print finalSymbolTable 
