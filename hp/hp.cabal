@@ -28,7 +28,10 @@ library
       AbstractSyntaxTree
       HpParser
       Lexer
+      PrintVisitor
+      SemanticAnalizer
       SymbolTable
+      Visitor
   other-modules:
       Paths_hp
   autogen-modules:
