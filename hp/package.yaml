@@ -26,6 +26,7 @@ dependencies:
 - parsec3-numbers
 - containers
 - mtl
+- HUnit 
 
 ghc-options:
 - -Wall
