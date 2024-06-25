@@ -20,3 +20,17 @@ testParseTakeTaskAttributeLiteral = TestCase $ do
             assertEqual "Should parse TakeTaskAttributeLiteral correctly"
                         "taskTitle" identifier
         _ -> assertFailure "Failed to parse TakeTaskAttributeLiteral"
+
+
+tests :: Test
+tests = TestList
+    [ testParseTakeTaskAttribute
+    , testParseTakeTaskAttributeLiteral
+    ]
+
+main :: IO ()
+main = do
+    counts <- runTestTT tests
+    if errors counts + failures counts == 0
+        then putStrLn "All tests passed."
+        else putStrLn "Some tests failed."

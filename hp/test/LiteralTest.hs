@@ -41,3 +41,18 @@ testParseLTakeMemberAttribute = TestCase $ do
             assertEqual "Should parse LTakeMemberAttribute correctly"
                         "memberId" identifier
         _ -> assertFailure "Failed to parse LTakeMemberAttribute"
+
+tests :: Test
+tests = TestList
+    [ testParseLStringIdentifier
+    , testParseLString
+    , testParseLTakeTaskAttribute
+    , testParseLTakeMemberAttribute
+    ]
+
+main :: IO ()
+main = do
+    counts <- runTestTT tests
+    if errors counts + failures counts == 0
+        then putStrLn "All tests passed."
+        else putStrLn "Some tests failed."
