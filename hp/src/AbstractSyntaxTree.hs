@@ -7,11 +7,11 @@ data Literal
   | LString StringFree
   | LTakeTaskAttribute TakeTaskAttributeLiteral
   | LTakeMemberAttribute TakeMemberAttribute
-  deriving (Show)
+  deriving (Show, Eq)
 
-newtype StringIdentifier = StringId String deriving (Show)
+newtype StringIdentifier = StringId String deriving (Show, Eq)
 
-newtype StringFree = String String deriving (Show)
+newtype StringFree = String String deriving (Show, Eq)
 
 type Identifier = String
 
@@ -31,7 +31,7 @@ data Type
   | TListBool
   | TListMember
   | TListTag
-  deriving (Show, Read)
+  deriving (Show, Read, Eq)
 
 data Value
   = ValLiteral Literal
@@ -40,10 +40,10 @@ data Value
   | ValMember Member
   | ValList List
   | ValBool Bool
-  deriving (Show)
+  deriving (Show, Eq)
 
 -- TASK DATA
-data Tag = Tag StringIdentifier | NoTag deriving (Show)
+data Tag = Tag StringIdentifier | NoTag deriving (Show, Eq)
 
 type TaskState = StringIdentifier
 
@@ -55,58 +55,58 @@ data Task = Task
     tag :: TagTask,
     subTasks :: SubTasksTask
   }
-  deriving (Show)
+  deriving (Show, Eq)
 
 -- TASK ATTRIBUTTE
 data TitleTask
   = TaskValueTitle StringFree
   | TaskIdentifierTitle Identifier
   | TaskTakeTitle Identifier
-  deriving (Show)
+  deriving (Show, Eq)
 
 data DescriptionTask
   = TaskValueDescription StringFree
   | TaskIdentifierDescription Identifier
   | TaskTakeDescription Identifier
-  deriving (Show)
+  deriving (Show, Eq)
 
 data StateTask
   = TaskValueState TaskState
   | TaskIdentifierState Identifier
   | TaskTakeState Identifier
-  deriving (Show)
+  deriving (Show, Eq)
 
 data TagTask
   = TaskValueTag Tag
   | TaskIdentifierTag Identifier
   | TaskTakeTag Identifier
-  deriving (Show)
+  deriving (Show, Eq)
 
 data MembersTask
   = TaskValueMembers List
   | TaskIdentifierMembers Identifier
   | TaskTakeMembers Identifier
-  deriving (Show)
+  deriving (Show, Eq)
 
 data SubTasksTask
   = TaskValueSubTasks List
   | TaskIdentifierSubTasks Identifier
   | TaskTakeSubTasks Identifier
-  deriving (Show)
+  deriving (Show, Eq)
 
 -- TAKE TASK ATTRIBUTE
 data TakeTaskAttribute
   = TakeTaskAttributeStrings TakeTaskAttributeLiteral
   | TakeTaskAttributeMembers Identifier
   | TakeTaskAttributeSubTasks Identifier
-  deriving (Show)
+  deriving (Show, Eq)
 
 data TakeTaskAttributeLiteral
   = TakeTaskAttributeTitle Identifier
   | TakeTaskAttributeDescription Identifier
   | TakeTaskAttributeState Identifier
   | TakeTaskAttributeTag Identifier
-  deriving (Show)
+  deriving (Show, Eq)
 
 -- MEMBER DATA
 type Role = StringIdentifier
@@ -119,24 +119,24 @@ data Member
         role :: MemberRole
       }
   | NoAssigned
-  deriving (Show)
+  deriving (Show, Eq)
 
 data MemberName
   = MemberValueName Name
   | MemberIdentifierName Identifier
   | MemberTakeName Identifier
-  deriving (Show)
+  deriving (Show, Eq)
 
 data MemberRole
   = MemberValueRole Role
   | MemberIdentifierRole Identifier
   | MemberTakeRole Identifier
-  deriving (Show)
+  deriving (Show, Eq)
 
 data TakeMemberAttribute
   = TakeMemberAttributeName Identifier
   | TakeMemberAttributeRole Identifier
-  deriving (Show)
+  deriving (Show, Eq)
 
 -- LIST DATA
 data List
@@ -148,41 +148,41 @@ data List
   | ListState [TaskState]
   | ListMember [Member]
   | ListList [List]
-  deriving (Show)
+  deriving (Show, Eq)
 
 -- FUNCTION
-data Func = Func Identifier Type [FuncParam] FuncBody deriving (Show)
+data Func = Func Identifier Type [FuncParam] FuncBody deriving (Show, Eq)
 
-data FuncParam = FuncParam Identifier Type deriving (Show, Read)
+data FuncParam = FuncParam Identifier Type deriving (Show, Read, Eq)
 
 data FuncBody
   = FuncReturn Statement
   | FuncPattern [PatternCase] PatternDefault
-  deriving (Show)
+  deriving (Show, Eq)
 
-data PatternCase = PatternCase [PatternCaseValue] Statement deriving (Show)
+data PatternCase = PatternCase [PatternCaseValue] Statement deriving (Show, Eq)
 
 data PatternCaseValue
   = PatternCaseValue Value
   | PatternCaseEmpty
-  deriving (Show)
+  deriving (Show, Eq)
 
-newtype PatternDefault = PatternDefault Statement deriving (Show)
+newtype PatternDefault = PatternDefault Statement deriving (Show, Eq)
 
 -- FUNCTION CALL
-data FuncCall = FuncCall Identifier [FuncCallParam] deriving (Show)
+data FuncCall = FuncCall Identifier [FuncCallParam] deriving (Show, Eq)
 
 data FuncCallParam
   = FuncCallParamValue Value
   | FuncCallParam FuncCall
   | FuncCallIdentifier Identifier
-  deriving (Show)
+  deriving (Show, Eq)
 
 -- BOOLEAN EXPRESSION
 data BoolExpression
   = BoolValue Bool
   | BoolComparison Comparison
-  deriving (Show)
+  deriving (Show, Eq)
 
 data BoolComparator
   = Eq
@@ -193,23 +193,22 @@ data BoolComparator
   | Ge
   | And
   | Or
-  deriving (Show)
+  deriving (Show, Eq)
 
 data Comparison
   = ComparisonString Literal BoolComparator Literal
   | ComparisonBool Bool BoolComparator Bool
   | ComparisonTask Task BoolComparator Task
   | ComparisonMember Member BoolComparator Member
-  deriving (Show)
+  deriving (Show, Eq)
 
 -- CONDITION STATEMENT
-
 data Condition = Condition
   { ifCondition :: BoolExpression,
     thenStatement :: Statement,
     elseStatament :: Statement
   }
-  deriving (Show)
+  deriving (Show, Eq)
 
 -- CYCLE STATEMENT
 type MapFunctionRef = Identifier
@@ -218,12 +217,12 @@ data Cycle = Cycle
   { mapF :: MapFunctionRef,
     mapL :: CycleList
   }
-  deriving (Show)
+  deriving (Show, Eq)
 
 data CycleList
   = CycleList List
   | CycleId Identifier
-  deriving (Show)
+  deriving (Show, Eq)
 
 -- STATEMENT
 data Statement
@@ -234,24 +233,24 @@ data Statement
   | SBoolExp BoolExpression
   | SBoolCondition Condition
   | SCycle Cycle
-  deriving (Show)
+  deriving (Show, Eq)
 
 -- DO NOTATION
 newtype DoNotation
   = DoNotation [DoStatement]
-  deriving (Show)
+  deriving (Show, Eq)
 
 data DoStatement
   = DoAssignment Identifier Type Statement
   | DoPrint Print
-  deriving (Show)
+  deriving (Show, Eq)
 
 data Print
   = PrintRef Identifier
   | PrintStatement Statement
-  deriving (Show)
+  deriving (Show, Eq)
 
 -- CODE
 data Code
   = Code [Func] DoNotation
-  deriving (Show)
+  deriving (Show, Eq)
