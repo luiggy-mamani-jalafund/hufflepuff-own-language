@@ -10,4 +10,5 @@ main = do
     Left err -> print err
     Right (parsedCode, finalSymbolTable) -> do
       print parsedCode
+      print "----"
       print finalSymbolTable 

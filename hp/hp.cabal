@@ -28,9 +28,9 @@ library
       AbstractSyntaxTree
       HpParser
       Lexer
-      PrintVisitor
-      SemanticAnalizer
+      SemanticAnalyzer
       SymbolTable
+      TestVisitor
       Visitor
   other-modules:
       Paths_hp

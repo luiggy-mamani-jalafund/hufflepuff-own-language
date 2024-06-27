@@ -79,9 +79,14 @@ func symTable = do
   whiteSpace
   _ <- string "}"
   whiteSpace
-  let func = Func funId (str2type funType) params body
-  let symTable''' = insertFunction funId (str2type funType) params body symTable''
-  return (func, symTable''')
+
+  case lookupSymbol funId symTable'' of
+    Just _  -> fail $ "Function " ++ funId ++ ", already exists"
+    Nothing -> do
+      let func = Func funId (str2type funType) params body
+      let symTable''' = insertFunction funId (str2type funType) params body symTable''
+      return (func, symTable''')
+
 
 funcParam :: SymbolTable -> Parser (FuncParam, SymbolTable)
 funcParam symTable = do
@@ -193,6 +198,7 @@ task' symTable = do
   whiteSpace
   _ <- string "}"
   whiteSpace
+
   let task =
         Task
           { title = t,
@@ -202,8 +208,15 @@ task' symTable = do
             tag = tg,
             subTasks = st
           }
-  let symTable7 = insertTask (show t) task symTable6 -- Define identifier type in future
-  return (task, symTable7)
+
+  let taskId = show t -- Define identifier type in future
+
+  case lookupSymbol taskId symTable6 of
+    Just _  -> fail $ "Task " ++ taskId ++ ", already exists"
+    Nothing -> do
+      let symTable7 = insertTask taskId task symTable6
+      return (task, symTable7)
+
 
 taskTitle :: SymbolTable -> Parser (TitleTask, SymbolTable)
 taskTitle symTable =
@@ -316,7 +329,11 @@ listOfMembers symTable =
     <* string "]"
     <* whiteSpace
   where
-    newSymTable lt = insertList (show lt) lt
+    newSymTable lt symTable' =
+      let listId = show lt
+      in case lookupSymbol listId symTable' of
+           Just _  -> error $ "Member list " ++ listId ++ " already exists."
+           Nothing -> insertList listId lt symTable'
     list = ListMember
 
 listOfTasks :: SymbolTable -> Parser (List, SymbolTable)
@@ -333,7 +350,12 @@ listOfTasks symTable =
     <* whiteSpace
   where
     lt = ListTask
-    newSymTable t = insertList (show t) (lt t)
+    newSymTable t symTable' =
+      let listId = show (lt t)
+      in case lookupSymbol listId symTable' of
+           Just _  -> error $ "Task list " ++ listId ++ " already exists."
+           Nothing -> insertList listId (lt t) symTable'
+
 
 listOfTags :: SymbolTable -> Parser (List, SymbolTable)
 listOfTags symTa =
@@ -349,7 +371,12 @@ listOfTags symTa =
     <* whiteSpace
   where
     lt = ListTag
-    newSymTable t = insertList (show t) (lt t)
+    newSymTable t symTa' =
+      let listId = show (lt t)
+      in case lookupSymbol listId symTa' of
+           Just _  -> error $ "Tags list " ++ listId ++ " already exists."
+           Nothing -> insertList listId (lt t) symTa'
+
 
 listOfStates :: SymbolTable -> Parser (List, SymbolTable)
 listOfStates symTa =
@@ -365,7 +392,12 @@ listOfStates symTa =
     <* whiteSpace
   where
     ls = ListState
-    newSymTable s = insertList (show s) (ls s)
+    newSymTable s symTa' =
+      let listId = show (ls s)
+      in case lookupSymbol listId symTa' of
+           Just _  -> error $ "State list " ++ listId ++ " already exists."
+           Nothing -> insertList listId (ls s) symTa'
+
 
 listOfBool :: SymbolTable -> Parser (List, SymbolTable)
 listOfBool symTa =
@@ -381,7 +413,12 @@ listOfBool symTa =
     <* whiteSpace
   where
     lb = ListBool
-    newSymTable b = insertList (show b) (lb b)
+    newSymTable b symTa' =
+      let listId = show (lb b)
+      in case lookupSymbol listId symTa' of
+           Just _  -> error $ "Bool list " ++ listId ++ " already exists in the symbol table."
+           Nothing -> insertList listId (lb b) symTa'
+
 
 tag' :: Parser Tag
 tag' =
@@ -414,16 +451,21 @@ member symTable =
 
     _ <- string "}"
     whiteSpace
-    let membetDef = Member {name = n, role = r}
-    let symTable3 = insertMember (show n) membetDef symTable2
 
-    return (membetDef, symTable3)
-    <|> ( do
-            whiteSpace
-            _ <- string "NoAssigned"
-            whiteSpace
-            return (NoAssigned, symTable)
-        )
+    let memberDef = Member {name = n, role = r}
+    let memberId = show n
+    
+    case lookupSymbol memberId symTable2 of
+      Just _  -> error $ "Member " ++ memberId ++ " already exists."
+      Nothing -> do
+        let symTable3 = insertMember memberId memberDef symTable2
+        return (memberDef, symTable3)
+  <|> do
+        whiteSpace
+        _ <- string "NoAssigned"
+        whiteSpace
+        return (NoAssigned, symTable)
+
 
 takeMemberAttribute :: Parser TakeMemberAttribute
 takeMemberAttribute = try tmaName <|> try tmaRole
