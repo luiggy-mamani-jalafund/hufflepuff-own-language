@@ -350,11 +350,7 @@ listOfTasks symTable =
     <* whiteSpace
   where
     lt = ListTask
-    newSymTable t symTable' =
-      let listId = show (lt t)
-      in case lookupSymbol listId symTable' of
-           Just _  -> error $ "Task list " ++ listId ++ " already exists."
-           Nothing -> insertList listId (lt t) symTable'
+    newSymTable t = insertList (show t) (lt t)
 
 
 listOfTags :: SymbolTable -> Parser (List, SymbolTable)
@@ -415,13 +411,9 @@ listOfBool symTa =
     lb = ListBool
     newSymTable b symTa' =
       let listId = show (lb b)
-          pos = pos
       in case lookupSymbol listId symTa' of
            Just _  -> error $ "Bool list " ++ listId ++ " already exists."
            Nothing -> insertList listId (lb b) symTa'
-
-pos :: Monad m => ParsecT s u m SourcePos  -- Specify the type of pos
-pos = getPosition
 
 tag' :: Parser Tag
 tag' =
@@ -458,11 +450,10 @@ member symTable =
     let memberDef = Member {name = n, role = r}
     let memberId = show n
     
-    pos <- getPosition
 
     case lookupSymbol memberId symTable2 of
       Just _  -> error $ "Member " ++ memberId ++
-                  " already exists. line " ++ show (sourceLine pos) ++ ", colum " ++ show (sourceColumn pos)
+                  " already exists. line "
       Nothing -> do
         let symTable3 = insertMember memberId memberDef symTable2
         return (memberDef, symTable3)
@@ -539,22 +530,20 @@ memberName symTable =
   try ((\tn -> (MemberTakeName tn, symTable)) <$> takeMemberAttributeName)
     <|> try
       ( do
-          pos <- getPosition
           v <- strFree
           case lookupSymbol v symTable of
             Just _  -> fail $ "Literal " ++ v ++
-                        " already exists. line " ++ show (sourceLine pos) ++ ", colum " ++ show (sourceColumn pos)
+                        " already exists. line "
             Nothing ->
               let symTable' = insertLiteral v (LString (String v)) symTable
                in return (MemberValueName (String v), symTable')
       )
     <|> try
       ( do
-          pos <- getPosition
           id <- identifier
           case lookupSymbol id symTable of
             Just _  -> fail $ "Identifier " ++ id ++
-                        " already exists. line " ++ show (sourceLine pos) ++ ", colum " ++ show (sourceColumn pos)
+                        " already exists. line "
             Nothing ->
               let symTable' = insertVariable id TString Nothing symTable
               in return (MemberIdentifierName id, symTable')
@@ -565,26 +554,18 @@ memberRole :: SymbolTable -> Parser (MemberRole, SymbolTable)
 memberRole symTable =
   try ((\tr -> (tr, symTable)) . MemberTakeRole <$> takeMemberAttributeRole)
     <|> try
-      ( do
-          pos <- getPosition
-          v <- strId
-          case lookupSymbol v symTable of
-            Just _  -> fail $ "Literal " ++ v ++
-                        " already exists. line " ++ show (sourceLine pos) ++ ", colum " ++ show (sourceColumn pos)
-            Nothing ->
-              let symTable' = insertLiteral v (LStringIdentifier (StringId v)) symTable
-              in return (MemberValueRole (StringId v), symTable')
+      ( ( \v ->
+            let symTable' = insertLiteral v (LStringIdentifier (StringId v)) symTable
+             in (MemberValueRole (StringId v), symTable')
+        )
+          <$> strId
       )
     <|> try
-      ( do
-          pos <- getPosition
-          id <- identifier
-          case lookupSymbol id symTable of
-            Just _  -> fail $ "Identifier " ++ id ++
-                        " already exists. line " ++ show (sourceLine pos) ++ ", colum " ++ show (sourceColumn pos)
-            Nothing ->
-              let symTable' = insertVariable id TStringId Nothing symTable
-              in return (MemberIdentifierRole id, symTable')
+      ( ( \id ->
+            let symTable' = insertVariable id TStringId Nothing symTable
+             in (MemberIdentifierRole id, symTable')
+        )
+          <$> identifier
       )
 
 
@@ -669,10 +650,9 @@ boolExpression symTable =
           boolVal <- boolValue
           whiteSpace
           let boolExpr = BoolValue boolVal
-          pos <- getPosition
           case lookupSymbol (show boolExpr) symTable of
             Just _  -> fail $ "Boolean expression " ++ show boolExpr ++
-                        " already exists. line " ++ show (sourceLine pos) ++ ", colum " ++ show (sourceColumn pos)
+                        " already exists. line "
             Nothing ->
               let symTable' = insertBoolExpression (show boolExpr) boolExpr symTable
               in return (boolExpr, symTable')
@@ -748,10 +728,9 @@ mapCycle symTable = do
   _ <- string ")"
   whiteSpace
   let cycleDef = Cycle {mapF = i, mapL = l}
-  pos <- getPosition
   case lookupSymbol i symTable1 of
     Just _  -> fail $ "Identifier " ++ i ++
-                " already exists. line " ++ show (sourceLine pos) ++ ", colum " ++ show (sourceColumn pos)
+                " already exists. line "
     Nothing ->
       let symTable2 = insertDoAssignment i TListString (SCycle cycleDef) symTable1
       in return (cycleDef, symTable2)
@@ -762,11 +741,10 @@ mapList symTable =
     ((\(list, symTable') -> (CycleList list, symTable')) <$> lists symTable)
     <|> try
       ( do
-          pos <- getPosition
           id <- identifier
           case lookupSymbol id symTable of
             Just _  -> fail $ "Identifier " ++ id ++
-                        " already exists. line " ++ show (sourceLine pos) ++ ", colum " ++ show (sourceColumn pos)
+                        " already exists. line "
             Nothing ->
               let cycleList = CycleId id
                   symTable' = insertVariable id TListString Nothing symTable
@@ -922,13 +900,12 @@ doAssignment symTable = do
   (s, symTable1) <- statement symTable
   whiteSpace
   let assignment = DoAssignment i (str2type t) s
-  pos <- getPosition
   case lookupSymbol i symTable1 of
     Just _  -> fail $ "Identifier " ++ i ++
-                " already exists. line " ++ show (sourceLine pos) ++ ", colum " ++ show (sourceColumn pos)
+                " already exists. line "
     Nothing ->
       let symTable2 = insertDoAssignment i (str2type t) s symTable1
-       in return (assignment, symTable2)
+      in return (assignment, symTable2)
 
 
 doPrint :: SymbolTable -> Parser (DoStatement, SymbolTable)

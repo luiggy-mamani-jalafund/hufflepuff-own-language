@@ -26,46 +26,73 @@ data SymbolInfo
     | DoAssignmentInfo Identifier Type Statement
     deriving (Show)
 
-newtype SymbolTable = SymbolTable (M.Map Identifier SymbolInfo)
+newtype SymbolTable = SymbolTable [M.Map Identifier SymbolInfo]
     deriving (Show)
 
 emptyTable :: SymbolTable
-emptyTable = SymbolTable M.empty
+emptyTable = SymbolTable [M.empty]
 
 insertVariable :: Identifier -> Type -> Maybe Value -> SymbolTable -> SymbolTable
-insertVariable name typ val (SymbolTable table) = 
-    SymbolTable (M.insert name (VariableInfo name typ val) table)
+insertVariable name typ val (SymbolTable (current:rest)) =
+    SymbolTable (M.insert name (VariableInfo name typ val) current:rest)
+insertVariable _ _ _ st = st
 
 insertFunction :: Identifier -> Type -> [FuncParam] -> FuncBody -> SymbolTable -> SymbolTable
-insertFunction name retType params body (SymbolTable table) =
-    SymbolTable (M.insert name (FunctionInfo name retType params body) table)
+insertFunction name retType params body (SymbolTable (current:rest)) =
+    SymbolTable (M.insert name (FunctionInfo name retType params body) current:rest)
+insertFunction _ _ _ _ st = st
 
 insertTask :: Identifier -> Task -> SymbolTable -> SymbolTable
-insertTask name task (SymbolTable table) =
-    SymbolTable (M.insert name (TaskInfo name task) table)
+insertTask name task (SymbolTable (current:rest)) =
+    SymbolTable (M.insert name (TaskInfo name task) current:rest)
+insertTask _ _ st = st
 
 insertMember :: Identifier -> Member -> SymbolTable -> SymbolTable
-insertMember name member (SymbolTable table) =
-    SymbolTable (M.insert name (MemberInfo name member) table)
+insertMember name member (SymbolTable (current:rest)) =
+    SymbolTable (M.insert name (MemberInfo name member) current:rest)
+insertMember _ _ st = st
 
 insertList :: Identifier -> List -> SymbolTable -> SymbolTable
-insertList name list (SymbolTable table) =
-    SymbolTable (M.insert name (ListInfo name list) table)
+insertList name list (SymbolTable (current:rest)) =
+    SymbolTable (M.insert name (ListInfo name list) current:rest)
+insertList _ _ st = st
 
 insertBoolExpression :: Identifier -> BoolExpression -> SymbolTable -> SymbolTable
-insertBoolExpression name boolExpr (SymbolTable table) =
-    SymbolTable (M.insert name (BoolExpressionInfo boolExpr) table)
+insertBoolExpression name boolExpr (SymbolTable (current:rest)) =
+    SymbolTable (M.insert name (BoolExpressionInfo boolExpr) current:rest)
+insertBoolExpression _ _ st = st
 
 insertLiteral :: Identifier -> Literal -> SymbolTable -> SymbolTable
-insertLiteral name lit (SymbolTable table) =
-    SymbolTable (M.insert name (LiteralInfo lit) table)
+insertLiteral name lit (SymbolTable (current:rest)) =
+    SymbolTable (M.insert name (LiteralInfo lit) current:rest)
+insertLiteral _ _ st = st
 
 insertDoAssignment :: Identifier -> Type -> Statement -> SymbolTable -> SymbolTable
-insertDoAssignment name typ stmt (SymbolTable table) = 
-    SymbolTable (M.insert name (DoAssignmentInfo name typ stmt) table)
+insertDoAssignment name typ stmt (SymbolTable (current:rest)) =
+    SymbolTable (M.insert name (DoAssignmentInfo name typ stmt) current:rest)
+insertDoAssignment _ _ _ st = st
 
 lookupSymbol :: Identifier -> SymbolTable -> Maybe SymbolInfo
-lookupSymbol name (SymbolTable table) = M.lookup name table
+lookupSymbol name (SymbolTable scopes) = lookupInScopes name scopes
+  where
+    lookupInScopes _ [] = Nothing
+    lookupInScopes name (scope:rest) =
+        case M.lookup name scope of
+            Just info -> Just info
+            Nothing -> lookupInScopes name rest
 
 removeSymbol :: Identifier -> SymbolTable -> SymbolTable
-removeSymbol name (SymbolTable table) = SymbolTable (M.delete name table)
+removeSymbol name (SymbolTable (current:rest)) = SymbolTable (M.delete name current : rest)
+removeSymbol _ st = st
+
+
+enterScope :: SymbolTable -> SymbolTable
+enterScope (SymbolTable scopes) = SymbolTable (M.empty : scopes)
+
+exitScope :: SymbolTable -> SymbolTable
+exitScope (SymbolTable (_:rest)) = SymbolTable rest
+exitScope st = st
+
+lookupCurrentScope :: Identifier -> SymbolTable -> Maybe SymbolInfo
+lookupCurrentScope name (SymbolTable (current:_)) = M.lookup name current
+lookupCurrentScope _ _ = Nothing
