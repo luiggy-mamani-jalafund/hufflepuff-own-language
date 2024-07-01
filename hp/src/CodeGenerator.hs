@@ -71,11 +71,31 @@ generateFuncParam fp = ""
 generateFuncBody :: FuncBody -> String
 generateFuncBody fb = ""
 
-generatePatternCase :: PatternCase -> String
-generatePatternCase pc = ""
+generatePatternCase :: PatternCase -> String -> [String] -> String
+generatePatternCase (PatternCase patternVals statement) condition paramsIds =
+  condition
+    ++ " ("
+    ++ generatePatternCase' "" patternVals paramsIds
+    ++ ") { return "
+    ++ generateStatement statement
+    ++ "}"
 
-generatePatternCaseValue :: PatternCaseValue -> String
-generatePatternCaseValue pcv = ""
+generatePatternCase' :: String -> [PatternCaseValue] -> [String] -> String
+generatePatternCase' acc [] [] = acc
+generatePatternCase' acc [x] [y] = acc ++ generatePatternCaseValue x y
+generatePatternCase' acc (x : xs) (y : ys) =
+  let concatCond = if not (null xs) && not (isEmptyPatternCase x) then " && " else ""
+   in generatePatternCase' (acc ++ generatePatternCaseValue x y ++ concatCond) xs ys
+generatePatternCase' acc _ [] = acc
+generatePatternCase' acc [] _ = acc
+
+isEmptyPatternCase :: PatternCaseValue -> Bool
+isEmptyPatternCase PatternCaseEmpty = True
+isEmptyPatternCase _ = False
+
+generatePatternCaseValue :: PatternCaseValue -> String -> String
+generatePatternCaseValue (PatternCaseValue v) cv = cv ++ "===" ++ generateValue v
+generatePatternCaseValue PatternCaseEmpty _ = ""
 
 generatePatternDefault :: PatternDefault -> String
 generatePatternDefault pd = ""
