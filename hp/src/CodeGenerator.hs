@@ -9,8 +9,11 @@ generateLiteral (LString sf) = generateStringFree sf
 generateLiteral (LTakeTaskAttribute tta) = generateTakeTaskAttributeLiteral tta
 generateLiteral (LTakeMemberAttribute tma) = generateTakeMemberAttribute tma
 
+generateIdentifier :: Identifier -> String
+generateIdentifier i = i
+
 generateStringIdentifier :: StringIdentifier -> String
-generateStringIdentifier (StringId si) = si
+generateStringIdentifier (StringId si) = "\"" ++ si ++ "\""
 
 generateStringFree :: StringFree -> String
 generateStringFree (String sf) = "\"" ++ sf ++ "\""
@@ -52,16 +55,22 @@ generateTakeTaskAttributeLiteral :: TakeTaskAttributeLiteral -> String
 generateTakeTaskAttributeLiteral ttal = ""
 
 generateMember :: Member -> String
-generateMember m = ""
+generateMember (Member name role) = "new Member(" ++ generateMemberName name ++ ", " ++ generateMemberRole role ++ ")"
+generateMember NoAssigned = "new Member('NoAssigned', 'No Role')"
 
 generateMemberName :: MemberName -> String
-generateMemberName mn = ""
+generateMemberName (MemberValueName memberName) = generateStringFree memberName
+generateMemberName (MemberIdentifierName id) = generateIdentifier id
+generateMemberName (MemberTakeName id) = generateTakeMemberAttribute (TakeMemberAttributeName id)
 
 generateMemberRole :: MemberRole -> String
-generateMemberRole mr = ""
+generateMemberRole (MemberValueRole memberRole) = generateStringIdentifier memberRole
+generateMemberRole (MemberIdentifierRole id) = generateIdentifier id
+generateMemberRole (MemberTakeRole id) = generateTakeMemberAttribute (TakeMemberAttributeRole id)
 
 generateTakeMemberAttribute :: TakeMemberAttribute -> String
-generateTakeMemberAttribute tma = ""
+generateTakeMemberAttribute (TakeMemberAttributeName id) = generateIdentifier (id ++ ".name")
+generateTakeMemberAttribute (TakeMemberAttributeRole id) = generateIdentifier (id ++ ".role")
 
 generateList :: List -> String
 generateList l = ""
