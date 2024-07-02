@@ -24,10 +24,10 @@ data SymbolInfo
     | BoolExpressionInfo BoolExpression
     | LiteralInfo Literal
     | DoAssignmentInfo Identifier Type Statement
-    deriving (Show)
+    deriving (Show, Eq)
 
 newtype SymbolTable = SymbolTable (M.Map Identifier SymbolInfo)
-    deriving (Show)
+    deriving (Show, Eq)
 
 emptyTable :: SymbolTable
 emptyTable = SymbolTable M.empty
