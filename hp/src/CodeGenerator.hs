@@ -63,6 +63,9 @@ generateTakeMemberAttribute tma = ""
 generateList :: List -> String
 generateList l = ""
 
+generateFuncs :: [Func] -> String
+generateFuncs = foldl (\acc f -> acc ++ generateFunc f ++ "\n\n") ""
+
 generateFunc :: Func -> String
 generateFunc (Func identifier _ params body) =
   "const "
@@ -71,7 +74,6 @@ generateFunc (Func identifier _ params body) =
     ++ generateFuncParams params ""
     ++ ") => \n"
     ++ generateFuncBody body (map (\(FuncParam ident _) -> ident) params)
-    ++ "\n\n"
 
 generateFuncParams :: [FuncParam] -> String -> String
 generateFuncParams [] acc = acc
@@ -84,8 +86,13 @@ generateFuncParam (FuncParam identifier _) = identifier
 
 generateFuncBody :: FuncBody -> [String] -> String
 generateFuncBody (FuncReturn statement) _ = generateStatement statement
+generateFuncBody (FuncPattern [] (PatternDefault statement)) _ =
+  generateStatement statement
 generateFuncBody (FuncPattern cases caseDef) paramsIds =
-  "{ \n\t" ++ generatePatternCases cases paramsIds "" ++ generatePatternDefault caseDef ++ "\n}"
+  "{ \n\t"
+    ++ generatePatternCases cases paramsIds ""
+    ++ generatePatternDefault caseDef
+    ++ "\n}"
 
 generatePatternCases :: [PatternCase] -> [String] -> String -> String
 generatePatternCases [] _ acc = acc
