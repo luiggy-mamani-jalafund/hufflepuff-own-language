@@ -89,18 +89,17 @@ generateTakeTaskAttributeLiteral :: TakeTaskAttributeLiteral -> String
 generateTakeTaskAttributeLiteral ttal = ""
 
 generateMember :: Member -> String
-generateMember (Member name role) = "new Member(" ++ generateMemberName name ++ ", " ++ generateMemberRole role ++ ")"
-generateMember NoAssigned = "new Member('NoAssigned', 'No Role')"
+generateMember (Member name role) = ""
 
 generateMemberName :: MemberName -> String
-generateMemberName (MemberValueName memberName) = generateStringFree memberName
-generateMemberName (MemberIdentifierName id) = generateIdentifier id
-generateMemberName (MemberTakeName id) = generateIdentifier id
+generateMemberName (MemberValueName memberName) = ""
+generateMemberName (MemberIdentifierName id) = ""
+generateMemberName (MemberTakeName id) = ""
 
 generateMemberRole :: MemberRole -> String
-generateMemberRole (MemberValueRole memberRole) = generateStringIdentifier memberRole
-generateMemberRole (MemberIdentifierRole id) = generateIdentifier id
-generateMemberRole (MemberTakeRole id) = generateIdentifier id
+generateMemberRole (MemberValueRole memberRole) = ""
+generateMemberRole (MemberIdentifierRole id) = ""
+generateMemberRole (MemberTakeRole id) = ""
 
 generateTakeMemberAttribute :: TakeMemberAttribute -> String
 generateTakeMemberAttribute tma = ""
