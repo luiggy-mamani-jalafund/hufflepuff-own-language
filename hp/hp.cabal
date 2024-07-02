@@ -71,6 +71,7 @@ test-suite hp-test
   main-is: Spec.hs
   other-modules:
       MemberSpec
+      TaskSpec
       Paths_hp
   autogen-modules:
       Paths_hp

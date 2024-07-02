@@ -203,7 +203,6 @@ data Comparison
   deriving (Show, Eq)
 
 -- CONDITION STATEMENT
-
 data Condition = Condition
   { ifCondition :: BoolExpression,
     thenStatement :: Statement,
