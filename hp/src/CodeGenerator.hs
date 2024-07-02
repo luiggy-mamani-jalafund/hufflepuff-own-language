@@ -1,6 +1,7 @@
 module CodeGenerator where
 
 import AbstractSyntaxTree
+import Data.Char
 
 generateLiteral :: Literal -> String
 generateLiteral literal = ""
@@ -70,6 +71,7 @@ generateFunc (Func identifier _ params body) =
     ++ generateFuncParams params ""
     ++ ") => \n"
     ++ generateFuncBody body (map (\(FuncParam ident _) -> ident) params)
+    ++ "\n\n"
 
 generateFuncParams :: [FuncParam] -> String -> String
 generateFuncParams [] acc = acc
@@ -133,17 +135,38 @@ generateFuncCall fc = ""
 generateFuncCallParam :: FuncCallParam -> String
 generateFuncCallParam fcp = ""
 
+generateBoolValue :: Bool -> [Char]
+generateBoolValue b = let str = show b in toLower (head str) : tail str
+
 generateBoolExpression :: BoolExpression -> String
-generateBoolExpression be = ""
+generateBoolExpression (BoolValue b) = generateBoolValue b
+generateBoolExpression (BoolComparison c) = generateComparison c
 
 generateBoolComparator :: BoolComparator -> String
 generateBoolComparator bc = ""
 
+comparisonTemplate :: String -> BoolComparator -> String -> String
+comparisonTemplate s1 cmp s2 = s1 ++ " " ++ generateBoolComparator cmp ++ " " ++ s2
+
 generateComparison :: Comparison -> String
-generateComparison c = ""
+generateComparison (ComparisonBool s1 cmp s2) =
+  comparisonTemplate (generateBoolValue s1) cmp (generateBoolValue s2)
+generateComparison (ComparisonString s1 cmp s2) =
+  comparisonTemplate (generateLiteral s1) cmp (generateLiteral s2)
+generateComparison (ComparisonTask s1 cmp s2) =
+  comparisonTemplate (generateTask s1) cmp (generateTask s2)
+generateComparison (ComparisonMember s1 cmp s2) =
+  comparisonTemplate (generateMember s1) cmp (generateMember s2)
 
 generateCondition :: Condition -> String
-generateCondition c = ""
+generateCondition (Condition ifCond thenStat elseStat) =
+  "("
+    ++ generateBoolExpression ifCond
+    ++ " ? "
+    ++ generateStatement thenStat
+    ++ " : "
+    ++ generateStatement elseStat
+    ++ ")"
 
 generateCycle :: Cycle -> String
 generateCycle cy = ""
