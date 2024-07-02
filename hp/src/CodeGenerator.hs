@@ -83,10 +83,15 @@ generateSubTasksTask (TaskIdentifierSubTasks id) = generateIdentifier id
 generateSubTasksTask (TaskTakeSubTasks id) = generateIdentifier id
 
 generateTakeTaskAttribute :: TakeTaskAttribute -> String
-generateTakeTaskAttribute tta = ""
+generateTakeTaskAttribute (TakeTaskAttributeStrings takeAttributeLit) = generateTakeTaskAttributeLiteral takeAttributeLit
+generateTakeTaskAttribute (TakeTaskAttributeMembers id) = generateIdentifier id
+generateTakeTaskAttribute (TakeTaskAttributeSubTasks id) = generateIdentifier id
 
 generateTakeTaskAttributeLiteral :: TakeTaskAttributeLiteral -> String
-generateTakeTaskAttributeLiteral ttal = ""
+generateTakeTaskAttributeLiteral (TakeTaskAttributeTitle id) = generateIdentifier id
+generateTakeTaskAttributeLiteral (TakeTaskAttributeDescription id) = generateIdentifier id
+generateTakeTaskAttributeLiteral (TakeTaskAttributeState id) = generateIdentifier id
+generateTakeTaskAttributeLiteral (TakeTaskAttributeTag id) = generateIdentifier id
 
 generateMember :: Member -> String
 generateMember (Member name role) = ""
