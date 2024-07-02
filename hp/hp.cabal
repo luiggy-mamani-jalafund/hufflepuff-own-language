@@ -26,6 +26,7 @@ source-repository head
 library
   exposed-modules:
       AbstractSyntaxTree
+      CodeGenerator
       HpParser
       Lexer
       SymbolTable
