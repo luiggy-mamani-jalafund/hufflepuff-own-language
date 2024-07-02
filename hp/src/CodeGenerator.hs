@@ -1,3 +1,5 @@
+{-# OPTIONS_GHC -Wno-name-shadowing #-}
+{-# OPTIONS_GHC -Wno-incomplete-patterns #-}
 module CodeGenerator where
 
 import AbstractSyntaxTree
@@ -6,10 +8,13 @@ generateLiteral :: Literal -> String
 generateLiteral literal = ""
 
 generateStringIdentifier :: StringIdentifier -> String
-generateStringIdentifier si = ""
+generateStringIdentifier (StringId id) = "\"" ++ id ++ "\""
+
+generateIdentifier :: Identifier -> String
+generateIdentifier id = "\"" ++ id ++ "\""
 
 generateStringFree :: StringFree -> String
-generateStringFree sf = ""
+generateStringFree (String str) = "\"" ++ str ++ "\""
 
 generateType :: Type -> String
 generateType t = ""
@@ -18,28 +23,44 @@ generateValue :: Value -> String
 generateValue v = ""
 
 generateTag :: Tag -> String
-generateTag t = ""
+generateTag (Tag id) = generateStringIdentifier id
+generateTag NoTag = "null"
 
 generateTask :: Task -> String
-generateTask task = ""
+generateTask (Task title description state members tag subTasks) = 
+    "new Task(" ++ generateTitleTask title ++ ", " ++ generateDescriptionTask description ++ ", " ++
+    generateStateTask state ++ ", " ++ generateMembersTask members ++ ", " ++ generateTagTask tag ++ 
+    ", " ++ generateSubTasksTask subTasks ++ ")"  
 
 generateTitleTask :: TitleTask -> String
-generateTitleTask tt = ""
+generateTitleTask (TaskValueTitle strFree) = generateStringFree strFree
+generateTitleTask (TaskIdentifierTitle id) = generateIdentifier id
+generateTitleTask (TaskTakeTitle id) = generateIdentifier id 
 
 generateDescriptionTask :: DescriptionTask -> String
-generateDescriptionTask dt = ""
+generateDescriptionTask (TaskValueDescription strFree) = generateStringFree strFree
+generateDescriptionTask (TaskIdentifierDescription id) = generateIdentifier id
+generateDescriptionTask (TaskTakeDescription id) = generateIdentifier id
 
 generateStateTask :: StateTask -> String
-generateStateTask st = ""
-
-generateTagTask :: TagTask -> String
-generateTagTask tt = ""
+generateStateTask (TaskValueState taskState) = generateStringIdentifier taskState
+generateStateTask (TaskIdentifierState id) = generateIdentifier id
+generateStateTask (TaskTakeState id) = generateIdentifier id
 
 generateMembersTask :: MembersTask -> String
-generateMembersTask mt = ""
+generateMembersTask (TaskValueMembers taskList) = generateList taskList
+generateMembersTask (TaskIdentifierMembers id) = generateIdentifier id
+generateMembersTask (TaskTakeMembers id) = generateIdentifier id
+
+generateTagTask :: TagTask -> String
+generateTagTask (TaskValueTag taskValueTag) = generateTag taskValueTag
+generateTagTask (TaskIdentifierTag id) = generateIdentifier id
+generateTagTask (TaskTakeTag id) = generateIdentifier id
 
 generateSubTasksTask :: SubTasksTask -> String
-generateSubTasksTask st = ""
+generateSubTasksTask (TaskValueSubTasks taskValueSubTask) = generateList taskValueSubTask
+generateSubTasksTask (TaskIdentifierSubTasks id) = generateIdentifier id
+generateSubTasksTask (TaskTakeSubTasks id) = generateIdentifier id
 
 generateTakeTaskAttribute :: TakeTaskAttribute -> String
 generateTakeTaskAttribute tta = ""
@@ -48,13 +69,18 @@ generateTakeTaskAttributeLiteral :: TakeTaskAttributeLiteral -> String
 generateTakeTaskAttributeLiteral ttal = ""
 
 generateMember :: Member -> String
-generateMember m = ""
+generateMember (Member name role) = "new Member(" ++ generateMemberName name ++ ", " ++ generateMemberRole role ++ ")"
+generateMember NoAssigned = "new Member('NoAssigned', 'No Role')"
 
 generateMemberName :: MemberName -> String
-generateMemberName mn = ""
+generateMemberName (MemberValueName memberName) = generateStringFree memberName
+generateMemberName (MemberIdentifierName id) = generateIdentifier id
+generateMemberName (MemberTakeName id) = generateIdentifier id
 
 generateMemberRole :: MemberRole -> String
-generateMemberRole mr = ""
+generateMemberRole (MemberValueRole memberRole) = generateStringIdentifier memberRole
+generateMemberRole (MemberIdentifierRole id) = generateIdentifier id
+generateMemberRole (MemberTakeRole id) = generateIdentifier id
 
 generateTakeMemberAttribute :: TakeMemberAttribute -> String
 generateTakeMemberAttribute tma = ""
