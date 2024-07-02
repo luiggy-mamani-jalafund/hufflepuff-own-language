@@ -63,28 +63,52 @@ generateList :: List -> String
 generateList l = ""
 
 generateFunc :: Func -> String
-generateFunc f = ""
+generateFunc (Func identifier _ params body) =
+  "const "
+    ++ identifier
+    ++ " = ("
+    ++ generateFuncParams params ""
+    ++ ") => \n"
+    ++ generateFuncBody body (map (\(FuncParam ident _) -> ident) params)
+
+generateFuncParams :: [FuncParam] -> String -> String
+generateFuncParams [] acc = acc
+generateFuncParams (x : xs) acc =
+  let concatCond = if not (null xs) then ", " else ""
+   in generateFuncParams xs (acc ++ generateFuncParam x ++ concatCond)
 
 generateFuncParam :: FuncParam -> String
-generateFuncParam fp = ""
+generateFuncParam (FuncParam identifier _) = identifier
 
-generateFuncBody :: FuncBody -> String
-generateFuncBody fb = ""
+generateFuncBody :: FuncBody -> [String] -> String
+generateFuncBody (FuncReturn statement) _ = generateStatement statement
+generateFuncBody (FuncPattern cases caseDef) paramsIds =
+  "{ \n\t" ++ generatePatternCases cases paramsIds "" ++ generatePatternDefault caseDef ++ "\n}"
 
-generatePatternCase :: PatternCase -> String -> [String] -> String
-generatePatternCase (PatternCase patternVals statement) condition paramsIds =
-  condition
-    ++ " ("
+generatePatternCases :: [PatternCase] -> [String] -> String -> String
+generatePatternCases [] _ acc = acc
+generatePatternCases (x : xs) paramsIds acc =
+  let concatCond = if not (null xs) then " else " else " "
+   in generatePatternCases xs paramsIds (acc ++ generatePatternCase x paramsIds ++ concatCond)
+
+generatePatternCase :: PatternCase -> [String] -> String
+generatePatternCase (PatternCase patternVals statement) paramsIds =
+  "if ("
     ++ generatePatternCase' "" patternVals paramsIds
-    ++ ") { return "
+    ++ ") {\n\t\treturn "
     ++ generateStatement statement
-    ++ "}"
+    ++ "\n\t}"
 
 generatePatternCase' :: String -> [PatternCaseValue] -> [String] -> String
 generatePatternCase' acc [] [] = acc
 generatePatternCase' acc [x] [y] = acc ++ generatePatternCaseValue x y
 generatePatternCase' acc (x : xs) (y : ys) =
-  let concatCond = if not (null xs) && not (isEmptyPatternCase x) then " && " else ""
+  let concatCond =
+        if not (null xs)
+          && not (isEmptyPatternCase x)
+          && not (isEmptyPatternCase (head xs))
+          then " && "
+          else ""
    in generatePatternCase' (acc ++ generatePatternCaseValue x y ++ concatCond) xs ys
 generatePatternCase' acc _ [] = acc
 generatePatternCase' acc [] _ = acc
@@ -94,11 +118,14 @@ isEmptyPatternCase PatternCaseEmpty = True
 isEmptyPatternCase _ = False
 
 generatePatternCaseValue :: PatternCaseValue -> String -> String
-generatePatternCaseValue (PatternCaseValue v) cv = cv ++ "===" ++ generateValue v
+generatePatternCaseValue (PatternCaseValue v) cv = cv ++ " === " ++ generateValue v
 generatePatternCaseValue PatternCaseEmpty _ = ""
 
 generatePatternDefault :: PatternDefault -> String
-generatePatternDefault pd = ""
+generatePatternDefault (PatternDefault statement) =
+  " else {\n\t\treturn "
+    ++ generateStatement statement
+    ++ "\n\t}"
 
 generateFuncCall :: FuncCall -> String
 generateFuncCall fc = ""
