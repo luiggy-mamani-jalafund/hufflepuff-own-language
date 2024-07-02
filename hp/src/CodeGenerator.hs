@@ -18,10 +18,29 @@ generateStringFree :: StringFree -> String
 generateStringFree (String str) = "\"" ++ str ++ "\""
 
 generateType :: Type -> String
-generateType t = ""
+generateType TStringId = "\"StringId\""
+generateType TString = "\"String\""
+generateType TState = "\"State\""
+generateType TBool = "\"Bool\""
+generateType TMember = "\"Member\""
+generateType TTag = "\"Tag\""
+generateType TTask = "\"Task\""
+generateType TListTask = "\"ListTask\""
+generateType TListList = "\"ListList\""
+generateType TListStringId = "\"ListStringId\""
+generateType TListString = "\"ListString\""
+generateType TListState = "\"ListState\""
+generateType TListBool = "\"ListBool\""
+generateType TListMember = "\"ListMember\""
+generateType TListTag = "\"ListTag\""
 
 generateValue :: Value -> String
-generateValue v = ""
+generateValue (ValLiteral literal) = generateLiteral literal
+generateValue (ValTask task) = generateTask task
+generateValue (ValTag tag) = generateTag tag
+generateValue (ValMember member) = generateMember member
+generateValue (ValList list) = generateList list
+generateValue (ValBool boolVal) = show boolVal
 
 generateTag :: Tag -> String
 generateTag (Tag id) = generateStringIdentifier id
