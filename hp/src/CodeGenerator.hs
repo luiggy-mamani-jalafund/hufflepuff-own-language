@@ -3,6 +3,7 @@
 module CodeGenerator where
 
 import AbstractSyntaxTree
+import Data.List (intercalate)
 
 generateLiteral :: Literal -> String
 generateLiteral literal = ""
@@ -86,7 +87,38 @@ generateTakeMemberAttribute :: TakeMemberAttribute -> String
 generateTakeMemberAttribute tma = ""
 
 generateList :: List -> String
-generateList l = ""
+generateList (ListStringId ids) = generateStringIdList ids
+generateList (ListString strs) = generateStringList strs
+generateList (ListBool bools) = generateBoolList bools
+generateList (ListTask tasks) = generateTaskList tasks
+generateList (ListTag tags) = generateTagList tags 
+generateList (ListState states) = generateStateList states
+generateList (ListMember memebers) = generateMemberList memebers
+generateList (ListList lists) = generateListList lists
+
+generateStringIdList :: [StringIdentifier] -> String 
+generateStringIdList ids = "[" ++ intercalate ", " (map generateStringIdentifier ids) ++ "]"
+
+generateStringList :: [StringFree] -> String
+generateStringList strs = "[" ++ intercalate ", " (map generateStringFree strs) ++ "]"
+
+generateBoolList :: [Bool] -> String
+generateBoolList bools = "[" ++ intercalate ", " (map show bools) ++ "]"
+
+generateTaskList :: [Task] -> String
+generateTaskList tasks = "[" ++ intercalate ", " (map generateTask tasks) ++ "]"
+
+generateTagList :: [Tag] -> String
+generateTagList tags = "[" ++ intercalate ", " (map generateTag tags) ++ "]"
+
+generateStateList :: [TaskState] -> String 
+generateStateList states = "[" ++ intercalate ", " (map generateStringIdentifier states) ++ "]"
+
+generateMemberList :: [Member] -> String
+generateMemberList members = "[" ++ intercalate ", " (map generateMember members) ++ "]"
+
+generateListList :: [List] -> String
+generateListList lists = "[" ++ intercalate ", " (map generateList lists) ++ "]"
 
 generateFunc :: Func -> String
 generateFunc f = ""
