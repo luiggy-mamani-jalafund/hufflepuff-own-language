@@ -202,7 +202,7 @@ task' symTable = do
             tag = tg,
             subTasks = st
           }
-  let symTable7 = insertTask (show t) task symTable6 -- Define identifier type in future
+  let symTable7 = insertTask (show t) task symTable6 
   return (task, symTable7)
 
 taskTitle :: SymbolTable -> Parser (TitleTask, SymbolTable)
@@ -415,7 +415,7 @@ member symTable =
     _ <- string "}"
     whiteSpace
     let membetDef = Member {name = n, role = r}
-    let symTable3 = insertMember (show n) membetDef symTable2
+    let symTable3 = insertMember (extractName n) membetDef symTable2
 
     return (membetDef, symTable3)
     <|> ( do
@@ -424,6 +424,10 @@ member symTable =
             whiteSpace
             return (NoAssigned, symTable)
         )
+
+extractName :: MemberName -> String
+extractName (MemberValueName (String str)) = "MemberValueName: " ++ str
+extractName _ = error "Invalid member name."
 
 takeMemberAttribute :: Parser TakeMemberAttribute
 takeMemberAttribute = try tmaName <|> try tmaRole
@@ -603,8 +607,7 @@ boolExpression symTable =
           boolVal <- boolValue
           whiteSpace
           let boolExpr = BoolValue boolVal
-          let symTable' = insertBoolExpression (show boolExpr) boolExpr symTable
-          return (boolExpr, symTable')
+          return (boolExpr, symTable)
       )
 
 comparison :: SymbolTable -> Parser (Comparison, SymbolTable)
