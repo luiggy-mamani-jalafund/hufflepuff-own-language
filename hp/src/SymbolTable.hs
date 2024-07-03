@@ -2,8 +2,7 @@
 module SymbolTable where
 
 import AbstractSyntaxTree
-    ( BoolExpression,
-      FuncBody,
+    ( FuncBody,
       FuncParam,
       List,
       Member,
@@ -17,11 +16,10 @@ import qualified Data.Map as M
 
 data SymbolInfo
     = VariableInfo Identifier Type (Maybe Value)
-    | FunctionInfo Identifier Type [FuncParam] FuncBody
-    | TaskInfo Identifier Task
+    | FunctionInfo Identifier Type [FuncParam] FuncBody 
+    | TaskInfo Identifier Task 
     | MemberInfo Identifier Member
-    | ListInfo Identifier List
-    | BoolExpressionInfo BoolExpression
+    | ListInfo List 
     | LiteralInfo Literal
     | DoAssignmentInfo Identifier Type Statement
     deriving (Show, Eq)
@@ -50,11 +48,7 @@ insertMember name member (SymbolTable table) =
 
 insertList :: Identifier -> List -> SymbolTable -> SymbolTable
 insertList name list (SymbolTable table) =
-    SymbolTable (M.insert name (ListInfo name list) table)
-
-insertBoolExpression :: Identifier -> BoolExpression -> SymbolTable -> SymbolTable
-insertBoolExpression name boolExpr (SymbolTable table) =
-    SymbolTable (M.insert name (BoolExpressionInfo boolExpr) table)
+    SymbolTable (M.insert name (ListInfo list) table)
 
 insertLiteral :: Identifier -> Literal -> SymbolTable -> SymbolTable
 insertLiteral name lit (SymbolTable table) =
