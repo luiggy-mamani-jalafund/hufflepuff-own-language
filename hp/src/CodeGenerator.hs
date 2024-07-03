@@ -269,7 +269,13 @@ generateCycleList :: CycleList -> String
 generateCycleList cl = ""
 
 generateStatement :: Statement -> String
-generateStatement s = ""
+generateStatement (SFuncCall fc) = generateFuncCall fc
+generateStatement (SValue v) = generateValue v
+generateStatement (STakeTaskAttribute tta) = generateTakeTaskAttribute tta
+generateStatement (STakeMemberAttribute tma) = generateTakeMemberAttribute tma
+generateStatement (SBoolExp be) = generateBoolExpression be
+generateStatement (SBoolCondition cond) = generateCondition cond
+generateStatement (SCycle cy) = generateCycle cy
 
 generateDoNotation :: DoNotation -> String
 generateDoNotation dn = ""
