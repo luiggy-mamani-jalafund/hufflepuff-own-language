@@ -8,16 +8,19 @@ import Data.Char
 
 
 generateLiteral :: Literal -> String
-generateLiteral literal = ""
-
-generateStringIdentifier :: StringIdentifier -> String
-generateStringIdentifier (StringId id) = "\"" ++ id ++ "\""
+generateLiteral (LStringIdentifier si) = generateStringIdentifier si
+generateLiteral (LString sf) = generateStringFree sf
+generateLiteral (LTakeTaskAttribute tta) = generateTakeTaskAttributeLiteral tta
+generateLiteral (LTakeMemberAttribute tma) = generateTakeMemberAttribute tma
 
 generateIdentifier :: Identifier -> String
-generateIdentifier id = "\"" ++ id ++ "\""
+generateIdentifier i = i
+
+generateStringIdentifier :: StringIdentifier -> String
+generateStringIdentifier (StringId si) = "\"" ++ si ++ "\""
 
 generateStringFree :: StringFree -> String
-generateStringFree (String str) = "\"" ++ str ++ "\""
+generateStringFree (String sf) = "\"" ++ sf ++ "\""
 
 generateType :: Type -> String
 generateType TStringId = "\"StringId\""
@@ -96,20 +99,22 @@ generateTakeTaskAttributeLiteral (TakeTaskAttributeState id) = generateIdentifie
 generateTakeTaskAttributeLiteral (TakeTaskAttributeTag id) = generateIdentifier id
 
 generateMember :: Member -> String
-generateMember (Member name role) = ""
+generateMember (Member name role) = "new Member(" ++ generateMemberName name ++ ", " ++ generateMemberRole role ++ ")"
+generateMember NoAssigned = "new Member('NoAssigned', 'No Role')"
 
 generateMemberName :: MemberName -> String
-generateMemberName (MemberValueName memberName) = ""
-generateMemberName (MemberIdentifierName id) = ""
-generateMemberName (MemberTakeName id) = ""
+generateMemberName (MemberValueName memberName) = generateStringFree memberName
+generateMemberName (MemberIdentifierName id) = generateIdentifier id
+generateMemberName (MemberTakeName id) = generateTakeMemberAttribute (TakeMemberAttributeName id)
 
 generateMemberRole :: MemberRole -> String
-generateMemberRole (MemberValueRole memberRole) = ""
-generateMemberRole (MemberIdentifierRole id) = ""
-generateMemberRole (MemberTakeRole id) = ""
+generateMemberRole (MemberValueRole memberRole) = generateStringIdentifier memberRole
+generateMemberRole (MemberIdentifierRole id) = generateIdentifier id
+generateMemberRole (MemberTakeRole id) = generateTakeMemberAttribute (TakeMemberAttributeRole id)
 
 generateTakeMemberAttribute :: TakeMemberAttribute -> String
-generateTakeMemberAttribute tma = ""
+generateTakeMemberAttribute (TakeMemberAttributeName id) = generateIdentifier (id ++ ".name")
+generateTakeMemberAttribute (TakeMemberAttributeRole id) = generateIdentifier (id ++ ".role")
 
 generateList :: List -> String
 generateList (ListStringId ids) = generateStringIdList ids
@@ -264,7 +269,13 @@ generateCycleList :: CycleList -> String
 generateCycleList cl = ""
 
 generateStatement :: Statement -> String
-generateStatement s = ""
+generateStatement (SFuncCall fc) = generateFuncCall fc
+generateStatement (SValue v) = generateValue v
+generateStatement (STakeTaskAttribute tta) = generateTakeTaskAttribute tta
+generateStatement (STakeMemberAttribute tma) = generateTakeMemberAttribute tma
+generateStatement (SBoolExp be) = generateBoolExpression be
+generateStatement (SBoolCondition cond) = generateCondition cond
+generateStatement (SCycle cy) = generateCycle cy
 
 generateDoNotation :: DoNotation -> String
 generateDoNotation dn = ""
