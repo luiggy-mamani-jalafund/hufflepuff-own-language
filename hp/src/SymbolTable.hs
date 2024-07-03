@@ -96,3 +96,9 @@ exitScope st = st
 lookupCurrentScope :: Identifier -> SymbolTable -> Maybe SymbolInfo
 lookupCurrentScope name (SymbolTable (current:_)) = M.lookup name current
 lookupCurrentScope _ _ = Nothing
+
+
+printSymbolTable :: SymbolTable -> [String]
+printSymbolTable (SymbolTable scopes) = concatMap printScope scopes
+  where
+    printScope scope = M.foldrWithKey (\key val acc -> (show key ++ " : " ++ show val) : acc) [] scope

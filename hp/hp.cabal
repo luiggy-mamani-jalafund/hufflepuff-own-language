@@ -30,7 +30,6 @@ library
       Lexer
       SemanticAnalyzer
       SymbolTable
-      Visitor
   other-modules:
       Paths_hp
   autogen-modules:
