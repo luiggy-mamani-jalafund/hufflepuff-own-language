@@ -70,6 +70,7 @@ test-suite hp-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      MemberSpec
       TaskSpec
       Paths_hp
   autogen-modules:
