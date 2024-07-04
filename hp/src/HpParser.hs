@@ -56,6 +56,7 @@ manyAccum p symTable = do
 
 func :: SymbolTable -> Parser (Func, SymbolTable)
 func symTable = do
+  let newScopeSymTable = enterScope symTable
   whiteSpace
   reserved "func"
   whiteSpace
@@ -71,7 +72,7 @@ func symTable = do
   whiteSpace
   _ <- string "{"
   whiteSpace
-  (params, symTable') <- funcParams symTable
+  (params, symTable') <- funcParams newScopeSymTable
   whiteSpace
   _ <- string "}"
   whiteSpace
@@ -80,7 +81,7 @@ func symTable = do
   _ <- string "}"
   whiteSpace
 
-  case lookupSymbol funId symTable'' of
+  case lookupCurrentScope funId symTable'' of
     Just _  -> fail $ "Function " ++ funId ++ ", already exists"
     Nothing -> do
       let func = Func funId (str2type funType) params body
@@ -98,7 +99,11 @@ funcParam symTable = do
   paramType <- dataType
   whiteSpace
   let param = FuncParam i (str2type paramType)
-  return (param, symTable)
+  case lookupCurrentScope i symTable of
+    Just _ -> fail $ "Param " ++ i ++ " already declared"
+    Nothing -> do
+      let symTable' = insertFuncParam i (str2type paramType) symTable
+      return (param, symTable')
 
 funcParams :: SymbolTable -> Parser ([FuncParam], SymbolTable)
 funcParams symTable = do
@@ -446,23 +451,20 @@ member symTable =
 
     _ <- string "}"
     whiteSpace
+    let membetDef = Member {name = n, role = r}
+    let symTable3 = insertMember (extractName n) membetDef symTable2
 
-    let memberDef = Member {name = n, role = r}
-    let memberId = show n
-    
+    return (membetDef, symTable3)
+    <|> ( do
+            whiteSpace
+            _ <- string "NoAssigned"
+            whiteSpace
+            return (NoAssigned, symTable)
+        )
 
-    case lookupSymbol memberId symTable2 of
-      Just _  -> error $ "Member " ++ memberId ++
-                  " already exists. line "
-      Nothing -> do
-        let symTable3 = insertMember memberId memberDef symTable2
-        return (memberDef, symTable3)
-  <|> do
-        whiteSpace
-        _ <- string "NoAssigned"
-        whiteSpace
-        return (NoAssigned, symTable)
-
+extractName :: MemberName -> String
+extractName (MemberValueName (String str)) = "MemberValueName: " ++ str
+extractName _ = error "Invalid member name."
 
 takeMemberAttribute :: Parser TakeMemberAttribute
 takeMemberAttribute = try tmaName <|> try tmaRole
@@ -529,24 +531,18 @@ memberName :: SymbolTable -> Parser (MemberName, SymbolTable)
 memberName symTable =
   try ((\tn -> (MemberTakeName tn, symTable)) <$> takeMemberAttributeName)
     <|> try
-      ( do
-          v <- strFree
-          case lookupSymbol v symTable of
-            Just _  -> fail $ "Literal " ++ v ++
-                        " already exists. line "
-            Nothing ->
-              let symTable' = insertLiteral v (LString (String v)) symTable
-               in return (MemberValueName (String v), symTable')
+      ( ( \v ->
+            let symTable' = insertLiteral v (LString (String v)) symTable
+             in (MemberValueName (String v), symTable')
+        )
+          <$> strFree
       )
     <|> try
-      ( do
-          id <- identifier
-          case lookupSymbol id symTable of
-            Just _  -> fail $ "Identifier " ++ id ++
-                        " already exists. line "
-            Nothing ->
-              let symTable' = insertVariable id TString Nothing symTable
-              in return (MemberIdentifierName id, symTable')
+      ( ( \id ->
+            let symTable' = insertVariable id TString Nothing symTable
+             in (MemberIdentifierName id, symTable')
+        )
+          <$> identifier
       )
 
 
@@ -851,6 +847,7 @@ funcCallParamVal symbolTable =
     <$ whiteSpace
     <*> value' symbolTable
     <* whiteSpace
+
 
 funcCallParamFC :: SymbolTable -> Parser (FuncCallParam, SymbolTable)
 funcCallParamFC symTabl =

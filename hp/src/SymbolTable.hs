@@ -24,6 +24,7 @@ data SymbolInfo
     | BoolExpressionInfo BoolExpression
     | LiteralInfo Literal
     | DoAssignmentInfo Identifier Type Statement
+    | FuncParamInfo Identifier Type
     deriving (Show)
 
 newtype SymbolTable = SymbolTable [M.Map Identifier SymbolInfo]
@@ -71,6 +72,11 @@ insertDoAssignment :: Identifier -> Type -> Statement -> SymbolTable -> SymbolTa
 insertDoAssignment name typ stmt (SymbolTable (current:rest)) =
     SymbolTable (M.insert name (DoAssignmentInfo name typ stmt) current:rest)
 insertDoAssignment _ _ _ st = st
+
+insertFuncParam :: Identifier -> Type -> SymbolTable -> SymbolTable
+insertFuncParam id typ (SymbolTable (current:rest)) =
+    SymbolTable (M.insert id (FuncParamInfo id typ) current:rest)
+insertFuncParam _ _ st = st
 
 lookupSymbol :: Identifier -> SymbolTable -> Maybe SymbolInfo
 lookupSymbol name (SymbolTable scopes) = lookupInScopes name scopes

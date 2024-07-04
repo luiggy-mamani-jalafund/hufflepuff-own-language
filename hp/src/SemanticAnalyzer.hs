@@ -43,6 +43,10 @@ verifyStatement (Right table) statement =
             table' <- verifyStatement (Right table) (SBoolExp cond)
             table'' <- verifyStatement (Right table') thenStmt
             verifyStatement (Right table'') elseStmt
+        SCycle (Cycle mapF (CycleId name)) ->
+            case lookupSymbol name table of
+                Nothing -> Left [UndeclaredVariable name]
+                Just _  -> Right table
         _ -> Right table
 
 verifyFunctions :: [Func] -> SymbolTable -> SemanticResult SymbolTable
@@ -52,7 +56,8 @@ verifyFunction :: SemanticResult SymbolTable -> Func -> SemanticResult SymbolTab
 verifyFunction (Left errors) _ = Left errors
 verifyFunction (Right table) (Func name retType params body) = do
     let table' = insertFunction name retType params body table
-    verifyFuncBody body table'
+    let paramTable = foldl (\acc (FuncParam paramId paramType) -> insertFuncParam paramId paramType acc) (enterScope table') params
+    verifyFuncBody body paramTable
 
 verifyFuncBody :: FuncBody -> SymbolTable -> SemanticResult SymbolTable
 verifyFuncBody (FuncReturn statement) table = verifyStatement (Right table) statement
