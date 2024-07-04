@@ -2,14 +2,7 @@ module SemanticAnalyzer where
 
 import AbstractSyntaxTree
 import SymbolTable
-import HpParser (statement)
-
-data SemanticError
-    = UndeclaredVariable Identifier
-    | UndeclaredFunction Identifier
-    deriving (Show)
-
-type SemanticResult a = Either [SemanticError] a
+import ErrorHandler
 
 verifyStatements :: [Statement] -> SymbolTable -> SemanticResult SymbolTable
 verifyStatements stmts table = foldl verifyStatement (Right table) stmts
@@ -56,8 +49,7 @@ verifyFunction :: SemanticResult SymbolTable -> Func -> SemanticResult SymbolTab
 verifyFunction (Left errors) _ = Left errors
 verifyFunction (Right table) (Func name retType params body) = do
     let table' = insertFunction name retType params body table
-    let paramTable = foldl (\acc (FuncParam paramId paramType) -> insertFuncParam paramId paramType acc) (enterScope table') params
-    verifyFuncBody body paramTable
+    verifyFuncBody body table'
 
 verifyFuncBody :: FuncBody -> SymbolTable -> SemanticResult SymbolTable
 verifyFuncBody (FuncReturn statement) table = verifyStatement (Right table) statement

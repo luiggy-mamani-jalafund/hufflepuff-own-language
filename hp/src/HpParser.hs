@@ -30,6 +30,7 @@ import Lexer
 import SymbolTable
 import Text.Parsec hiding (manyAccum)
 import Text.Parsec.String (Parser)
+import ErrorHandler (SemanticError(AlreadyDeclared))
 
 parseCode :: Parser (Code, SymbolTable)
 parseCode =
@@ -81,11 +82,12 @@ func symTable = do
   _ <- string "}"
   whiteSpace
 
-  case lookupCurrentScope funId symTable'' of
-    Just _  -> fail $ "Function " ++ funId ++ ", already exists"
+  let mainScope = exitScope symTable''
+  case lookupCurrentScope funId mainScope of
+    Just _  -> fail $ show (AlreadyDeclared funId)
     Nothing -> do
       let func = Func funId (str2type funType) params body
-      let symTable''' = insertFunction funId (str2type funType) params body symTable''
+      let symTable''' = insertFunction funId (str2type funType) params body mainScope
       return (func, symTable''')
 
 
@@ -100,7 +102,7 @@ funcParam symTable = do
   whiteSpace
   let param = FuncParam i (str2type paramType)
   case lookupCurrentScope i symTable of
-    Just _ -> fail $ "Param " ++ i ++ " already declared"
+    Just _ -> fail $ show (AlreadyDeclared i)
     Nothing -> do
       let symTable' = insertFuncParam i (str2type paramType) symTable
       return (param, symTable')
@@ -217,7 +219,7 @@ task' symTable = do
   let taskId = show t -- Define identifier type in future
 
   case lookupSymbol taskId symTable6 of
-    Just _  -> fail $ "Task " ++ taskId ++ ", already exists"
+    Just _  -> fail $ show (AlreadyDeclared taskId)
     Nothing -> do
       let symTable7 = insertTask taskId task symTable6
       return (task, symTable7)
@@ -337,7 +339,7 @@ listOfMembers symTable =
     newSymTable lt symTable' =
       let listId = show lt
       in case lookupSymbol listId symTable' of
-           Just _  -> error $ "Member list " ++ listId ++ " already exists."
+           Just _  -> error $ show (AlreadyDeclared listId)
            Nothing -> insertList listId lt symTable'
     list = ListMember
 
@@ -375,7 +377,7 @@ listOfTags symTa =
     newSymTable t symTa' =
       let listId = show (lt t)
       in case lookupSymbol listId symTa' of
-           Just _  -> error $ "Tags list " ++ listId ++ " already exists."
+           Just _  -> error $ show (AlreadyDeclared listId)
            Nothing -> insertList listId (lt t) symTa'
 
 
@@ -396,7 +398,7 @@ listOfStates symTa =
     newSymTable s symTa' =
       let listId = show (ls s)
       in case lookupSymbol listId symTa' of
-           Just _  -> error $ "State list " ++ listId ++ " already exists."
+           Just _  -> error $ show (AlreadyDeclared listId)
            Nothing -> insertList listId (ls s) symTa'
 
 
@@ -417,7 +419,7 @@ listOfBool symTa =
     newSymTable b symTa' =
       let listId = show (lb b)
       in case lookupSymbol listId symTa' of
-           Just _  -> error $ "Bool list " ++ listId ++ " already exists."
+           Just _  -> error $ show (AlreadyDeclared listId)
            Nothing -> insertList listId (lb b) symTa'
 
 tag' :: Parser Tag
@@ -647,8 +649,7 @@ boolExpression symTable =
           whiteSpace
           let boolExpr = BoolValue boolVal
           case lookupSymbol (show boolExpr) symTable of
-            Just _  -> fail $ "Boolean expression " ++ show boolExpr ++
-                        " already exists. line "
+            Just _  -> fail $ show (AlreadyDeclared (show boolExpr))
             Nothing ->
               let symTable' = insertBoolExpression (show boolExpr) boolExpr symTable
               in return (boolExpr, symTable')
@@ -725,8 +726,7 @@ mapCycle symTable = do
   whiteSpace
   let cycleDef = Cycle {mapF = i, mapL = l}
   case lookupSymbol i symTable1 of
-    Just _  -> fail $ "Identifier " ++ i ++
-                " already exists. line "
+    Just _  -> fail $ show (AlreadyDeclared i)
     Nothing ->
       let symTable2 = insertDoAssignment i TListString (SCycle cycleDef) symTable1
       in return (cycleDef, symTable2)
@@ -739,8 +739,7 @@ mapList symTable =
       ( do
           id <- identifier
           case lookupSymbol id symTable of
-            Just _  -> fail $ "Identifier " ++ id ++
-                        " already exists. line "
+            Just _  -> fail $ show (AlreadyDeclared  id)
             Nothing ->
               let cycleList = CycleId id
                   symTable' = insertVariable id TListString Nothing symTable
@@ -898,8 +897,7 @@ doAssignment symTable = do
   whiteSpace
   let assignment = DoAssignment i (str2type t) s
   case lookupSymbol i symTable1 of
-    Just _  -> fail $ "Identifier " ++ i ++
-                " already exists. line "
+    Just _  -> fail $ show (AlreadyDeclared i)
     Nothing ->
       let symTable2 = insertDoAssignment i (str2type t) s symTable1
       in return (assignment, symTable2)
