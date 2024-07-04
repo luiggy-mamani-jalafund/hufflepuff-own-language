@@ -233,7 +233,7 @@ generateBoolExpression (BoolComparison c) = generateComparison c
 
 generateBoolComparator :: BoolComparator -> String
 generateBoolComparator Eq  = "=="
-generateBoolComparator Neq = "!=="
+generateBoolComparator Neq = "!="
 generateBoolComparator Lt = "<"
 generateBoolComparator Le = "<="
 generateBoolComparator Gt = ">"
