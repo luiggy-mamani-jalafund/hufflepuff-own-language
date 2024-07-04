@@ -277,10 +277,11 @@ generateCondition (Condition ifCond thenStat elseStat) =
     ++ ")"
 
 generateCycle :: Cycle -> String
-generateCycle cy = ""
+generateCycle (Cycle mapF mapL) = generateCycleList mapL ++ ".map(" ++ generateIdentifier mapF ++ ")"
 
 generateCycleList :: CycleList -> String
-generateCycleList cl = ""
+generateCycleList (CycleList list) = generateList list
+generateCycleList (CycleId id) = generateIdentifier id
 
 generateStatement :: Statement -> String
 generateStatement (SFuncCall fc) = generateFuncCall fc
