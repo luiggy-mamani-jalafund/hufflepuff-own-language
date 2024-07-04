@@ -88,15 +88,22 @@ generateSubTasksTask (TaskIdentifierSubTasks id) = generateIdentifier id
 generateSubTasksTask (TaskTakeSubTasks id) = generateIdentifier id
 
 generateTakeTaskAttribute :: TakeTaskAttribute -> String
-generateTakeTaskAttribute (TakeTaskAttributeStrings takeAttributeLit) = generateTakeTaskAttributeLiteral takeAttributeLit
-generateTakeTaskAttribute (TakeTaskAttributeMembers id) = generateIdentifier id
-generateTakeTaskAttribute (TakeTaskAttributeSubTasks id) = generateIdentifier id
+generateTakeTaskAttribute (TakeTaskAttributeStrings takeAttributeLit) 
+  = generateTakeTaskAttributeLiteral takeAttributeLit
+generateTakeTaskAttribute (TakeTaskAttributeMembers id) 
+  = generateIdentifier (id ++ ".members")
+generateTakeTaskAttribute (TakeTaskAttributeSubTasks id) 
+  = generateIdentifier (id ++ ".subTasks")
 
 generateTakeTaskAttributeLiteral :: TakeTaskAttributeLiteral -> String
-generateTakeTaskAttributeLiteral (TakeTaskAttributeTitle id) = generateIdentifier id
-generateTakeTaskAttributeLiteral (TakeTaskAttributeDescription id) = generateIdentifier id
-generateTakeTaskAttributeLiteral (TakeTaskAttributeState id) = generateIdentifier id
-generateTakeTaskAttributeLiteral (TakeTaskAttributeTag id) = generateIdentifier id
+generateTakeTaskAttributeLiteral (TakeTaskAttributeTitle id) 
+  = generateIdentifier (id ++ ".title")
+generateTakeTaskAttributeLiteral (TakeTaskAttributeDescription id) 
+  = generateIdentifier (id ++ ".description")
+generateTakeTaskAttributeLiteral (TakeTaskAttributeState id) 
+  = generateIdentifier (id ++ ".state")
+generateTakeTaskAttributeLiteral (TakeTaskAttributeTag id) 
+  = generateIdentifier (id ++ "tag")
 
 generateMember :: Member -> String
 generateMember (Member name role) = "new Member(" ++ generateMemberName name ++ ", " ++ generateMemberRole role ++ ")"
