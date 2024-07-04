@@ -7,7 +7,7 @@ func sprint4Tasks -> List:Task {
         title: "Sound effects",
         description: "As a developer, I want to add sound effects for Pac-Man's actions and interactions with ghosts and special points.",
         state: "DONE",
-        members: List:Member [Member {name: "Santiago", role: "Developer"}],
+        members: List:Member [Member {name: "Santiago", role: "Developer"}, Member {name: "Santiago", role: "Developer"}],
         tag: "Backend",
         subTasks: List:Task [
           Task {
@@ -50,6 +50,11 @@ func createTaskForBackgroundMusic -> Task {
 	        subTasks: List:Task []
         }
     }
+}
+
+func myTask -> Bool {
+  params {}
+  return { False }
 }
 
 // Verify if the task is in progress

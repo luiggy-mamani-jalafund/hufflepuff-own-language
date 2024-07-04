@@ -30,6 +30,7 @@ import Lexer
 import SymbolTable
 import Text.Parsec hiding (manyAccum)
 import Text.Parsec.String (Parser)
+import ErrorHandler (SemanticError(AlreadyDeclared))
 
 parseCode :: Parser (Code, SymbolTable)
 parseCode =
@@ -56,6 +57,7 @@ manyAccum p symTable = do
 
 func :: SymbolTable -> Parser (Func, SymbolTable)
 func symTable = do
+  let newScopeSymTable = enterScope symTable
   whiteSpace
   reserved "func"
   whiteSpace
@@ -71,7 +73,7 @@ func symTable = do
   whiteSpace
   _ <- string "{"
   whiteSpace
-  (params, symTable') <- funcParams symTable
+  (params, symTable') <- funcParams newScopeSymTable
   whiteSpace
   _ <- string "}"
   whiteSpace
@@ -79,9 +81,15 @@ func symTable = do
   whiteSpace
   _ <- string "}"
   whiteSpace
-  let func = Func funId (str2type funType) params body
-  let symTable''' = insertFunction funId (str2type funType) params body symTable''
-  return (func, symTable''')
+
+  let mainScope = exitScope symTable''
+  case lookupCurrentScope funId mainScope of
+    Just _  -> fail $ show (AlreadyDeclared funId)
+    Nothing -> do
+      let func = Func funId (str2type funType) params body
+      let symTable''' = insertFunction funId (str2type funType) params body mainScope
+      return (func, symTable''')
+
 
 funcParam :: SymbolTable -> Parser (FuncParam, SymbolTable)
 funcParam symTable = do
@@ -93,7 +101,11 @@ funcParam symTable = do
   paramType <- dataType
   whiteSpace
   let param = FuncParam i (str2type paramType)
-  return (param, symTable)
+  case lookupCurrentScope i symTable of
+    Just _ -> fail $ show (AlreadyDeclared i)
+    Nothing -> do
+      let symTable' = insertFuncParam i (str2type paramType) symTable
+      return (param, symTable')
 
 funcParams :: SymbolTable -> Parser ([FuncParam], SymbolTable)
 funcParams symTable = do
@@ -193,6 +205,7 @@ task' symTable = do
   whiteSpace
   _ <- string "}"
   whiteSpace
+
   let task =
         Task
           { title = t,
@@ -316,7 +329,11 @@ listOfMembers symTable =
     <* string "]"
     <* whiteSpace
   where
-    newSymTable lt = insertList (show lt) lt
+    newSymTable lt symTable' =
+      let listId = show lt
+      in case lookupSymbol listId symTable' of
+           Just _  -> error $ show (AlreadyDeclared listId)
+           Nothing -> insertList listId lt symTable'
     list = ListMember
 
 listOfTasks :: SymbolTable -> Parser (List, SymbolTable)
@@ -335,6 +352,7 @@ listOfTasks symTable =
     lt = ListTask
     newSymTable t = insertList (show t) (lt t)
 
+
 listOfTags :: SymbolTable -> Parser (List, SymbolTable)
 listOfTags symTa =
   (\t -> (lt t, newSymTable t symTa))
@@ -349,7 +367,12 @@ listOfTags symTa =
     <* whiteSpace
   where
     lt = ListTag
-    newSymTable t = insertList (show t) (lt t)
+    newSymTable t symTa' =
+      let listId = show (lt t)
+      in case lookupSymbol listId symTa' of
+           Just _  -> error $ show (AlreadyDeclared listId)
+           Nothing -> insertList listId (lt t) symTa'
+
 
 listOfStates :: SymbolTable -> Parser (List, SymbolTable)
 listOfStates symTa =
@@ -365,7 +388,12 @@ listOfStates symTa =
     <* whiteSpace
   where
     ls = ListState
-    newSymTable s = insertList (show s) (ls s)
+    newSymTable s symTa' =
+      let listId = show (ls s)
+      in case lookupSymbol listId symTa' of
+           Just _  -> error $ show (AlreadyDeclared listId)
+           Nothing -> insertList listId (ls s) symTa'
+
 
 listOfBool :: SymbolTable -> Parser (List, SymbolTable)
 listOfBool symTa =
@@ -381,7 +409,11 @@ listOfBool symTa =
     <* whiteSpace
   where
     lb = ListBool
-    newSymTable b = insertList (show b) (lb b)
+    newSymTable b symTa' =
+      let listId = show (lb b)
+      in case lookupSymbol listId symTa' of
+           Just _  -> error $ show (AlreadyDeclared listId)
+           Nothing -> insertList listId (lb b) symTa'
 
 tag' :: Parser Tag
 tag' =
@@ -508,6 +540,7 @@ memberName symTable =
           <$> identifier
       )
 
+
 memberRole :: SymbolTable -> Parser (MemberRole, SymbolTable)
 memberRole symTable =
   try ((\tr -> (tr, symTable)) . MemberTakeRole <$> takeMemberAttributeRole)
@@ -525,6 +558,7 @@ memberRole symTable =
         )
           <$> identifier
       )
+
 
 takeMemberAttributeName :: Parser String
 takeMemberAttributeName = takeAttributeId ".name"
@@ -607,8 +641,13 @@ boolExpression symTable =
           boolVal <- boolValue
           whiteSpace
           let boolExpr = BoolValue boolVal
-          return (boolExpr, symTable)
+          case lookupSymbol (show boolExpr) symTable of
+            Just _  -> fail $ show (AlreadyDeclared (show boolExpr))
+            Nothing ->
+              let symTable' = insertBoolExpression (show boolExpr) boolExpr symTable
+              in return (boolExpr, symTable')
       )
+
 
 comparison :: SymbolTable -> Parser (Comparison, SymbolTable)
 comparison symTable =
@@ -679,8 +718,11 @@ mapCycle symTable = do
   _ <- string ")"
   whiteSpace
   let cycleDef = Cycle {mapF = i, mapL = l}
-  let symTable2 = insertDoAssignment i TListString (SCycle cycleDef) symTable1
-  return (cycleDef, symTable2)
+  case lookupSymbol i symTable1 of
+    Just _  -> fail $ show (AlreadyDeclared i)
+    Nothing ->
+      let symTable2 = insertDoAssignment i TListString (SCycle cycleDef) symTable1
+      in return (cycleDef, symTable2)
 
 mapList :: SymbolTable -> Parser (CycleList, SymbolTable)
 mapList symTable =
@@ -689,10 +731,14 @@ mapList symTable =
     <|> try
       ( do
           id <- identifier
-          let cycleList = CycleId id
-          let symTable' = insertVariable id TListString Nothing symTable
-          return (cycleList, symTable')
+          case lookupSymbol id symTable of
+            Just _  -> fail $ show (AlreadyDeclared  id)
+            Nothing ->
+              let cycleList = CycleId id
+                  symTable' = insertVariable id TListString Nothing symTable
+              in return (cycleList, symTable')
       )
+
 
 funcPattern :: SymbolTable -> Parser (FuncBody, SymbolTable)
 funcPattern symTable = do
@@ -794,6 +840,7 @@ funcCallParamVal symbolTable =
     <*> value' symbolTable
     <* whiteSpace
 
+
 funcCallParamFC :: SymbolTable -> Parser (FuncCallParam, SymbolTable)
 funcCallParamFC symTabl =
   (\(v, symTable') -> (FuncCallParam v, symTable'))
@@ -842,8 +889,12 @@ doAssignment symTable = do
   (s, symTable1) <- statement symTable
   whiteSpace
   let assignment = DoAssignment i (str2type t) s
-  let symTable2 = insertDoAssignment i (str2type t) s symTable1
-  return (assignment, symTable2)
+  case lookupSymbol i symTable1 of
+    Just _  -> fail $ show (AlreadyDeclared i)
+    Nothing ->
+      let symTable2 = insertDoAssignment i (str2type t) s symTable1
+      in return (assignment, symTable2)
+
 
 doPrint :: SymbolTable -> Parser (DoStatement, SymbolTable)
 doPrint symTable =
