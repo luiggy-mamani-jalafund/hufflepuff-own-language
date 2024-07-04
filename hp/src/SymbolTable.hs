@@ -2,8 +2,7 @@
 module SymbolTable where
 
 import AbstractSyntaxTree
-    ( BoolExpression,
-      FuncBody,
+    ( FuncBody,
       FuncParam,
       List,
       Member,
@@ -12,13 +11,14 @@ import AbstractSyntaxTree
       Type,
       Identifier,
       Literal,
-      Statement )
+      Statement,
+      BoolExpression, )
 import qualified Data.Map as M
 
 data SymbolInfo
     = VariableInfo Identifier Type (Maybe Value)
-    | FunctionInfo Identifier Type [FuncParam] FuncBody
-    | TaskInfo Identifier Task
+    | FunctionInfo Identifier Type [FuncParam] FuncBody 
+    | TaskInfo Identifier Task 
     | MemberInfo Identifier Member
     | ListInfo Identifier List
     | BoolExpressionInfo BoolExpression

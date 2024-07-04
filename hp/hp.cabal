@@ -41,6 +41,7 @@ library
   build-depends:
       base >=4.7 && <5
     , containers
+    , hspec
     , mtl
     , parsec
     , parsec-numbers
@@ -60,6 +61,7 @@ executable hp-exe
       base >=4.7 && <5
     , containers
     , hp
+    , hspec
     , mtl
     , parsec
     , parsec-numbers
@@ -70,6 +72,8 @@ test-suite hp-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      MemberSpec
+      TaskSpec
       Paths_hp
   autogen-modules:
       Paths_hp
@@ -80,6 +84,7 @@ test-suite hp-test
       base >=4.7 && <5
     , containers
     , hp
+    , hspec
     , mtl
     , parsec
     , parsec-numbers

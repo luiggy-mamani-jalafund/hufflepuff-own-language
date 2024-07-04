@@ -2,7 +2,7 @@ module Main (main) where
 
 import HpParser (parseCode)
 import SemanticAnalyzer (verifyProgram)
-import SymbolTable (SymbolTable, emptyTable, printSymbolTable)
+import SymbolTable (printSymbolTable)
 import Text.Parsec (parse)
 
 main :: IO ()

@@ -215,15 +215,8 @@ task' symTable = do
             tag = tg,
             subTasks = st
           }
-
-  let taskId = show t -- Define identifier type in future
-
-  case lookupSymbol taskId symTable6 of
-    Just _  -> fail $ show (AlreadyDeclared taskId)
-    Nothing -> do
-      let symTable7 = insertTask taskId task symTable6
-      return (task, symTable7)
-
+  let symTable7 = insertTask (show t) task symTable6 
+  return (task, symTable7)
 
 taskTitle :: SymbolTable -> Parser (TitleTask, SymbolTable)
 taskTitle symTable =
