@@ -277,7 +277,7 @@ generateCondition (Condition ifCond thenStat elseStat) =
     ++ ")"
 
 generateCycle :: Cycle -> String
-generateCycle (Cycle mapF mapL) = "map(" ++ generateIdentifier mapF ++ ", " ++ generateCycleList mapL ++ ")"
+generateCycle (Cycle mapF mapL) = generateCycleList mapL ++ ".map(" ++ generateIdentifier mapF ++ ")"
 
 generateCycleList :: CycleList -> String
 generateCycleList (CycleList list) = generateList list
