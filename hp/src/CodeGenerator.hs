@@ -309,5 +309,32 @@ generatePrint :: Print -> String
 generatePrint p = ""
 
 -- This have to generate the Task, Member classes, the main function and its call
+generateDoNotation :: DoNotation -> String
+generateDoNotation (DoNotation statements) = generateDoStatements statements
+
+generateDoStatements :: [DoStatement] -> String
+generateDoStatements = foldl (\acc s -> acc ++ "\t" ++ generateDoStatement s ++ "\n") ""
+
+generateDoStatement :: DoStatement -> String
+generateDoStatement (DoAssignment identifier _ statement) = "let " ++ generateIdentifier identifier ++ " = " ++ generateStatement statement
+generateDoStatement (DoPrint p) = generatePrint p
+
+generatePrint :: Print -> String
+generatePrint (PrintRef identifier) = "console.log(" ++ generateIdentifier identifier ++ ")"
+generatePrint (PrintStatement statement) = "console.log(" ++ generateStatement statement ++ ")"
+
+generateTaskClass :: String
+generateTaskClass = "class Task { constructor(title, description, state, members, tag, subTasks) {this.title = title;this.description = description;this.state = state;this.members = members;this.tag = tag;this.subTasks = subTasks; } }\n\n"
+
+generateMemberClass :: String
+generateMemberClass = "class Member { constructor(name, role) {this.name = name;this.role = role;} }\n\n"
+
 generateCode :: Code -> String
-generateCode c = ""
+generateCode (Code functions doNotation) =
+  generateTaskClass
+    ++ generateMemberClass
+    ++ generateFuncs functions
+    ++ "const main = () => {\n"
+    ++ generateDoNotation doNotation
+    ++ "}; \n\nmain();"
+
