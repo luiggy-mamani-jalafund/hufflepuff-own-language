@@ -26,6 +26,7 @@ source-repository head
 library
   exposed-modules:
       AbstractSyntaxTree
+      CodeGenerator
       HpParser
       Lexer
       SymbolTable
@@ -44,6 +45,7 @@ library
     , parsec
     , parsec-numbers
     , parsec3-numbers
+    , process
   default-language: Haskell2010
 
 executable hp-exe
@@ -64,6 +66,7 @@ executable hp-exe
     , parsec
     , parsec-numbers
     , parsec3-numbers
+    , process
   default-language: Haskell2010
 
 test-suite hp-test
@@ -87,4 +90,5 @@ test-suite hp-test
     , parsec
     , parsec-numbers
     , parsec3-numbers
+    , process
   default-language: Haskell2010

@@ -6,7 +6,6 @@ import AbstractSyntaxTree
 import Data.List (intercalate)
 import Data.Char
 
-
 generateLiteral :: Literal -> String
 generateLiteral (LStringIdentifier si) = generateStringIdentifier si
 generateLiteral (LString sf) = generateStringFree sf
@@ -103,7 +102,7 @@ generateTakeTaskAttributeLiteral (TakeTaskAttributeDescription id)
 generateTakeTaskAttributeLiteral (TakeTaskAttributeState id) 
   = generateIdentifier (id ++ ".state")
 generateTakeTaskAttributeLiteral (TakeTaskAttributeTag id) 
-  = generateIdentifier (id ++ "tag")
+  = generateIdentifier (id ++ ".tag")
 
 generateMember :: Member -> String
 generateMember (Member name role) = "new Member(" ++ generateMemberName name ++ ", " ++ generateMemberRole role ++ ")"
@@ -300,14 +299,31 @@ generateStatement (SBoolCondition cond) = generateCondition cond
 generateStatement (SCycle cy) = generateCycle cy
 
 generateDoNotation :: DoNotation -> String
-generateDoNotation dn = ""
+generateDoNotation (DoNotation statements) = generateDoStatements statements
+
+generateDoStatements :: [DoStatement] -> String
+generateDoStatements = foldl (\acc s -> acc ++ "\t" ++ generateDoStatement s ++ "\n") ""
 
 generateDoStatement :: DoStatement -> String
-generateDoStatement ds = ""
+generateDoStatement (DoAssignment identifier _ statement) = "let " ++ generateIdentifier identifier ++ " = " ++ generateStatement statement
+generateDoStatement (DoPrint p) = generatePrint p
 
 generatePrint :: Print -> String
-generatePrint p = ""
+generatePrint (PrintRef identifier) = "console.log(" ++ generateIdentifier identifier ++ ")"
+generatePrint (PrintStatement statement) = "console.log(" ++ generateStatement statement ++ ")"
 
--- This have to generate the Task, Member classes, the main function and its call
+generateTaskClass :: String
+generateTaskClass = "class Task { constructor(title, description, state, members, tag, subTasks) {this.title = title;this.description = description;this.state = state;this.members = members;this.tag = tag;this.subTasks = subTasks; } }\n\n"
+
+generateMemberClass :: String
+generateMemberClass = "class Member { constructor(name, role) {this.name = name;this.role = role;} }\n\n"
+
 generateCode :: Code -> String
-generateCode c = ""
+generateCode (Code functions doNotation) =
+  generateTaskClass
+    ++ generateMemberClass
+    ++ generateFuncs functions
+    ++ "const main = () => {\n"
+    ++ generateDoNotation doNotation
+    ++ "}; \n\nmain();"
+
