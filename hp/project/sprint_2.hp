@@ -1,0 +1,77 @@
+// SPRINT 2
+func sprint2Tasks -> List:Task {
+  params {}
+  return {
+    List:Task [
+      Task {
+        title: "Spike: Research ghost movement patterns",
+        description: "As a user, I want to define the movement patterns for each ghost based on studies of previous Pac-Man versions and modern adaptations. Explore AI algorithms to improve movement autonomy.",
+        state: "DONE",
+        members: List:Member [Member {name: "Santiago", role: "Developer"}],
+        tag: "Spike",
+        subTasks: List:Task [
+          Task {
+            title: "Experimenting with AI algorithms",
+            description: "As a user, I want to implement AI algorithm prototypes to simulate autonomous and adaptive ghost movements.",
+            state: "DONE",
+            members: List:Member [Member {name: "Axel", role: "Developer"}],
+            tag: "Backend",
+            subTasks: List:Task []
+          }
+        ]
+      },
+      Task {
+        title: "Interaction mechanics",
+        description: "As a developer, I want the interaction mechanics between Pac-Man and the ghosts, including losing lives when Pac-Man is touched and the ability to eat ghosts when consuming power pellets.",
+        state: "DONE",
+        members: List:Member [Member {name: "Sebas", role: "Developer"}],
+        tag: "Backend",
+        subTasks: List:Task []
+      }
+    ]
+  }
+}
+
+// Create task for QA testing with pattern matching
+func createTaskForTesting -> Task {
+    params {
+        titleTask: String,
+        descriptionTask: String,
+        stateTask: State,
+        tag: Tag
+    }
+    pattern {
+      case (_, _, _, "QA") {
+        Task {
+          title: titleTask,
+          description: descriptionTask,
+          state: stateTask,
+          members: List:Member [Member {name: "Luiggy", role: "Developer"}],
+          tag: tag,
+          subTasks: List:Task []
+        }
+      }
+      default {
+        Task {
+          title: "Task for testing",
+          description: "Task for testing",
+          state: "NoStatus",
+          members: List:Member [],
+          tag: "QA",
+          subTasks: List:Task []
+          }
+        }
+      }
+}
+
+// Function execution
+do {
+  print(
+    createTaskForTesting(
+      "Initial testing of Pac-Man mechanics",
+      "As a developer, I want to conduct initial tests to ensure the implemented mechanics work correctly in various scenarios and there are no logical errors regarding the implemented AI logic.",
+      "ToDo",
+      "QA"
+    )
+  )
+}
