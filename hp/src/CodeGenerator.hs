@@ -6,7 +6,6 @@ import AbstractSyntaxTree
 import Data.List (intercalate)
 import Data.Char
 
-
 generateLiteral :: Literal -> String
 generateLiteral (LStringIdentifier si) = generateStringIdentifier si
 generateLiteral (LString sf) = generateStringFree sf
@@ -299,16 +298,6 @@ generateStatement (SBoolExp be) = generateBoolExpression be
 generateStatement (SBoolCondition cond) = generateCondition cond
 generateStatement (SCycle cy) = generateCycle cy
 
-generateDoNotation :: DoNotation -> String
-generateDoNotation dn = ""
-
-generateDoStatement :: DoStatement -> String
-generateDoStatement ds = ""
-
-generatePrint :: Print -> String
-generatePrint p = ""
-
--- This have to generate the Task, Member classes, the main function and its call
 generateDoNotation :: DoNotation -> String
 generateDoNotation (DoNotation statements) = generateDoStatements statements
 
