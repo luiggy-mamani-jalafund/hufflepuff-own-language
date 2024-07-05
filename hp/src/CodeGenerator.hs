@@ -231,10 +231,17 @@ generatePatternDefault (PatternDefault statement) =
     ++ "\n\t}"
 
 generateFuncCall :: FuncCall -> String
-generateFuncCall fc = ""
+generateFuncCall (FuncCall identifier params) = identifier ++ "(" ++ generateFuncCallParams params ++ ")"
+
+generateFuncCallParams :: [FuncCallParam] -> String
+generateFuncCallParams [] = ""
+generateFuncCallParams [param] = generateFuncCallParam param
+generateFuncCallParams (param : rest) = generateFuncCallParam param ++ ", " ++ generateFuncCallParams rest
 
 generateFuncCallParam :: FuncCallParam -> String
-generateFuncCallParam fcp = ""
+generateFuncCallParam (FuncCallParamValue value) = generateValue value
+generateFuncCallParam (FuncCallParam funcCall) = generateFuncCall funcCall
+generateFuncCallParam (FuncCallIdentifier identifier) = identifier
 
 generateBoolValue :: Bool -> [Char]
 generateBoolValue b = let str = show b in toLower (head str) : tail str
