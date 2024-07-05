@@ -1,0 +1,68 @@
+// SPRINT 3
+func sprint3Tasks -> List:Task {
+  params {}
+  return {
+    List:Task [
+      Task {
+        title: "Complete level design",
+        description: "As a user, I want to finalize the design and implementation of all game levels.",
+        state: "DONE",
+        members: List:Member [Member {name: "Sebas", role: "Designer"}],
+        tag: "Frontend",
+        subTasks: List:Task []
+      },
+      Task {
+        title: "Basic UI implementation",
+        description: "As a developer, I want to have the user interface developed and completed, including start screens, settings menus, and high score screens.",
+        state: "DONE",
+        members: List:Member [Member {name: "Luiggy", role: "Developer"}],
+        tag: "UI",
+        subTasks: List:Task []
+      }
+    ]
+  }
+}
+
+// Create task for QA testing
+func createTaskForTesting -> Task {
+    params {
+        titleTask: String,
+        descriptionTask: String,
+        stateTask: State,
+        tag: Tag
+    }
+    return {
+        Task {
+          title: titleTask,
+	        description: descriptionTask,
+	        state: stateTask,
+	        members: List:Member [Member {name: "Luiggy", role: "Developer"}],
+	        tag: tag,
+	        subTasks: List:Task []
+        }
+    }
+}
+
+// Verify if the task is for QA
+func verifiedIfTaskIsForQA -> Bool {
+  params { myTask: Task }
+  return {
+    if (myTask.tag == "QA") then True
+    else False
+  }
+}
+
+// Function execution
+do {
+  print("is task for QA?")
+  print(
+    verifiedIfTaskIsForQA(
+      createTaskForTesting(
+        "UI and Level Testing",
+        "As a developer, I want thorough tests to ensure levels are well designed and the UI works as expected on different platforms and resolutions.",
+        "ToDo",
+        "QA"
+      )
+    )
+  )
+}

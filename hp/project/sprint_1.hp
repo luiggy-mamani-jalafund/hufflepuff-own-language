@@ -1,0 +1,70 @@
+// SPRINT 1
+func sprint1Tasks -> List:Task {
+  params {}
+  return {
+    List:Task [
+      Task {
+        title: "Development environment setup",
+        description: "As a developer, I want to have all necessary tools like compilers, development environments, and version control systems installed.",
+        state: "DONE",
+        members: List:Member [Member {name: "Axel", role: "Developer"}],
+        tag: "Backend",
+        subTasks: List:Task []
+      },
+      Task {
+        title: "Initial maze design",
+        description: "As a user, I want to create a basic maze design using graphic design tools.",
+        state: "DONE",
+        members: List:Member [Member {name: "Diego", role: "Designer"}],
+        tag: "Frontend",
+        subTasks: List:Task []
+      }
+    ]
+  }
+}
+
+// Create task for Pacman movement
+func taskMovementPacman -> Task {
+    params {
+        titleTask: String
+    }
+    return {
+        Task {
+          title: titleTask,
+	        description: "As a developer, I want to implement the basic movement of Pacman in the maze.",
+	        state: "DONE",
+	        members: List:Member [Member {name: "Luiggy", role: "Developer"}],
+	        tag: "Backend",
+	        subTasks: List:Task []
+        }
+    }
+}
+
+// Print task titles
+func printTasksTitle -> StringId {
+  params { task: Task }
+  return {
+    task.title
+  }
+}
+
+// Check task status
+func taskIsDone -> Bool {
+  params { myTask: Task }
+  return {
+    if (myTask.state == "DONE") then True
+    else False
+  }
+}
+
+// Function execution
+do {
+  let isDone:Bool = taskIsDone(taskMovementPacman("Basic Pacman movement"))
+  print("Is done:")
+  print(isDone)
+  // Since do can only handle one function at a time, another example of execution is:
+  let tasks:List:Task = sprint1Tasks()
+  print(
+    map(printTasksTitle, tasks)
+  )
+}

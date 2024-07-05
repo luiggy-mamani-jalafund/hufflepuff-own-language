@@ -102,7 +102,7 @@ generateTakeTaskAttributeLiteral (TakeTaskAttributeDescription id)
 generateTakeTaskAttributeLiteral (TakeTaskAttributeState id) 
   = generateIdentifier (id ++ ".state")
 generateTakeTaskAttributeLiteral (TakeTaskAttributeTag id) 
-  = generateIdentifier (id ++ "tag")
+  = generateIdentifier (id ++ ".tag")
 
 generateMember :: Member -> String
 generateMember (Member name role) = "new Member(" ++ generateMemberName name ++ ", " ++ generateMemberRole role ++ ")"
